@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     # define, tiene prioridad sobre la auto-selección por prefijo.
     qwen_base_url_override: str = ""
     qwen_text_model: str = "qwen3.7-plus"   # razonamiento/coherencia: qwen3.7-max
+    vision_model: str = "qwen3-vl-plus"     # entiende video (concordancia texto↔video)
 
     # Generación de video: HappyHorse o Wan (t2v). Wan2.6-t2i es texto→IMAGEN.
     video_model: str = "happyhorse-1.1-t2v"   # tool "happyhorse"

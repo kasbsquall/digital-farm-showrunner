@@ -23,9 +23,12 @@ USER_TMPL = """Guion original:
 Prompt de video usado:
 {video_prompt}
 
-Video generado (URL): {video_url}
+LO QUE REALMENTE SE VE EN EL VIDEO (análisis de visión):
+{video_description}
 
-¿El episodio es válido para publicar? Devuelve JSON exacto:
+¿El video refleja razonablemente la intención del guion (personajes y acción
+principal presentes)? No exijas perfección; rechaza solo si hay incoherencia
+grave o el video está roto/vacío. Devuelve JSON exacto:
 {{"qa_status": "approved"|"rejected", "qa_notes": "<motivo breve>"}}"""
 
 
@@ -37,10 +40,11 @@ def _mock(video_url: str) -> str:
     )
 
 
-def run(video_url: str, script: str, video_prompt: str = "") -> dict:
+def run(video_url: str, script: str, video_prompt: str = "", video_description: str = "") -> dict:
+    desc = video_description.strip() or "(no disponible — video en modo placeholder)"
     text = chat(
         SYSTEM,
-        USER_TMPL.format(script=script, video_prompt=video_prompt, video_url=video_url),
+        USER_TMPL.format(script=script, video_prompt=video_prompt, video_description=desc),
         temperature=0.2,
         mock=_mock(video_url),
     )

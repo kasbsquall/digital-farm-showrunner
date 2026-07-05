@@ -37,6 +37,7 @@ class Episode(Base):
     video_prompt = Column(Text)
     video_tool = Column(String(32))   # "wan" | "happyhorse"
     video_url = Column(Text)
+    video_description = Column(Text)  # lo que Qwen visión ve realmente en el video
 
     # Agent 3 — QA Reviewer
     qa_status = Column(String(16), default="pending")  # approved | rejected | pending

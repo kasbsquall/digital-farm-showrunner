@@ -22,7 +22,7 @@ from config import settings
 from database.models import Character, Episode
 from agents import scriptwriter, production_director, qa_reviewer, packager
 from services.video_gen_client import generate_video
-from services import oss_client
+from services import oss_client, vision_client
 
 MAX_REGEN = 2  # Director can be re-run this many times after a QA rejection.
 RECENT_LIMIT = 5
@@ -32,12 +32,14 @@ class FarmState(TypedDict, total=False):
     # Inputs
     characters: list[dict]
     recent: list[str]
+    idea: str
     # Agent 1
     story: dict
     used: list[dict]
     # Agent 2 + video
     direction: dict
     video_url: str
+    video_description: str
     # Agent 3
     qa: dict
     attempt: int
@@ -48,7 +50,7 @@ class FarmState(TypedDict, total=False):
 # --- Nodes -----------------------------------------------------------------
 
 def scriptwriter_node(state: FarmState) -> FarmState:
-    story = scriptwriter.run(state["characters"], state["recent"])
+    story = scriptwriter.run(state["characters"], state["recent"], state.get("idea", ""))
     used = [c for c in state["characters"] if c["name"] in story["characters_used"]]
     return {"story": story, "used": used or state["characters"]}
 
@@ -58,24 +60,38 @@ def director_node(state: FarmState) -> FarmState:
     return {"direction": direction}
 
 
+def _video_is_real() -> bool:
+    return not settings.use_mock and not settings.mock_video
+
+
 def video_node(state: FarmState) -> FarmState:
     d = state["direction"]
     url = generate_video(d["video_prompt"], d["video_tool"])
-    # Persistir a OSS solo cuando el video es real (mock ya es una URL pública estable).
-    if not settings.use_mock and not settings.mock_video and oss_client.is_configured():
-        url = oss_client.persist_video(url)
-    return {"video_url": url}
+    description = ""
+    if _video_is_real():
+        if oss_client.is_configured():
+            url = oss_client.persist_video(url)
+        # Qwen visión mira el video real para cerrar el loop texto↔video.
+        try:
+            description = vision_client.describe_video(url)
+        except Exception as e:  # visión no debe tumbar el pipeline
+            description = ""
+            print(f"[vision] no se pudo describir el video: {e}")
+    return {"video_url": url, "video_description": description}
 
 
 def qa_node(state: FarmState) -> FarmState:
     qa = qa_reviewer.run(
-        state["video_url"], state["story"]["script"], state["direction"]["video_prompt"]
+        state["video_url"], state["story"]["script"],
+        state["direction"]["video_prompt"], state.get("video_description", ""),
     )
     return {"qa": qa, "attempt": state.get("attempt", 0) + 1}
 
 
 def packager_node(state: FarmState) -> FarmState:
-    pack = packager.run(state["story"]["event"], state["story"]["script"])
+    pack = packager.run(
+        state["story"]["event"], state["story"]["script"], state.get("video_description", "")
+    )
     return {"pack": pack}
 
 
@@ -126,9 +142,11 @@ def _load_context(db: Session) -> tuple[list[dict], list[str]]:
     return characters, recent
 
 
-def run_daily_episode(db: Session) -> Episode:
+def run_daily_episode(db: Session, idea: str = "") -> Episode:
     characters, recent = _load_context(db)
-    final: FarmState = GRAPH.invoke({"characters": characters, "recent": recent})
+    final: FarmState = GRAPH.invoke(
+        {"characters": characters, "recent": recent, "idea": idea}
+    )
 
     story, direction, qa, pack = final["story"], final["direction"], final["qa"], final["pack"]
     approved = qa["qa_status"] == "approved"
@@ -140,6 +158,7 @@ def run_daily_episode(db: Session) -> Episode:
         video_prompt=direction["video_prompt"],
         video_tool=direction["video_tool"],
         video_url=final["video_url"],
+        video_description=final.get("video_description", ""),
         qa_status=qa["qa_status"],
         qa_notes=qa["qa_notes"],
         qa_attempts=final["attempt"],

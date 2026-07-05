@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database.db import Base, engine, get_db
@@ -41,6 +42,7 @@ def _episode_dict(e: Episode) -> dict:
         "video_prompt": e.video_prompt,
         "video_tool": e.video_tool,
         "video_url": e.video_url,
+        "video_description": e.video_description,
         "qa_status": e.qa_status,
         "qa_notes": e.qa_notes,
         "qa_attempts": e.qa_attempts,
@@ -55,10 +57,15 @@ def health():
     return {"status": "ok", "service": "digital-farm-showrunner", "mock_mode": settings.use_mock}
 
 
+class GenerateRequest(BaseModel):
+    idea: str = ""
+
+
 @app.post("/episodes/generate")
-def generate_episode(db: Session = Depends(get_db)):
+def generate_episode(req: GenerateRequest | None = None, db: Session = Depends(get_db)):
     """Run the full 4-agent pipeline and return the new episode."""
-    episode = run_daily_episode(db)
+    idea = req.idea if req else ""
+    episode = run_daily_episode(db, idea=idea)
     return _episode_dict(episode)
 
 

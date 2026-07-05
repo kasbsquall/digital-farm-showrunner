@@ -17,7 +17,7 @@ USER_TMPL = """Personajes disponibles (usa 2 o 3):
 
 Eventos recientes (evita repetir, pero puedes dar continuidad):
 {recent}
-
+{idea}
 Inventa el EVENTO ABSURDO de hoy y escribe un guion corto de 20-30 segundos con
 diálogo simple entre los animales involucrados.
 
@@ -56,12 +56,13 @@ def _mock(characters: list[dict], recent_events: list[str]) -> str:
     return json.dumps(idea, ensure_ascii=False)
 
 
-def run(characters: list[dict], recent_events: list[str]) -> dict:
+def run(characters: list[dict], recent_events: list[str], idea: str = "") -> dict:
     cast = "\n".join(f"- {c['name']} ({c['species']}): {c['personality']}" for c in characters)
     recent = "\n".join(f"- {e}" for e in recent_events) or "- (ninguno todavía)"
+    idea_block = f"\nIDEA SUGERIDA por el usuario (respétala como base): {idea}\n" if idea.strip() else ""
     text = chat(
         SYSTEM,
-        USER_TMPL.format(cast=cast, recent=recent),
+        USER_TMPL.format(cast=cast, recent=recent, idea=idea_block),
         temperature=0.9,
         mock=_mock(characters, recent_events),
     )

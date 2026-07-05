@@ -19,7 +19,11 @@ USER_TMPL = """Evento del episodio: {event}
 Guion:
 {script}
 
-Genera el paquete de publicación. Devuelve JSON exacto:
+LO QUE REALMENTE SE VE EN EL VIDEO (prioriza esto para que el texto coincida):
+{video_description}
+
+Genera el paquete de publicación. El título y la descripción deben reflejar lo
+que de verdad se ve en el video (arriba), no solo el guion. Devuelve JSON exacto:
 {{"title": "<título viral, con 1-2 emojis>",
   "thumbnail_hint": "<descripción visual del thumbnail sugerido>",
   "description": "<2-3 frases + 3 hashtags>"}}"""
@@ -38,10 +42,11 @@ def _mock(event: str, script: str) -> str:
     )
 
 
-def run(event: str, script: str) -> dict:
+def run(event: str, script: str, video_description: str = "") -> dict:
+    desc = video_description.strip() or "(no disponible — usa el guion)"
     text = chat(
         SYSTEM,
-        USER_TMPL.format(event=event, script=script),
+        USER_TMPL.format(event=event, script=script, video_description=desc),
         temperature=0.8,
         mock=_mock(event, script),
     )

@@ -14,7 +14,7 @@ _MOCK_SAMPLE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sampl
 
 def generate_video(prompt: str, tool: str = "wan") -> str:
     """Submit a generation job and return a playable video URL."""
-    if settings.use_mock:
+    if settings.use_mock or settings.mock_video:
         # Deterministic per-prompt tag so different episodes look distinct in logs.
         tag = hashlib.sha1(prompt.encode()).hexdigest()[:8]
         return f"{_MOCK_SAMPLE}#mock-{tool}-{tag}"

@@ -15,11 +15,17 @@ class Settings(BaseSettings):
     qwen_api_key: str = ""
     qwen_base_url_payg: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
     qwen_base_url_token_plan: str = "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
+    # Endpoint específico de workspace (Model Studio, keys "sk-ws-..."). Si se
+    # define, tiene prioridad sobre la auto-selección por prefijo.
+    qwen_base_url_override: str = ""
     qwen_text_model: str = "qwen3.7-plus"   # razonamiento/coherencia: qwen3.7-max
 
-    # Generación de video: HappyHorse (texto→video). Wan2.6 es texto→IMAGEN.
+    # Generación de video: HappyHorse o Wan (t2v). Wan2.6-t2i es texto→IMAGEN.
     video_model: str = "happyhorse-1.1-t2v"
     image_model: str = "wan2.6-t2i"         # para thumbnails del episodio
+    # Mantener el video en mock aunque Qwen texto sea real (hasta implementar
+    # el submit/poll real de generación de video).
+    mock_video: bool = True
 
     # Alibaba Cloud OSS (video storage).
     oss_access_key_id: str = ""
@@ -37,7 +43,9 @@ class Settings(BaseSettings):
 
     @property
     def qwen_base_url(self) -> str:
-        """Auto-selecciona el endpoint según el prefijo de la key (evita el 401)."""
+        """Override de workspace si existe; si no, auto-selecciona por prefijo."""
+        if self.qwen_base_url_override:
+            return self.qwen_base_url_override
         return (
             self.qwen_base_url_token_plan
             if self.qwen_api_key.startswith("sk-sp-")

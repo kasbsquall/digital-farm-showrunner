@@ -1,25 +1,106 @@
-"""Pipeline orchestration: runs the 4 agents in sequence.
+"""Pipeline orchestration with LangGraph.
 
-Day 1-2: plain sequential runner (this file) so we can test end-to-end now.
-Day 3: this gets ported to LangGraph, keeping the same QA -> Director regen loop.
+The 4 agents are wired as a StateGraph. The QA node routes back to the Director
+(regen loop) when the take is rejected, up to MAX_REGEN times — this is the
+token-budget guard. On approval (or after exhausting regens) it flows to the
+Packager and ends.
 
-Sequence:
-  scriptwriter -> production_director -> [video gen] -> qa_reviewer
-                                              ▲            │
-                                              └── reject ──┘ (up to MAX_REGEN)
-                                                         │ approve
-                                                         ▼
-                                                     packager
+Graph:
+    START → scriptwriter → director → video → qa ─(approved / out of budget)→ packager → END
+                              ▲                    │
+                              └──── rejected ──────┘
+
+`run_daily_episode(db)` keeps the same signature the API depends on: it loads
+context from the DB, runs the graph, and persists the resulting Episode.
 """
+from typing import TypedDict
+
+from langgraph.graph import StateGraph, START, END
 from sqlalchemy.orm import Session
 
 from database.models import Character, Episode
 from agents import scriptwriter, production_director, qa_reviewer, packager
 from services.video_gen_client import generate_video
 
-MAX_REGEN = 2  # QA can bounce back to the Director this many times before giving up.
+MAX_REGEN = 2  # Director can be re-run this many times after a QA rejection.
 RECENT_LIMIT = 5
 
+
+class FarmState(TypedDict, total=False):
+    # Inputs
+    characters: list[dict]
+    recent: list[str]
+    # Agent 1
+    story: dict
+    used: list[dict]
+    # Agent 2 + video
+    direction: dict
+    video_url: str
+    # Agent 3
+    qa: dict
+    attempt: int
+    # Agent 4
+    pack: dict
+
+
+# --- Nodes -----------------------------------------------------------------
+
+def scriptwriter_node(state: FarmState) -> FarmState:
+    story = scriptwriter.run(state["characters"], state["recent"])
+    used = [c for c in state["characters"] if c["name"] in story["characters_used"]]
+    return {"story": story, "used": used or state["characters"]}
+
+
+def director_node(state: FarmState) -> FarmState:
+    direction = production_director.run(state["story"]["script"], state["used"])
+    return {"direction": direction}
+
+
+def video_node(state: FarmState) -> FarmState:
+    d = state["direction"]
+    return {"video_url": generate_video(d["video_prompt"], d["video_tool"])}
+
+
+def qa_node(state: FarmState) -> FarmState:
+    qa = qa_reviewer.run(
+        state["video_url"], state["story"]["script"], state["direction"]["video_prompt"]
+    )
+    return {"qa": qa, "attempt": state.get("attempt", 0) + 1}
+
+
+def packager_node(state: FarmState) -> FarmState:
+    pack = packager.run(state["story"]["event"], state["story"]["script"])
+    return {"pack": pack}
+
+
+def _after_qa(state: FarmState) -> str:
+    """Approve → package; reject but budget left → regenerate; else package best take."""
+    if state["qa"]["qa_status"] == "approved" or state["attempt"] > MAX_REGEN:
+        return "packager"
+    return "director"
+
+
+def _build_graph():
+    g = StateGraph(FarmState)
+    g.add_node("scriptwriter", scriptwriter_node)
+    g.add_node("director", director_node)
+    g.add_node("video", video_node)
+    g.add_node("qa", qa_node)
+    g.add_node("packager", packager_node)
+
+    g.add_edge(START, "scriptwriter")
+    g.add_edge("scriptwriter", "director")
+    g.add_edge("director", "video")
+    g.add_edge("video", "qa")
+    g.add_conditional_edges("qa", _after_qa, {"director": "director", "packager": "packager"})
+    g.add_edge("packager", END)
+    return g.compile()
+
+
+GRAPH = _build_graph()
+
+
+# --- Public entry ----------------------------------------------------------
 
 def _load_context(db: Session) -> tuple[list[dict], list[str]]:
     characters = [
@@ -41,44 +122,26 @@ def _load_context(db: Session) -> tuple[list[dict], list[str]]:
 
 def run_daily_episode(db: Session) -> Episode:
     characters, recent = _load_context(db)
+    final: FarmState = GRAPH.invoke({"characters": characters, "recent": recent})
 
-    # Agent 1 — Scriptwriter
-    story = scriptwriter.run(characters, recent)
-    used = [c for c in characters if c["name"] in story["characters_used"]] or characters
+    story, direction, qa, pack = final["story"], final["direction"], final["qa"], final["pack"]
+    approved = qa["qa_status"] == "approved"
 
     episode = Episode(
         event=story["event"],
         script=story["script"],
         characters_used=story["characters_used"],
+        video_prompt=direction["video_prompt"],
+        video_tool=direction["video_tool"],
+        video_url=final["video_url"],
+        qa_status=qa["qa_status"],
+        qa_notes=qa["qa_notes"],
+        qa_attempts=final["attempt"],
+        title=pack["title"],
+        thumbnail_hint=pack["thumbnail_hint"],
+        description=pack["description"],
+        status="published" if approved else "draft",
     )
-
-    # Agent 2 + video gen + Agent 3, with regen loop.
-    qa = {"qa_status": "rejected", "qa_notes": ""}
-    attempt = 0
-    while attempt <= MAX_REGEN:
-        direction = production_director.run(story["script"], used)
-        video_url = generate_video(direction["video_prompt"], direction["video_tool"])
-        qa = qa_reviewer.run(video_url, story["script"], direction["video_prompt"])
-        attempt += 1
-
-        episode.video_prompt = direction["video_prompt"]
-        episode.video_tool = direction["video_tool"]
-        episode.video_url = video_url
-        episode.qa_status = qa["qa_status"]
-        episode.qa_notes = qa["qa_notes"]
-        episode.qa_attempts = attempt
-
-        if qa["qa_status"] == "approved":
-            break
-
-    # Agent 4 — Packager (only meaningful when approved, but we always package
-    # the best take so nothing is lost).
-    pack = packager.run(story["event"], story["script"])
-    episode.title = pack["title"]
-    episode.thumbnail_hint = pack["thumbnail_hint"]
-    episode.description = pack["description"]
-    episode.status = "published" if qa["qa_status"] == "approved" else "draft"
-
     db.add(episode)
     db.commit()
     db.refresh(episode)

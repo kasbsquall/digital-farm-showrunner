@@ -22,7 +22,7 @@ from config import settings
 from database.models import Character, Episode
 from agents import scriptwriter, production_director, qa_reviewer, packager
 from services.video_gen_client import generate_video
-from services import oss_client, vision_client, image_gen_client
+from services import oss_client, vision_client, image_gen_client, video_gen_client
 
 MAX_REGEN = 2  # Director can be re-run this many times after a QA rejection.
 RECENT_LIMIT = 5
@@ -67,18 +67,25 @@ def _video_is_real() -> bool:
 
 def video_node(state: FarmState) -> FarmState:
     d = state["direction"]
-    url = generate_video(d["video_prompt"], d["video_tool"])
+    if not _video_is_real():
+        # Modo demo: video placeholder, sin keyframe ni visión.
+        return {"video_url": generate_video(d.get("motion_prompt", "farm"), "happyhorse"),
+                "video_description": "", "thumbnail_url": ""}
+
+    # 1) Keyframe: imagen fija de la escena, en el estilo de los personajes.
+    kf_temp = image_gen_client.generate_image(d["keyframe_prompt"], size="1280*720")
+    kf_url = oss_client.persist_image(kf_temp, prefix="keyframes") if oss_client.is_configured() else kf_temp
+    # 2) Animar el keyframe (image→video) → hereda el look de los personajes.
+    vid_temp = video_gen_client.animate_image(kf_url, d["motion_prompt"])
+    vid_url = oss_client.persist_video(vid_temp) if oss_client.is_configured() else vid_temp
+    # 3) Visión: describir lo que realmente pasa.
     description = ""
-    if _video_is_real():
-        if oss_client.is_configured():
-            url = oss_client.persist_video(url)
-        # Qwen visión mira el video real para cerrar el loop texto↔video.
-        try:
-            description = vision_client.describe_video(url)
-        except Exception as e:  # visión no debe tumbar el pipeline
-            description = ""
-            print(f"[vision] no se pudo describir el video: {e}")
-    return {"video_url": url, "video_description": description}
+    try:
+        description = vision_client.describe_video(vid_url)
+    except Exception as e:
+        print(f"[vision] no se pudo describir el video: {e}")
+    # El keyframe ES el primer frame → thumbnail perfectamente coherente.
+    return {"video_url": vid_url, "video_description": description, "thumbnail_url": kf_url}
 
 
 def qa_node(state: FarmState) -> FarmState:
@@ -89,32 +96,17 @@ def qa_node(state: FarmState) -> FarmState:
                 "attempt": attempt}
     qa = qa_reviewer.run(
         state["video_url"], state["story"]["script"],
-        state["direction"]["video_prompt"], state.get("video_description", ""),
+        state["direction"].get("motion_prompt", ""), state.get("video_description", ""),
     )
     return {"qa": qa, "attempt": attempt}
 
 
 def packager_node(state: FarmState) -> FarmState:
+    # El thumbnail ya es el keyframe (primer frame del video) desde video_node.
     pack = packager.run(
         state["story"]["event"], state["story"]["script"], state.get("video_description", "")
     )
-    # Thumbnail real generado por IA (coherente con lo que se ve en el video).
-    thumb = ""
-    if not settings.use_mock:
-        try:
-            base = state.get("video_description") or state["story"]["event"]
-            tprompt = (
-                f"{base}. Vibrant eye-catching video thumbnail, claymation farm animals, "
-                "bold dramatic lighting, cinematic, high contrast, poster style"
-            )
-            timg = image_gen_client.generate_image(tprompt, size="1280*720")
-            if oss_client.is_configured():
-                thumb = oss_client.persist_image(timg, prefix="thumbnails")
-            else:
-                thumb = timg
-        except Exception as e:
-            print(f"[thumb] no se pudo generar thumbnail: {e}")
-    return {"pack": pack, "thumbnail_url": thumb}
+    return {"pack": pack}
 
 
 def _after_qa(state: FarmState) -> str:
@@ -171,7 +163,7 @@ def _episode_from_state(final: FarmState) -> Episode:
         event=story["event"],
         script=story["script"],
         characters_used=story["characters_used"],
-        video_prompt=direction["video_prompt"],
+        video_prompt=f"KEYFRAME: {direction.get('keyframe_prompt','')}\nMOTION: {direction.get('motion_prompt','')}",
         video_tool=direction["video_tool"],
         video_url=final["video_url"],
         video_description=final.get("video_description", ""),

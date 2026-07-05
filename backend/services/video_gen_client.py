@@ -40,6 +40,28 @@ def _headers(extra: dict | None = None) -> dict:
     return h
 
 
+def _submit_raw(model: str, inp: dict) -> str:
+    url = f"{settings.dashscope_base}/services/aigc/video-generation/video-synthesis"
+    body = {"model": model, "input": inp, "parameters": {}}
+    resp = httpx.post(url, headers=_headers({"X-DashScope-Async": "enable"}), json=body, timeout=60)
+    resp.raise_for_status()
+    task_id = resp.json().get("output", {}).get("task_id")
+    if not task_id:
+        raise RuntimeError(f"Sin task_id en la respuesta de submit: {resp.json()}")
+    return task_id
+
+
+def animate_image(image_url: str, motion_prompt: str) -> str:
+    """Image→video (HappyHorse i2v): animate a keyframe. Returns a playable URL."""
+    if settings.use_mock or settings.mock_video:
+        return _mock_url(motion_prompt, "i2v")
+    task_id = _submit_raw(
+        settings.video_model_i2v,
+        {"media": [{"url": image_url}], "prompt": motion_prompt},
+    )
+    return _poll(task_id)
+
+
 def _submit(model: str, prompt: str) -> str:
     url = f"{settings.dashscope_base}/services/aigc/video-generation/video-synthesis"
     # HappyHorse/Wan exigen un objeto `parameters` (usa defaults del modelo si va vacío).

@@ -7,15 +7,15 @@ type Status = "idle" | "active" | "done" | "reject";
 
 const STAGES = [
   { key: "scriptwriter", role: "Guionista", tag: "qwen3.7 · texto" },
-  { key: "director", role: "Director de Producción", tag: "qwen3.7 · texto" },
-  { key: "video", role: "Video + Visión", tag: "happyhorse · qwen3-vl" },
+  { key: "director", role: "Director de Producción", tag: "qwen3.7 · keyframe" },
+  { key: "video", role: "Keyframe → Video → Visión", tag: "qwen-image · happyhorse-i2v · qwen3-vl" },
   { key: "qa", role: "Control de Calidad", tag: "qwen3.7 · texto" },
-  { key: "packager", role: "Empaquetador", tag: "qwen-image · thumbnail" },
+  { key: "packager", role: "Empaquetador", tag: "qwen3.7 · publicación" },
 ] as const;
 
 type Data = {
   script?: { event: string; script: string };
-  director?: { video_prompt: string; video_tool: string };
+  director?: { keyframe_prompt: string; motion_prompt: string; video_tool: string };
   video?: { video_url: string; video_description: string };
   qa?: { qa_status: string; qa_notes: string };
   pack?: { title: string; description: string; thumbnail_url: string };
@@ -153,10 +153,10 @@ function StageBody({ k, data, regen }: { k: string; data: Data; regen: number })
   if (k === "director" && data.director)
     return (
       <div className="out">
-        <span className="k">Herramienta</span>
-        {data.director.video_tool}
-        <span className="k">Prompt de video</span>
-        {data.director.video_prompt}
+        <span className="k">Keyframe (imagen semilla)</span>
+        {data.director.keyframe_prompt}
+        <span className="k">Acción de 5s</span>
+        {data.director.motion_prompt}
         {regen > 0 && <div className="regen">↻ regeneración #{regen}</div>}
       </div>
     );

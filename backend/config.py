@@ -22,7 +22,8 @@ class Settings(BaseSettings):
     vision_model: str = "qwen3-vl-plus"     # entiende video (concordancia texto↔video)
 
     # Generación de video: HappyHorse o Wan (t2v). Wan2.6-t2i es texto→IMAGEN.
-    video_model: str = "happyhorse-1.1-t2v"   # tool "happyhorse"
+    video_model: str = "happyhorse-1.1-t2v"   # texto→video (fallback)
+    video_model_i2v: str = "happyhorse-1.1-i2v"  # imagen→video (keyframe animado)
     video_model_wan: str = "wan2.7-t2v"       # tool "wan"
     image_model: str = "qwen-image-2.0"       # retratos de personajes + thumbnails
     video_poll_seconds: int = 10              # intervalo de sondeo de la tarea

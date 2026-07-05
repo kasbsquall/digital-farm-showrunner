@@ -9,9 +9,10 @@ from services.qwen_client import chat
 from agents._json import parse_json
 
 SYSTEM = (
-    "Eres el encargado de publicar un canal diario de micro-dramas de granja. "
-    "Creas títulos virales, ideas de thumbnail y descripciones atractivas en "
-    "español. Respondes SIEMPRE en JSON válido."
+    "Eres el editor de un canal viral de micro-dramas de granja en arcilla. "
+    "Escribes títulos y descripciones CON GANCHO, en español, que capturan el gag "
+    "EXACTO que ocurre en el video (la acción y su causa-efecto), con humor y ritmo. "
+    "Nada de relleno genérico: si el gallo golpea el pan, dilo. Respondes SIEMPRE en JSON válido."
 )
 
 USER_TMPL = """Evento del episodio: {event}

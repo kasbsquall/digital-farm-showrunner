@@ -68,7 +68,7 @@
 
   <!-- Video gen inline node -->
   <rect x="360" y="410" width="440" height="44" rx="10" fill="#eef4f7" stroke="#6ba7c4" stroke-width="1.6"/>
-  <text x="378" y="437" class="sub" fill="#3d7d99" font-weight="700">🎬 Generación de video (Wan / HappyHorse)</text>
+  <text x="378" y="437" class="sub" fill="#3d7d99" font-weight="700">🎬 Generación de video (HappyHorse t2v)</text>
 
   <!-- vertical flow arrows between agents -->
   <line x1="580" y1="296" x2="580" y2="322" stroke="#2b2118" stroke-width="2" marker-end="url(#arrow)"/>
@@ -84,8 +84,8 @@
   <rect x="940" y="230" width="240" height="120" rx="14" class="cloud"/>
   <text x="1060" y="262" text-anchor="middle" class="title" fill="#2b2118">☁ Qwen Cloud</text>
   <text x="1060" y="284" text-anchor="middle" class="sub">DashScope · OpenAI-compatible</text>
-  <text x="1060" y="308" text-anchor="middle" class="sub">Qwen (texto) — agentes 1-4</text>
-  <text x="1060" y="328" text-anchor="middle" class="sub">Wan / HappyHorse — video</text>
+  <text x="1060" y="308" text-anchor="middle" class="sub">qwen3.7-plus (texto) — agentes 1-4</text>
+  <text x="1060" y="328" text-anchor="middle" class="sub">HappyHorse — video · Wan2.6 — thumbnail</text>
 
   <!-- Database -->
   <rect x="940" y="430" width="240" height="90" rx="14" class="store"/>

@@ -82,11 +82,16 @@ def video_node(state: FarmState) -> FarmState:
 
 
 def qa_node(state: FarmState) -> FarmState:
+    attempt = state.get("attempt", 0) + 1
+    # Sin video real (modo placeholder) no hay nada que revisar: aprobamos.
+    if not _video_is_real():
+        return {"qa": {"qa_status": "approved", "qa_notes": "Video en modo demo (placeholder)."},
+                "attempt": attempt}
     qa = qa_reviewer.run(
         state["video_url"], state["story"]["script"],
         state["direction"]["video_prompt"], state.get("video_description", ""),
     )
-    return {"qa": qa, "attempt": state.get("attempt", 0) + 1}
+    return {"qa": qa, "attempt": attempt}
 
 
 def packager_node(state: FarmState) -> FarmState:
@@ -159,16 +164,10 @@ def _load_context(db: Session) -> tuple[list[dict], list[str]]:
     return characters, recent
 
 
-def run_daily_episode(db: Session, idea: str = "") -> Episode:
-    characters, recent = _load_context(db)
-    final: FarmState = GRAPH.invoke(
-        {"characters": characters, "recent": recent, "idea": idea}
-    )
-
+def _episode_from_state(final: FarmState) -> Episode:
     story, direction, qa, pack = final["story"], final["direction"], final["qa"], final["pack"]
     approved = qa["qa_status"] == "approved"
-
-    episode = Episode(
+    return Episode(
         event=story["event"],
         script=story["script"],
         characters_used=story["characters_used"],
@@ -185,7 +184,37 @@ def run_daily_episode(db: Session, idea: str = "") -> Episode:
         description=pack["description"],
         status="published" if approved else "draft",
     )
+
+
+def run_daily_episode(db: Session, idea: str = "") -> Episode:
+    characters, recent = _load_context(db)
+    final: FarmState = GRAPH.invoke(
+        {"characters": characters, "recent": recent, "idea": idea}
+    )
+    episode = _episode_from_state(final)
     db.add(episode)
     db.commit()
     db.refresh(episode)
     return episode
+
+
+def run_stream(db: Session, idea: str = ""):
+    """Generator yielding (stage, data) per pipeline node, then ('done', episode).
+
+    Powers the live "Studio" wizard so the user watches each agent work.
+    """
+    characters, recent = _load_context(db)
+    final: FarmState = {}
+    for chunk in GRAPH.stream(
+        {"characters": characters, "recent": recent, "idea": idea}, stream_mode="updates"
+    ):
+        for node, update in chunk.items():
+            if update:
+                final.update(update)
+            yield node, update or {}
+
+    episode = _episode_from_state(final)
+    db.add(episode)
+    db.commit()
+    db.refresh(episode)
+    yield "done", {"id": episode.id}

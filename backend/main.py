@@ -5,14 +5,17 @@ verifiably alive. Episode-generation endpoint gets wired once the pipeline exist
 """
 from contextlib import asynccontextmanager
 
+import json
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from database.db import Base, engine, get_db
+from database.db import Base, engine, get_db, SessionLocal
 from database.models import Character, Episode
-from pipeline.orchestrator import run_daily_episode
+from pipeline.orchestrator import run_daily_episode, run_stream
 from config import settings
 
 
@@ -70,6 +73,27 @@ def generate_episode(req: GenerateRequest | None = None, db: Session = Depends(g
     return _episode_dict(episode)
 
 
+@app.get("/episodes/generate/stream")
+def generate_episode_stream(idea: str = ""):
+    """Server-Sent Events: emits each pipeline stage live for the Studio wizard."""
+
+    def event_source():
+        db = SessionLocal()
+        try:
+            for stage, data in run_stream(db, idea=idea):
+                yield f"event: {stage}\ndata: {json.dumps(data, ensure_ascii=False, default=str)}\n\n"
+        except Exception as e:  # surface failures to the client
+            yield f"event: failed\ndata: {json.dumps({'message': str(e)})}\n\n"
+        finally:
+            db.close()
+
+    return StreamingResponse(
+        event_source(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 @app.get("/characters")
 def list_characters(db: Session = Depends(get_db)):
     rows = db.query(Character).all()
@@ -83,16 +107,4 @@ def list_characters(db: Session = Depends(get_db)):
 @app.get("/episodes")
 def list_episodes(db: Session = Depends(get_db)):
     rows = db.query(Episode).order_by(Episode.created_at.desc()).all()
-    return [
-        {
-            "id": e.id,
-            "title": e.title,
-            "event": e.event,
-            "video_url": e.video_url,
-            "thumbnail_hint": e.thumbnail_hint,
-            "description": e.description,
-            "status": e.status,
-            "qa_status": e.qa_status,
-        }
-        for e in rows
-    ]
+    return [_episode_dict(e) for e in rows]

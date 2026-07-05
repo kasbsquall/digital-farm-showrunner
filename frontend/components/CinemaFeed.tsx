@@ -21,35 +21,52 @@ function splitPrompt(vp: string | null): { keyframe: string; motion: string } {
   };
 }
 
-function BehindScenes({ ep }: { ep: Episode }) {
+function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
   const { keyframe, motion } = splitPrompt(ep.video_prompt);
   const approved = ep.qa_status === "approved";
-  const rows = [
-    { img: "/agents/scriptwriter.png", who: "Scriptwriter", body: (
-      <><b>Event.</b> {ep.event}<br /><b>Script.</b> {ep.script}</>
+  const steps = [
+    { img: "/agents/scriptwriter.png", who: "Scriptwriter", model: "qwen3.7", body: (
+      <><span className="k">Event</span>{ep.event}<span className="k">Script</span>{ep.script}</>
     ) },
-    { img: "/agents/director.png", who: "Production Director", body: (
-      <><b>Keyframe.</b> {keyframe}<br /><b>5s action.</b> {motion}</>
+    { img: "/agents/director.png", who: "Production Director", model: "qwen3.7", body: (
+      <><span className="k">Keyframe (seed image)</span>{keyframe}<span className="k">5-second action</span>{motion}</>
     ) },
-    { img: "", who: "Vision (qwen3-vl)", body: <>{ep.video_description || "—"}</> },
-    { img: "/agents/qa.png", who: "Quality Control", body: (
-      <>{approved ? "✓ Approved" : "✗ Rejected"} — {ep.qa_notes} <i>({ep.qa_attempts} attempt{ep.qa_attempts === 1 ? "" : "s"})</i></>
+    { img: "/set/clapper.png", who: "Keyframe → Video → Vision", model: "qwen-image · happyhorse-i2v · qwen3-vl", body: (
+      <><span className="k">What the AI actually sees</span>{ep.video_description || "—"}</>
     ) },
-    { img: "/agents/packager.png", who: "Packager", body: (
-      <><b>{ep.title}</b><br />{ep.description}</>
+    { img: "/agents/qa.png", who: "Quality Control", model: "qwen3.7", body: (
+      <><span className="k">Verdict</span>{approved ? "✓ Approved" : "✗ Rejected"} — {ep.qa_notes} <i>({ep.qa_attempts} attempt{ep.qa_attempts === 1 ? "" : "s"})</i></>
+    ) },
+    { img: "/agents/packager.png", who: "Packager", model: "qwen3.7", body: (
+      <><span className="k">Title</span><b>{ep.title}</b><span className="k">Description</span>{ep.description}</>
     ) },
   ];
   return (
-    <div className="bts">
-      {rows.map((r, i) => (
-        <div className="bts-row" key={i}>
-          <div className="bts-who">
-            {r.img ? <img src={r.img} alt="" /> : <span className="bts-cam">🎬</span>}
-            <span>{r.who}</span>
+    <div className="modal-scrim" onClick={onClose}>
+      <div className="modal" role="dialog" aria-modal="true" aria-label="How it was made" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div>
+            <span className="eyebrow">Behind the scenes</span>
+            <h3>How it was made</h3>
           </div>
-          <div className="bts-body">{r.body}</div>
+          <button className="modal-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
-      ))}
+        <img className="modal-hero" src={ossThumb(ep.thumbnail_url, 900)} alt="" />
+        <div className="bts-timeline">
+          {steps.map((s, i) => (
+            <div className="bts-step" key={i}>
+              <div className="bts-avatar">
+                {s.img ? <img src={s.img} alt="" /> : <span>🎬</span>}
+                <span className="bts-n">{i + 1}</span>
+              </div>
+              <div className="bts-content">
+                <div className="bts-name">{s.who} <span className="bts-model">{s.model}</span></div>
+                <div className="bts-out">{s.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -138,9 +155,10 @@ export function CinemaFeed({
               chars[n] ? <img key={n} src={ossThumb(chars[n], 64)} alt={n} title={n} /> : null
             )}
           </div>
-          {showBTS && <BehindScenes ep={sel} />}
         </div>
       </div>
+
+      {showBTS && <BTSModal ep={sel} onClose={() => setShowBTS(false)} />}
 
       <div className="playlist">
         {episodes.map((ep) => {

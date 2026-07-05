@@ -108,14 +108,28 @@ img { max-width: 100%; }
 .tag { font-family: var(--font-mono); font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; background: rgba(0,0,0,.55); color: var(--amber); padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid var(--line-strong); }
 .bts-toggle { margin-left: auto; font: inherit; font-weight: 700; font-size: 0.78rem; cursor: pointer; color: var(--amber); background: transparent; border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.3rem 0.75rem; transition: border-color .2s, background .2s; }
 .bts-toggle:hover { border-color: var(--amber); background: rgba(244,165,33,.1); }
-.bts { margin-top: 1.1rem; border-top: 1px dashed var(--line-strong); padding-top: 1rem; display: grid; gap: 0.7rem; }
-.bts-row { display: grid; grid-template-columns: 130px 1fr; gap: 0.8rem; align-items: start; }
-@media (max-width: 560px) { .bts-row { grid-template-columns: 1fr; } }
-.bts-who { display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 0.82rem; color: var(--text); }
-.bts-who img { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--line-strong); }
-.bts-cam { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-2); border: 1.5px solid var(--line-strong); }
-.bts-body { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
-.bts-body b { color: var(--amber-soft); font-weight: 700; }
+/* Behind-the-scenes modal */
+.modal-scrim { position: fixed; inset: 0; z-index: 50; background: rgba(10,7,4,.72); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 1.2rem; animation: fade .2s var(--ease); }
+@keyframes fade { from { opacity: 0; } }
+.modal { width: min(760px, 100%); max-height: 90vh; overflow-y: auto; background: linear-gradient(180deg, #241811, #1a120b); border: 1px solid var(--line-strong); border-radius: 22px; box-shadow: 0 40px 100px -30px #000; }
+.modal-head { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 1.3rem 1.5rem 1rem; background: linear-gradient(#241811, rgba(36,24,17,.9)); }
+.modal-head h3 { font-family: var(--font-display); font-size: 1.7rem; margin: 0.1rem 0 0; }
+.modal-x { font: inherit; font-size: 1.1rem; cursor: pointer; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); }
+.modal-x:hover { border-color: var(--amber); color: var(--amber); }
+.modal-hero { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+.bts-timeline { padding: 1.3rem 1.5rem 1.8rem; display: grid; gap: 0; position: relative; }
+.bts-step { display: grid; grid-template-columns: 64px 1fr; gap: 1rem; padding-bottom: 1.4rem; position: relative; }
+.bts-step:not(:last-child)::before { content: ""; position: absolute; left: 31px; top: 64px; bottom: 0; width: 2px; background: var(--line-strong); }
+.bts-avatar { position: relative; width: 64px; height: 64px; }
+.bts-avatar img { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--line-strong); object-fit: cover; }
+.bts-avatar span { width: 64px; height: 64px; display: grid; place-items: center; font-size: 1.6rem; border-radius: 50%; background: var(--surface-2); border: 2px solid var(--line-strong); }
+.bts-n { position: absolute; bottom: -4px; right: -4px; width: 24px; height: 24px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 0.8rem; background: var(--amber); color: #1a1206; border-radius: 50%; border: 2px solid #1a120b; }
+.bts-content { padding-top: 0.2rem; }
+.bts-name { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+.bts-model { font-family: var(--font-mono); font-size: 0.62rem; color: var(--faint); text-transform: uppercase; letter-spacing: 0.08em; }
+.bts-out { margin-top: 0.4rem; font-size: 0.88rem; color: var(--muted); line-height: 1.55; white-space: pre-wrap; }
+.bts-out .k { display: block; color: var(--amber); font-size: 0.7rem; font-weight: 700; margin: 0.5rem 0 0.1rem; }
+.bts-out b { color: var(--amber-soft); }
 .badge { font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid; }
 .badge.ok { color: var(--live); border-color: rgba(95,230,160,.4); background: rgba(95,230,160,.08); }
 .badge.draft { color: var(--barn); border-color: rgba(239,91,60,.4); background: rgba(239,91,60,.08); }
@@ -168,17 +182,34 @@ img { max-width: 100%; }
 .wizard-video, .wizard-img { margin-top: 0.6rem; width: 100%; border-radius: 10px; border: 1px solid var(--line); }
 
 /* ---------- Cast ---------- */
-.cast-grid { display: grid; gap: 1.2rem; grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 620px) { .cast-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 940px) { .cast-grid { grid-template-columns: repeat(5, 1fr); } }
-.cast-card { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--surface); transition: transform .25s var(--ease), border-color .25s; }
-.cast-card:hover { transform: translateY(-5px); border-color: var(--amber); }
-.cast-card .pic { aspect-ratio: 1; background: var(--bg-2); overflow: hidden; }
-.cast-card .pic img { width: 100%; height: 100%; object-fit: cover; }
-.cast-card .info { padding: 0.85rem 0.9rem 1rem; }
-.cast-card .info b { font-family: var(--font-display); font-size: 1.15rem; }
-.cast-card .info .role { font-size: 0.7rem; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin: 2px 0 0.4rem; }
-.cast-card .info p { font-size: 0.82rem; color: var(--muted); margin: 0; line-height: 1.4; }
+.cast-grid { display: grid; gap: 1.4rem; grid-template-columns: repeat(1, 1fr); }
+@media (min-width: 560px) { .cast-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 960px) { .cast-grid { grid-template-columns: repeat(4, 1fr); } }
+.cast-card { text-align: left; font: inherit; color: inherit; cursor: pointer; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: var(--surface); backdrop-filter: blur(7px); transition: transform .25s var(--ease), border-color .25s, box-shadow .25s; padding: 0; }
+.cast-card:hover { transform: translateY(-6px) rotate(-0.5deg); border-color: var(--amber); box-shadow: 0 26px 50px -26px #000; }
+.cast-card .pic { position: relative; aspect-ratio: 1; background: var(--bg-2); overflow: hidden; }
+.cast-card .pic img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s var(--ease); }
+.cast-card:hover .pic img { transform: scale(1.05); }
+.cast-card .count { position: absolute; bottom: 0.6rem; right: 0.6rem; font-size: 0.68rem; font-weight: 700; background: rgba(10,7,4,.8); color: var(--amber); border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.22rem 0.6rem; }
+.cast-card .info { padding: 0.95rem 1rem 1.15rem; }
+.cast-card .info b { font-family: var(--font-display); font-size: 1.4rem; }
+.cast-card .info .role { font-size: 0.72rem; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin: 2px 0 0.5rem; font-weight: 700; }
+.cast-card .info p { font-size: 0.85rem; color: var(--muted); margin: 0; line-height: 1.45; }
+
+/* Character modal */
+.char-modal { width: min(640px, 100%); }
+.char-hero { display: flex; gap: 1.1rem; padding: 1.4rem 1.5rem; align-items: center; }
+.char-hero img { width: 110px; height: 110px; border-radius: 20px; object-fit: cover; border: 2px solid var(--line-strong); }
+.char-hero h3 { font-family: var(--font-display); font-size: 2rem; margin: 0; }
+.char-hero .role { color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; font-weight: 700; }
+.char-hero p { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.92rem; }
+.char-eps { padding: 0 1.5rem 1.6rem; }
+.char-eps .lbl { font-family: var(--font-mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--amber); }
+.char-eps .row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; margin-top: 0.7rem; }
+.char-eps .ep { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.char-eps .ep img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+.char-eps .ep span { display: block; padding: 0.5rem 0.6rem; font-size: 0.76rem; font-weight: 600; }
+.char-eps .none { color: var(--faint); font-size: 0.85rem; margin-top: 0.5rem; }
 
 .empty { text-align: center; color: var(--muted); padding: 3rem 1rem; }
 

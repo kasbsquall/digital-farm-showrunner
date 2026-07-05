@@ -87,7 +87,7 @@ export default function Home() {
             <h2>Meet the barnyard</h2>
           </div>
         </div>
-        <CastGrid characters={characters} />
+        <CastGrid characters={characters} episodes={episodes} />
       </section>
 
       <footer>

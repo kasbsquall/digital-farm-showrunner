@@ -21,8 +21,11 @@ class Settings(BaseSettings):
     qwen_text_model: str = "qwen3.7-plus"   # razonamiento/coherencia: qwen3.7-max
 
     # Generación de video: HappyHorse o Wan (t2v). Wan2.6-t2i es texto→IMAGEN.
-    video_model: str = "happyhorse-1.1-t2v"
-    image_model: str = "wan2.6-t2i"         # para thumbnails del episodio
+    video_model: str = "happyhorse-1.1-t2v"   # tool "happyhorse"
+    video_model_wan: str = "wan2.7-t2v"       # tool "wan"
+    image_model: str = "wan2.6-t2i"           # para thumbnails del episodio
+    video_poll_seconds: int = 10              # intervalo de sondeo de la tarea
+    video_timeout_seconds: int = 600          # tope de espera por un video
     # Mantener el video en mock aunque Qwen texto sea real (hasta implementar
     # el submit/poll real de generación de video).
     mock_video: bool = True
@@ -51,6 +54,11 @@ class Settings(BaseSettings):
             if self.qwen_api_key.startswith("sk-sp-")
             else self.qwen_base_url_payg
         )
+
+    @property
+    def dashscope_base(self) -> str:
+        """Endpoint DashScope nativo (async video/imagen). Deriva del base OpenAI."""
+        return self.qwen_base_url.replace("/compatible-mode/v1", "/api/v1")
 
 
 settings = Settings()

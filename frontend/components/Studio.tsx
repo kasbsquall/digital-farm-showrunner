@@ -6,11 +6,16 @@ import { streamEpisode } from "@/lib/api";
 type Status = "idle" | "active" | "done" | "reject";
 
 const STAGES = [
-  { key: "scriptwriter", role: "Scriptwriter", tag: "qwen3.7 · text", img: "/agents/scriptwriter.png" },
-  { key: "director", role: "Production Director", tag: "qwen3.7 · keyframe", img: "/agents/director.png" },
-  { key: "video", role: "Keyframe → Video → Vision", tag: "qwen-image · happyhorse-i2v · qwen3-vl", img: "/set/clapper.png" },
-  { key: "qa", role: "Quality Control", tag: "qwen3.7 · text", img: "/agents/qa.png" },
-  { key: "packager", role: "Packager", tag: "qwen3.7 · publish", img: "/agents/packager.png" },
+  { key: "scriptwriter", role: "Scriptwriter", tag: "qwen3.7 · text", img: "/agents/scriptwriter.png",
+    about: "Invents today's absurd event and writes the tiny script." },
+  { key: "director", role: "Production Director", tag: "qwen3.7 · keyframe", img: "/agents/director.png",
+    about: "Turns the script into a seed image and a single 5-second action." },
+  { key: "video", role: "Keyframe → Video → Vision", tag: "qwen-image · happyhorse-i2v · qwen3-vl", img: "/set/clapper.png",
+    about: "Paints the scene, animates it, then watches what really happened." },
+  { key: "qa", role: "Quality Control", tag: "qwen3.7 · text", img: "/agents/qa.png",
+    about: "Checks the video matches the script — or calls for a retake." },
+  { key: "packager", role: "Packager", tag: "qwen3.7 · publish", img: "/agents/packager.png",
+    about: "Writes the viral title and description, ready to publish." },
 ] as const;
 
 type Data = {
@@ -133,7 +138,7 @@ export function Studio({ onDone }: { onDone: () => void }) {
           />
         </div>
         <button className="btn" onClick={start} disabled={running}>
-          {running ? "Rolling live…" : "Produce episode"}
+          <span>{running ? "Rolling live…" : "Produce episode"}</span>
         </button>
         {error && <p className="err">⚠ {error}</p>}
       </div>
@@ -142,12 +147,21 @@ export function Studio({ onDone }: { onDone: () => void }) {
         {STAGES.map((st, i) => {
           const s = status[st.key] ?? "idle";
           return (
-            <div className="stage" key={st.key} data-state={s} data-n={i + 1}>
-              <div className="role">
-                {st.img && <img className="agent-av" src={st.img} alt="" />}
-                {st.role} <span className="rtag">{st.tag}</span>
+            <div className="wstep" key={st.key} data-state={s}>
+              <div className="wstep-av">
+                {st.img ? <img src={st.img} alt="" /> : <span className="cam">🎬</span>}
+                <span className="wstep-n">{s === "done" ? "✓" : i + 1}</span>
               </div>
-              <StageBody k={st.key} data={data} regen={regen} />
+              <div className="wstep-main">
+                <div className="wstep-role">
+                  {st.role} <span className="rtag">{st.tag}</span>
+                </div>
+                {s === "idle" ? (
+                  <p className="wstep-about">{st.about}</p>
+                ) : (
+                  <StageBody k={st.key} data={data} regen={regen} />
+                )}
+              </div>
             </div>
           );
         })}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { streamEpisode } from "@/lib/api";
 
 type Status = "idle" | "active" | "done" | "reject";
@@ -29,43 +29,48 @@ export function Studio({ onDone }: { onDone: () => void }) {
   const [regen, setRegen] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const esRef = useRef<EventSource | null>(null);
-  const finished = useRef(false);
+
+  // Close the SSE connection if the component unmounts mid-stream.
+  useEffect(() => () => esRef.current?.close(), []);
 
   function setStage(key: string, s: Status) {
     setStatus((prev) => ({ ...prev, [key]: s }));
   }
 
   function start() {
+    esRef.current?.close(); // never leave a previous stream open
     setRunning(true);
     setError(null);
     setRegen(0);
     setData({});
     setStatus({ scriptwriter: "active" });
-    finished.current = false;
 
     const es = streamEpisode(idea);
     esRef.current = es;
 
-    es.addEventListener("scriptwriter", (e) => {
-      const d = JSON.parse((e as MessageEvent).data);
+    // Ignore events from a stale connection (a newer run replaced this one).
+    const on = (name: string, fn: (d: any) => void) =>
+      es.addEventListener(name, (e) => {
+        if (esRef.current !== es) return;
+        fn(JSON.parse((e as MessageEvent).data));
+      });
+
+    on("scriptwriter", (d) => {
       setData((p) => ({ ...p, script: d.story }));
       setStage("scriptwriter", "done");
       setStage("director", "active");
     });
-    es.addEventListener("director", (e) => {
-      const d = JSON.parse((e as MessageEvent).data);
+    on("director", (d) => {
       setData((p) => ({ ...p, director: d.direction }));
       setStage("director", "done");
       setStage("video", "active");
     });
-    es.addEventListener("video", (e) => {
-      const d = JSON.parse((e as MessageEvent).data);
+    on("video", (d) => {
       setData((p) => ({ ...p, video: d }));
       setStage("video", "done");
       setStage("qa", "active");
     });
-    es.addEventListener("qa", (e) => {
-      const d = JSON.parse((e as MessageEvent).data);
+    on("qa", (d) => {
       const approved = d.qa?.qa_status === "approved";
       setData((p) => ({ ...p, qa: d.qa }));
       setStage("qa", approved ? "done" : "reject");
@@ -73,30 +78,26 @@ export function Studio({ onDone }: { onDone: () => void }) {
         setStage("packager", "active");
       } else {
         setRegen((r) => r + 1);
-        setStage("director", "active"); // regen loop
+        setStage("director", "active");
       }
     });
-    es.addEventListener("packager", (e) => {
-      const d = JSON.parse((e as MessageEvent).data);
+    on("packager", (d) => {
       setData((p) => ({ ...p, pack: { ...d.pack, thumbnail_url: d.thumbnail_url } }));
       setStage("qa", "done");
       setStage("packager", "done");
     });
-    es.addEventListener("done", () => {
-      finished.current = true;
+    on("done", () => {
       es.close();
       setRunning(false);
       onDone();
     });
-    es.addEventListener("failed", (e) => {
-      const d = JSON.parse((e as MessageEvent).data);
-      finished.current = true;
+    on("failed", (d) => {
       es.close();
       setRunning(false);
       setError(d.message ?? "Falló la generación");
     });
     es.onerror = () => {
-      if (finished.current) return;
+      if (esRef.current !== es) return;
       es.close();
       setRunning(false);
       setError("Se perdió la conexión con el estudio (¿backend activo?).");
@@ -109,8 +110,9 @@ export function Studio({ onDone }: { onDone: () => void }) {
         <h3>El Estudio</h3>
         <p className="hint">Escribe una idea o déjalo en blanco y deja que los agentes improvisen.</p>
         <div className="field">
-          <label>Idea del episodio (opcional)</label>
+          <label htmlFor="episode-idea">Idea del episodio (opcional)</label>
           <textarea
+            id="episode-idea"
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
             placeholder="Ej: Bruno organiza una huelga contra el amanecer…"
@@ -183,11 +185,7 @@ function StageBody({ k, data, regen }: { k: string; data: Data; regen: number })
         <span className="k">Título</span>
         {data.pack.title}
         {data.pack.thumbnail_url && (
-          <img
-            src={data.pack.thumbnail_url}
-            alt="thumbnail"
-            style={{ width: "100%", borderRadius: 10, marginTop: 8, border: "1px solid var(--line)" }}
-          />
+          <img className="wizard-img" src={data.pack.thumbnail_url} alt="thumbnail del episodio" />
         )}
       </div>
     );

@@ -12,12 +12,6 @@ CLAY = ("claymation stop-motion plasticine character, Aardman-style, visible fin
 
 BASE_CAST = [
     {
-        "name": "Bruno",
-        "species": "rooster",
-        "personality": "The tireless union leader of the coop. Turns every tiny inconvenience into a strike, a rally or a heroic speech about workers' rights.",
-        "visual_desc": f"A bold red {CLAY}, huge floppy comb, always clutching a tiny handmade protest placard, confident chest-out posture.",
-    },
-    {
         "name": "Lola",
         "species": "cow",
         "personality": "A hopeless romantic who falls head-over-hooves in love with the most random objects — a fencepost, a passing cloud, a shiny bucket.",

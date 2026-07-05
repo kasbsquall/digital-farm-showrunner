@@ -178,19 +178,20 @@ def _episode_from_state(final: FarmState) -> Episode:
     )
 
 
-def run_daily_episode(db: Session, idea: str = "") -> Episode:
+def run_daily_episode(db: Session, idea: str = "", creator: str = "") -> Episode:
     characters, recent = _load_context(db)
     final: FarmState = GRAPH.invoke(
         {"characters": characters, "recent": recent, "idea": idea}
     )
     episode = _episode_from_state(final)
+    episode.creator = (creator or "").strip()[:48] or None
     db.add(episode)
     db.commit()
     db.refresh(episode)
     return episode
 
 
-def run_stream(db: Session, idea: str = ""):
+def run_stream(db: Session, idea: str = "", creator: str = ""):
     """Generator yielding (stage, data) per pipeline node, then ('done', episode).
 
     Powers the live "Studio" wizard so the user watches each agent work.
@@ -206,6 +207,7 @@ def run_stream(db: Session, idea: str = ""):
             yield node, update or {}
 
     episode = _episode_from_state(final)
+    episode.creator = (creator or "").strip()[:48] or None
     db.add(episode)
     db.commit()
     db.refresh(episode)

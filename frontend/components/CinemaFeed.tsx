@@ -78,6 +78,21 @@ export function CinemaFeed({
     setShowBTS(false);
   }
 
+  async function share() {
+    const url = sel.video_url ?? window.location.href;
+    const text = `${selTitle} — a claymation farm drama made by AI on MUCKFLIX`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "MUCKFLIX", text, url });
+      } else {
+        await navigator.clipboard.writeText(`${text} ${url}`);
+        alert("Link copied to clipboard!");
+      }
+    } catch {
+      /* user cancelled */
+    }
+  }
+
   return (
     <div className="cinema">
       <div className="stage-wrap">
@@ -113,6 +128,10 @@ export function CinemaFeed({
             </button>
           </div>
           <h3>{selTitle}</h3>
+          <div className="byline">
+            {sel.creator ? <span>Idea by <b>{sel.creator}</b></span> : <span>Auto-generated</span>}
+            <button className="share-btn" onClick={share}>↗ Share</button>
+          </div>
           {sel.description && <p>{sel.description}</p>}
           <div className="cast-mini">
             {(sel.characters_used ?? []).map((n) =>

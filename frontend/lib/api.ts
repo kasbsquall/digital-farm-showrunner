@@ -9,6 +9,7 @@ export type Character = {
 
 export type Episode = {
   id: number;
+  creator: string | null;
   title: string | null;
   event: string | null;
   script: string | null;
@@ -52,7 +53,7 @@ export function ossThumb(url: string | null | undefined, w: number): string | un
   return `${url}?x-oss-process=image/resize,w_${w}/quality,q_80/format,webp`;
 }
 
-export function streamEpisode(idea: string) {
-  const url = `${API}/episodes/generate/stream?idea=${encodeURIComponent(idea)}`;
+export function streamEpisode(idea: string, creator: string) {
+  const url = `${API}/episodes/generate/stream?idea=${encodeURIComponent(idea)}&creator=${encodeURIComponent(creator)}`;
   return new EventSource(url);
 }

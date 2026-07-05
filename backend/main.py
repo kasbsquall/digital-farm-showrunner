@@ -38,6 +38,7 @@ app.add_middleware(
 def _episode_dict(e: Episode) -> dict:
     return {
         "id": e.id,
+        "creator": e.creator,
         "title": e.title,
         "event": e.event,
         "script": e.script,
@@ -63,24 +64,26 @@ def health():
 
 class GenerateRequest(BaseModel):
     idea: str = ""
+    creator: str = ""
 
 
 @app.post("/episodes/generate")
 def generate_episode(req: GenerateRequest | None = None, db: Session = Depends(get_db)):
     """Run the full 4-agent pipeline and return the new episode."""
     idea = req.idea if req else ""
-    episode = run_daily_episode(db, idea=idea)
+    creator = req.creator if req else ""
+    episode = run_daily_episode(db, idea=idea, creator=creator)
     return _episode_dict(episode)
 
 
 @app.get("/episodes/generate/stream")
-def generate_episode_stream(idea: str = ""):
+def generate_episode_stream(idea: str = "", creator: str = ""):
     """Server-Sent Events: emits each pipeline stage live for the Studio wizard."""
 
     def event_source():
         db = SessionLocal()
         try:
-            for stage, data in run_stream(db, idea=idea):
+            for stage, data in run_stream(db, idea=idea, creator=creator):
                 yield f"event: {stage}\ndata: {json.dumps(data, ensure_ascii=False, default=str)}\n\n"
         except Exception as e:  # surface failures to the client
             yield f"event: failed\ndata: {json.dumps({'message': str(e)})}\n\n"

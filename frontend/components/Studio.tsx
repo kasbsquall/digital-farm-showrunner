@@ -8,7 +8,7 @@ type Status = "idle" | "active" | "done" | "reject";
 const STAGES = [
   { key: "scriptwriter", role: "Scriptwriter", tag: "qwen3.7 · text", img: "/agents/scriptwriter.png" },
   { key: "director", role: "Production Director", tag: "qwen3.7 · keyframe", img: "/agents/director.png" },
-  { key: "video", role: "Keyframe → Video → Vision", tag: "qwen-image · happyhorse-i2v · qwen3-vl", img: "" },
+  { key: "video", role: "Keyframe → Video → Vision", tag: "qwen-image · happyhorse-i2v · qwen3-vl", img: "/set/clapper.png" },
   { key: "qa", role: "Quality Control", tag: "qwen3.7 · text", img: "/agents/qa.png" },
   { key: "packager", role: "Packager", tag: "qwen3.7 · publish", img: "/agents/packager.png" },
 ] as const;
@@ -23,6 +23,7 @@ type Data = {
 
 export function Studio({ onDone }: { onDone: () => void }) {
   const [idea, setIdea] = useState("");
+  const [creator, setCreator] = useState("");
   const [running, setRunning] = useState(false);
   const [status, setStatus] = useState<Record<string, Status>>({});
   const [data, setData] = useState<Data>({});
@@ -45,7 +46,7 @@ export function Studio({ onDone }: { onDone: () => void }) {
     setData({});
     setStatus({ scriptwriter: "active" });
 
-    const es = streamEpisode(idea);
+    const es = streamEpisode(idea, creator);
     esRef.current = es;
 
     // Ignore events from a stale connection (a newer run replaced this one).
@@ -115,12 +116,24 @@ export function Studio({ onDone }: { onDone: () => void }) {
             id="episode-idea"
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
-            placeholder="e.g. Bruno starts a strike against the sunrise…"
+            placeholder="e.g. Kiki the goose starts a strike against the sunrise…"
+            disabled={running}
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="creator">Your name (optional — we'll credit you)</label>
+          <input
+            id="creator"
+            className="text-input"
+            value={creator}
+            onChange={(e) => setCreator(e.target.value)}
+            placeholder="@yourhandle"
+            maxLength={48}
             disabled={running}
           />
         </div>
         <button className="btn" onClick={start} disabled={running}>
-          {running ? "● Rolling live…" : "🎬 Produce episode"}
+          {running ? "Rolling live…" : "Produce episode"}
         </button>
         {error && <p className="err">⚠ {error}</p>}
       </div>

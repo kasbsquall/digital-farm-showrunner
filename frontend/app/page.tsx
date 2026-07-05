@@ -45,7 +45,6 @@ export default function Home() {
       </div>
 
       <header className="hero">
-        <div className="bg" style={{ backgroundImage: "url(/hero.png)" }} />
         <div className="inner">
           <span className="eyebrow">Qwen Cloud · AI Showrunner</span>
           <h1>
@@ -92,7 +91,33 @@ export default function Home() {
       </section>
 
       <footer>
-        MUCKFLIX · The Digital Farm Showrunner · Qwen Cloud Hackathon 2026 · Kevin Soto Burgos · AVANC3
+        <div className="foot-card">
+          <div className="foot-brand">
+            <img src="/logo.png" alt="MUCKFLIX" />
+            <div>
+              <div className="word">MUCK<b>FLIX</b></div>
+              <p>The world's first fully autonomous claymation farm channel. A brand-new
+                micro-drama every day — written, filmed and edited by AI.</p>
+            </div>
+          </div>
+          <div className="foot-stack">
+            <div className="row">
+              <span className="foot-chip">Qwen3.7</span>
+              <span className="foot-chip">HappyHorse i2v</span>
+              <span className="foot-chip">Qwen-Image</span>
+              <span className="foot-chip">Qwen3-VL</span>
+            </div>
+            <div className="row">
+              <span className="foot-chip">FastAPI</span>
+              <span className="foot-chip">LangGraph</span>
+              <span className="foot-chip">Next.js</span>
+              <span className="foot-chip">Alibaba Cloud OSS</span>
+            </div>
+          </div>
+        </div>
+        <div className="foot-legal">
+          Built by Kevin Soto Burgos · AVANC3 · Qwen Cloud Global AI Hackathon 2026 · Track 2: AI Showrunner
+        </div>
       </footer>
     </div>
   );

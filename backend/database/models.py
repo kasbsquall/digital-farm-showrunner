@@ -28,6 +28,7 @@ class Episode(Base):
 
     id = Column(Integer, primary_key=True)
     created_at = Column(DateTime, default=_now)
+    creator = Column(String(48))  # nickname of whoever prompted this episode
 
     # Agent 1 — Scriptwriter
     event = Column(Text)          # the absurd event of the day

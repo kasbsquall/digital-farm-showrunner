@@ -28,10 +28,19 @@ def public_url(key: str) -> str:
     return f"https://{settings.oss_bucket}.{host}/{key}"
 
 
-def persist_video(src_url: str) -> str:
-    """Download a video from src_url and upload it to OSS. Returns the public URL."""
+def _persist(src_url: str, prefix: str, ext: str, content_type: str) -> str:
     resp = httpx.get(src_url, timeout=120, follow_redirects=True)
     resp.raise_for_status()
-    key = f"episodes/{hashlib.sha1(src_url.encode()).hexdigest()[:12]}.mp4"
-    _bucket().put_object(key, resp.content, headers={"Content-Type": "video/mp4"})
+    key = f"{prefix}/{hashlib.sha1(src_url.encode()).hexdigest()[:12]}.{ext}"
+    _bucket().put_object(key, resp.content, headers={"Content-Type": content_type})
     return public_url(key)
+
+
+def persist_video(src_url: str) -> str:
+    """Download a video from src_url and upload it to OSS. Returns the public URL."""
+    return _persist(src_url, "episodes", "mp4", "video/mp4")
+
+
+def persist_image(src_url: str, prefix: str = "images") -> str:
+    """Download an image from src_url and upload it to OSS. Returns the public URL."""
+    return _persist(src_url, prefix, "png", "image/png")

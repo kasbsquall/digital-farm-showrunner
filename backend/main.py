@@ -47,6 +47,7 @@ def _episode_dict(e: Episode) -> dict:
         "qa_notes": e.qa_notes,
         "qa_attempts": e.qa_attempts,
         "thumbnail_hint": e.thumbnail_hint,
+        "thumbnail_url": e.thumbnail_url,
         "description": e.description,
         "status": e.status,
     }
@@ -73,7 +74,8 @@ def generate_episode(req: GenerateRequest | None = None, db: Session = Depends(g
 def list_characters(db: Session = Depends(get_db)):
     rows = db.query(Character).all()
     return [
-        {"name": c.name, "species": c.species, "personality": c.personality}
+        {"name": c.name, "species": c.species, "personality": c.personality,
+         "image_url": c.image_url}
         for c in rows
     ]
 

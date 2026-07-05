@@ -22,7 +22,7 @@ from config import settings
 from database.models import Character, Episode
 from agents import scriptwriter, production_director, qa_reviewer, packager
 from services.video_gen_client import generate_video
-from services import oss_client, vision_client
+from services import oss_client, vision_client, image_gen_client
 
 MAX_REGEN = 2  # Director can be re-run this many times after a QA rejection.
 RECENT_LIMIT = 5
@@ -45,6 +45,7 @@ class FarmState(TypedDict, total=False):
     attempt: int
     # Agent 4
     pack: dict
+    thumbnail_url: str
 
 
 # --- Nodes -----------------------------------------------------------------
@@ -92,7 +93,23 @@ def packager_node(state: FarmState) -> FarmState:
     pack = packager.run(
         state["story"]["event"], state["story"]["script"], state.get("video_description", "")
     )
-    return {"pack": pack}
+    # Thumbnail real generado por IA (coherente con lo que se ve en el video).
+    thumb = ""
+    if not settings.use_mock:
+        try:
+            base = state.get("video_description") or state["story"]["event"]
+            tprompt = (
+                f"{base}. Vibrant eye-catching video thumbnail, claymation farm animals, "
+                "bold dramatic lighting, cinematic, high contrast, poster style"
+            )
+            timg = image_gen_client.generate_image(tprompt, size="1280*720")
+            if oss_client.is_configured():
+                thumb = oss_client.persist_image(timg, prefix="thumbnails")
+            else:
+                thumb = timg
+        except Exception as e:
+            print(f"[thumb] no se pudo generar thumbnail: {e}")
+    return {"pack": pack, "thumbnail_url": thumb}
 
 
 def _after_qa(state: FarmState) -> str:
@@ -164,6 +181,7 @@ def run_daily_episode(db: Session, idea: str = "") -> Episode:
         qa_attempts=final["attempt"],
         title=pack["title"],
         thumbnail_hint=pack["thumbnail_hint"],
+        thumbnail_url=final.get("thumbnail_url", ""),
         description=pack["description"],
         status="published" if approved else "draft",
     )

@@ -19,6 +19,7 @@ class Character(Base):
     species = Column(String(64), nullable=False)
     personality = Column(Text, nullable=False)
     visual_desc = Column(Text, nullable=False)
+    image_url = Column(Text)  # retrato generado por IA (en OSS)
 
 
 class Episode(Base):
@@ -47,6 +48,7 @@ class Episode(Base):
     # Agent 4 — Packager
     title = Column(String(200))
     thumbnail_hint = Column(Text)
+    thumbnail_url = Column(Text)  # thumbnail generado por IA (en OSS)
     description = Column(Text)
 
     status = Column(String(16), default="draft")  # draft | published

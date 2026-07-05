@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     # Generación de video: HappyHorse o Wan (t2v). Wan2.6-t2i es texto→IMAGEN.
     video_model: str = "happyhorse-1.1-t2v"   # tool "happyhorse"
     video_model_wan: str = "wan2.7-t2v"       # tool "wan"
-    image_model: str = "wan2.6-t2i"           # para thumbnails del episodio
+    image_model: str = "qwen-image-2.0"       # retratos de personajes + thumbnails
     video_poll_seconds: int = 10              # intervalo de sondeo de la tarea
     video_timeout_seconds: int = 600          # tope de espera por un video
     # Mantener el video en mock aunque Qwen texto sea real (hasta implementar

@@ -18,9 +18,11 @@ from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from sqlalchemy.orm import Session
 
+from config import settings
 from database.models import Character, Episode
 from agents import scriptwriter, production_director, qa_reviewer, packager
 from services.video_gen_client import generate_video
+from services import oss_client
 
 MAX_REGEN = 2  # Director can be re-run this many times after a QA rejection.
 RECENT_LIMIT = 5
@@ -58,7 +60,11 @@ def director_node(state: FarmState) -> FarmState:
 
 def video_node(state: FarmState) -> FarmState:
     d = state["direction"]
-    return {"video_url": generate_video(d["video_prompt"], d["video_tool"])}
+    url = generate_video(d["video_prompt"], d["video_tool"])
+    # Persistir a OSS solo cuando el video es real (mock ya es una URL pública estable).
+    if not settings.use_mock and not settings.mock_video and oss_client.is_configured():
+        url = oss_client.persist_video(url)
+    return {"video_url": url}
 
 
 def qa_node(state: FarmState) -> FarmState:

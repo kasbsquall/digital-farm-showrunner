@@ -12,6 +12,48 @@ function activateOnKey(fn: () => void) {
   };
 }
 
+function splitPrompt(vp: string | null): { keyframe: string; motion: string } {
+  if (!vp) return { keyframe: "", motion: "" };
+  const m = vp.split(/MOTION:/i);
+  return {
+    keyframe: (m[0] ?? "").replace(/KEYFRAME:/i, "").trim(),
+    motion: (m[1] ?? "").trim(),
+  };
+}
+
+function BehindScenes({ ep }: { ep: Episode }) {
+  const { keyframe, motion } = splitPrompt(ep.video_prompt);
+  const approved = ep.qa_status === "approved";
+  const rows = [
+    { img: "/agents/scriptwriter.png", who: "Scriptwriter", body: (
+      <><b>Event.</b> {ep.event}<br /><b>Script.</b> {ep.script}</>
+    ) },
+    { img: "/agents/director.png", who: "Production Director", body: (
+      <><b>Keyframe.</b> {keyframe}<br /><b>5s action.</b> {motion}</>
+    ) },
+    { img: "", who: "Vision (qwen3-vl)", body: <>{ep.video_description || "—"}</> },
+    { img: "/agents/qa.png", who: "Quality Control", body: (
+      <>{approved ? "✓ Approved" : "✗ Rejected"} — {ep.qa_notes} <i>({ep.qa_attempts} attempt{ep.qa_attempts === 1 ? "" : "s"})</i></>
+    ) },
+    { img: "/agents/packager.png", who: "Packager", body: (
+      <><b>{ep.title}</b><br />{ep.description}</>
+    ) },
+  ];
+  return (
+    <div className="bts">
+      {rows.map((r, i) => (
+        <div className="bts-row" key={i}>
+          <div className="bts-who">
+            {r.img ? <img src={r.img} alt="" /> : <span className="bts-cam">🎬</span>}
+            <span>{r.who}</span>
+          </div>
+          <div className="bts-body">{r.body}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function CinemaFeed({
   episodes,
   chars,
@@ -21,17 +63,19 @@ export function CinemaFeed({
 }) {
   const [selId, setSelId] = useState<number | null>(episodes[0]?.id ?? null);
   const [playing, setPlaying] = useState(false);
+  const [showBTS, setShowBTS] = useState(false);
 
   if (episodes.length === 0)
-    return <p className="empty">Aún no hay episodios — produce el primero en el Estudio ↑</p>;
+    return <p className="empty">No episodes yet — produce the first one in The Studio ↑</p>;
 
   const sel = episodes.find((e) => e.id === selId) ?? episodes[0];
   const approved = sel.qa_status === "approved";
-  const selTitle = sel.title ?? sel.event ?? `Episodio ${sel.id}`;
+  const selTitle = sel.title ?? sel.event ?? `Episode ${sel.id}`;
 
   function pick(id: number) {
     setSelId(id);
     setPlaying(false);
+    setShowBTS(false);
   }
 
   return (
@@ -41,18 +85,12 @@ export function CinemaFeed({
           className="screen"
           role="button"
           tabIndex={0}
-          aria-label={`Reproducir: ${selTitle}`}
+          aria-label={`Play: ${selTitle}`}
           onClick={() => sel.video_url && setPlaying(true)}
           onKeyDown={activateOnKey(() => sel.video_url && setPlaying(true))}
         >
           {playing && sel.video_url ? (
-            <video
-              key={sel.id}
-              src={sel.video_url}
-              poster={ossThumb(sel.thumbnail_url, 1280)}
-              controls
-              autoPlay
-            />
+            <video key={sel.id} src={sel.video_url} poster={ossThumb(sel.thumbnail_url, 1280)} controls autoPlay />
           ) : (
             <>
               <img className="poster" src={ossThumb(sel.thumbnail_url, 1280)} alt={selTitle} />
@@ -68,8 +106,11 @@ export function CinemaFeed({
           <div className="toolrow">
             {sel.video_tool && <span className="tag">{sel.video_tool}</span>}
             <span className={`badge ${approved ? "ok" : "draft"}`}>
-              {approved ? "✓ Aprobado por QA" : "Borrador"}
+              {approved ? "✓ QA approved" : "Draft"}
             </span>
+            <button className="bts-toggle" onClick={() => setShowBTS((v) => !v)}>
+              {showBTS ? "Hide the making-of" : "🎬 How it was made"}
+            </button>
           </div>
           <h3>{selTitle}</h3>
           {sel.description && <p>{sel.description}</p>}
@@ -78,12 +119,13 @@ export function CinemaFeed({
               chars[n] ? <img key={n} src={ossThumb(chars[n], 64)} alt={n} title={n} /> : null
             )}
           </div>
+          {showBTS && <BehindScenes ep={sel} />}
         </div>
       </div>
 
       <div className="playlist">
         {episodes.map((ep) => {
-          const t = ep.title ?? ep.event ?? `Episodio ${ep.id}`;
+          const t = ep.title ?? ep.event ?? `Episode ${ep.id}`;
           return (
             <div
               key={ep.id}

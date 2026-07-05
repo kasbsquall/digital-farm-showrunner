@@ -6,11 +6,11 @@ import { streamEpisode } from "@/lib/api";
 type Status = "idle" | "active" | "done" | "reject";
 
 const STAGES = [
-  { key: "scriptwriter", role: "Guionista", tag: "qwen3.7 · texto" },
-  { key: "director", role: "Director de Producción", tag: "qwen3.7 · keyframe" },
-  { key: "video", role: "Keyframe → Video → Visión", tag: "qwen-image · happyhorse-i2v · qwen3-vl" },
-  { key: "qa", role: "Control de Calidad", tag: "qwen3.7 · texto" },
-  { key: "packager", role: "Empaquetador", tag: "qwen3.7 · publicación" },
+  { key: "scriptwriter", role: "Scriptwriter", tag: "qwen3.7 · text", img: "/agents/scriptwriter.png" },
+  { key: "director", role: "Production Director", tag: "qwen3.7 · keyframe", img: "/agents/director.png" },
+  { key: "video", role: "Keyframe → Video → Vision", tag: "qwen-image · happyhorse-i2v · qwen3-vl", img: "" },
+  { key: "qa", role: "Quality Control", tag: "qwen3.7 · text", img: "/agents/qa.png" },
+  { key: "packager", role: "Packager", tag: "qwen3.7 · publish", img: "/agents/packager.png" },
 ] as const;
 
 type Data = {
@@ -100,27 +100,27 @@ export function Studio({ onDone }: { onDone: () => void }) {
       if (esRef.current !== es) return;
       es.close();
       setRunning(false);
-      setError("Se perdió la conexión con el estudio (¿backend activo?).");
+      setError("Lost connection to the studio (is the backend running?).");
     };
   }
 
   return (
     <section className="studio">
       <div className="panel">
-        <h3>El Estudio</h3>
-        <p className="hint">Escribe una idea o déjalo en blanco y deja que los agentes improvisen.</p>
+        <h3>The Studio</h3>
+        <p className="hint">Type an idea, or leave it blank and let the agents improvise.</p>
         <div className="field">
-          <label htmlFor="episode-idea">Idea del episodio (opcional)</label>
+          <label htmlFor="episode-idea">Episode idea (optional)</label>
           <textarea
             id="episode-idea"
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
-            placeholder="Ej: Bruno organiza una huelga contra el amanecer…"
+            placeholder="e.g. Bruno starts a strike against the sunrise…"
             disabled={running}
           />
         </div>
         <button className="btn" onClick={start} disabled={running}>
-          {running ? "● Rodando en vivo…" : "🎬 Producir episodio"}
+          {running ? "● Rolling live…" : "🎬 Produce episode"}
         </button>
         {error && <p className="err">⚠ {error}</p>}
       </div>
@@ -131,6 +131,7 @@ export function Studio({ onDone }: { onDone: () => void }) {
           return (
             <div className="stage" key={st.key} data-state={s} data-n={i + 1}>
               <div className="role">
+                {st.img && <img className="agent-av" src={st.img} alt="" />}
                 {st.role} <span className="rtag">{st.tag}</span>
               </div>
               <StageBody k={st.key} data={data} regen={regen} />
@@ -146,27 +147,27 @@ function StageBody({ k, data, regen }: { k: string; data: Data; regen: number })
   if (k === "scriptwriter" && data.script)
     return (
       <div className="out">
-        <span className="k">Evento</span>
+        <span className="k">Event</span>
         {data.script.event}
-        <span className="k">Guion</span>
+        <span className="k">Script</span>
         {data.script.script}
       </div>
     );
   if (k === "director" && data.director)
     return (
       <div className="out">
-        <span className="k">Keyframe (imagen semilla)</span>
+        <span className="k">Keyframe (seed image)</span>
         {data.director.keyframe_prompt}
-        <span className="k">Acción de 5s</span>
+        <span className="k">5-second action</span>
         {data.director.motion_prompt}
-        {regen > 0 && <div className="regen">↻ regeneración #{regen}</div>}
+        {regen > 0 && <div className="regen">↻ regeneration #{regen}</div>}
       </div>
     );
   if (k === "video" && data.video)
     return (
       <div className="out">
-        <span className="k">Lo que la IA ve en el video</span>
-        {data.video.video_description || "(video en modo demo)"}
+        <span className="k">What the AI sees in the video</span>
+        {data.video.video_description || "(video in demo mode)"}
         {data.video.video_url && (
           <video className="wizard-video" src={data.video.video_url} controls preload="metadata" />
         )}
@@ -175,17 +176,17 @@ function StageBody({ k, data, regen }: { k: string; data: Data; regen: number })
   if (k === "qa" && data.qa)
     return (
       <div className="out">
-        <span className="k">Veredicto</span>
-        {data.qa.qa_status === "approved" ? "✓ Aprobado" : "✗ Rechazado"} — {data.qa.qa_notes}
+        <span className="k">Verdict</span>
+        {data.qa.qa_status === "approved" ? "✓ Approved" : "✗ Rejected"} — {data.qa.qa_notes}
       </div>
     );
   if (k === "packager" && data.pack)
     return (
       <div className="out">
-        <span className="k">Título</span>
+        <span className="k">Title</span>
         {data.pack.title}
         {data.pack.thumbnail_url && (
-          <img className="wizard-img" src={data.pack.thumbnail_url} alt="thumbnail del episodio" />
+          <img className="wizard-img" src={data.pack.thumbnail_url} alt="episode thumbnail" />
         )}
       </div>
     );

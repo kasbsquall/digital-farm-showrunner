@@ -1,65 +1,66 @@
 """Agent 1 — Scriptwriter.
 
-Decides today's absurd event and writes a short (20-30s) dialogue script,
-keeping continuity with recent events. Uses a Qwen reasoning model.
+Decides today's absurd event and writes a tiny script that resolves in a single
+instant visual gag (the video is only ~5 seconds). English output.
 """
+import json
+
 from services.qwen_client import chat
 from agents._json import parse_json
 
 SYSTEM = (
-    "Eres el guionista de una granja digital de micro-dramas absurdos y virales. "
-    "Escribes en español, con humor tonto pero encantador. Mantienes continuidad "
-    "entre episodios. Respondes SIEMPRE en JSON válido, sin texto extra."
+    "You are the writer of a viral daily channel of absurd claymation farm micro-dramas. "
+    "You write in ENGLISH, with silly but charming humor, and keep continuity between "
+    "episodes. Because each video is only ~5 seconds, the story must revolve around ONE "
+    "instant visual gag. You ALWAYS answer in valid JSON, no extra text."
 )
 
-USER_TMPL = """Personajes disponibles (usa 2 o 3):
+USER_TMPL = """Available characters (use 2 or 3):
 {cast}
 
-Eventos recientes (evita repetir, pero puedes dar continuidad):
+Recent events (avoid repeating, but you may build continuity):
 {recent}
 {idea}
-Inventa el EVENTO ABSURDO de hoy y escribe un guion corto de 20-30 segundos con
-diálogo simple entre los animales involucrados.
+Invent TODAY'S absurd event and write a very short script whose punchline is a single
+instant physical gag that can play out in ~5 seconds.
 
-Devuelve JSON exacto con esta forma:
-{{"event": "<una frase describiendo el evento>",
-  "script": "<guion con diálogo, formato PERSONAJE: línea>",
-  "characters_used": ["<nombre>", "..."]}}"""
+Return exactly this JSON:
+{{"event": "<one sentence describing the event>",
+  "script": "<short script, format CHARACTER: line>",
+  "characters_used": ["<name>", "..."]}}"""
 
 
 def _mock(characters: list[dict], recent_events: list[str]) -> str:
     ideas = [
         {
-            "event": "Bruno organiza una huelga porque el gallo del pueblo vecino canta más temprano.",
-            "script": ("BRUNO: ¡Camaradas, exijo horario justo de cacareo!\n"
-                       "NINA: (anotando) Última hora: el gallinero se levanta en armas.\n"
-                       "PEPE: El amanecer es solo una idea... impuesta por el sol."),
-            "characters_used": ["Bruno", "Nina", "Pepe"],
+            "event": "Bruno the rooster tries to raise his protest placard but smacks a falling bread into Pepe's mouth.",
+            "script": ("BRUNO: Workers of the mud, RISE UP!\n"
+                       "PEPE: (mouth full) ...the revolution tastes like sourdough.\n"
+                       "NINA: Breaking news: bread solidarity achieved."),
+            "characters_used": ["Bruno", "Pepe", "Nina"],
         },
         {
-            "event": "Lola le escribe un poema al Tractor y espera respuesta.",
-            "script": ("LOLA: Tractor, mi motor arde por ti.\n"
-                       "TRACTOR: ...bip.\n"
-                       "PEPE: El amor correspondido es una avería del alma."),
-            "characters_used": ["Lola", "Tractor", "Pepe"],
+            "event": "Lola falls in love with a shiny bucket and tries to serenade it.",
+            "script": ("LOLA: My love, you reflect my soul!\n"
+                       "MOMO: It's a bucket.\n"
+                       "LOLA: Don't ruin this for us."),
+            "characters_used": ["Lola", "Momo"],
         },
         {
-            "event": "Nina inventa un noticiero en vivo sobre un charco misterioso.",
-            "script": ("NINA: ¡El charco ha crecido tres centímetros!\n"
-                       "BRUNO: ¡Es sabotaje del sistema!\n"
-                       "LOLA: ¿Y si el Tractor lo cruza y me rescata?"),
-            "characters_used": ["Nina", "Bruno", "Lola"],
+            "event": "Kiki the goose honks so hard she launches Bex the sheep into the air.",
+            "script": ("KIKI: HONK! No trespassing!\n"
+                       "BEX: I wasn't even— AAAH!\n"
+                       "DORA: I KNEW the pond was a trap."),
+            "characters_used": ["Kiki", "Bex", "Dora"],
         },
     ]
-    idea = ideas[len(recent_events) % len(ideas)]
-    import json
-    return json.dumps(idea, ensure_ascii=False)
+    return json.dumps(ideas[len(recent_events) % len(ideas)], ensure_ascii=False)
 
 
 def run(characters: list[dict], recent_events: list[str], idea: str = "") -> dict:
     cast = "\n".join(f"- {c['name']} ({c['species']}): {c['personality']}" for c in characters)
-    recent = "\n".join(f"- {e}" for e in recent_events) or "- (ninguno todavía)"
-    idea_block = f"\nIDEA SUGERIDA por el usuario (respétala como base): {idea}\n" if idea.strip() else ""
+    recent = "\n".join(f"- {e}" for e in recent_events) or "- (none yet)"
+    idea_block = f"\nUSER-SUGGESTED idea (respect it as the base): {idea}\n" if idea.strip() else ""
     text = chat(
         SYSTEM,
         USER_TMPL.format(cast=cast, recent=recent, idea=idea_block),

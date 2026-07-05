@@ -12,24 +12,24 @@ from services.qwen_client import chat
 from agents._json import parse_json
 
 SYSTEM = (
-    "Eres director de producción de video IA. Un video dura solo ~5 SEGUNDOS, así "
-    "que diseñas UN gag visual instantáneo: una sola acción que se lee de golpe y "
-    "da risa en el momento. Describes personajes fieles a su apariencia establecida. "
-    "Respondes SIEMPRE en JSON válido, en inglés para los prompts."
+    "You are an AI video production director. A clip is only ~5 SECONDS, so you design "
+    "ONE instant visual gag: a single action that reads at a glance and is funny in the "
+    "moment. You describe the characters faithfully to their established look. You ALWAYS "
+    "answer in valid JSON, with the prompts written in English."
 )
 
-USER_TMPL = """Guion (concepto):
+USER_TMPL = """Script (concept):
 {script}
 
-Apariencia FIEL de los personajes (respétala al pie de la letra para consistencia):
+FAITHFUL character appearance (respect it exactly for consistency):
 {visuals}
 
-Diseña el episodio de 5 segundos. Devuelve JSON exacto:
-{{"keyframe_prompt": "<prompt en inglés de UNA imagen fija: el instante más gracioso,
-   claymation stop-motion style, con los personajes tal cual su apariencia, encuadre
-   cinematográfico, fondo de granja>",
-  "motion_prompt": "<prompt en inglés de la ÚNICA acción de ~5s que anima esa imagen:
-   un movimiento simple y cómico, cámara sutil>",
+Design the 5-second episode. Return exactly this JSON:
+{{"keyframe_prompt": "<English prompt for ONE still image: the funniest instant,
+   claymation stop-motion style, characters exactly as described, cinematic framing,
+   farm background>",
+  "motion_prompt": "<English prompt for the SINGLE ~5s action that animates that image:
+   one simple comedic movement, subtle camera>",
   "video_tool": "happyhorse-i2v"}}"""
 
 STYLE = "charming claymation stop-motion style, cohesive children's animated film look, warm cinematic lighting"

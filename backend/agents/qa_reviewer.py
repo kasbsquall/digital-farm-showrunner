@@ -1,10 +1,7 @@
 """Agent 3 — QA Reviewer.
 
-Reviews the generated video and decides approve vs regenerate. This guards the
-token budget: catching a bad take here avoids wasting downstream generations.
-
-In real mode this can inspect a frame/caption of the video; for the MVP it
-reasons over the prompt+script coherence. Mock approves.
+Reviews the generated video and decides approve vs regenerate, guarding the token
+budget. Reasons over what the video actually shows (from Qwen vision). English output.
 """
 import json
 
@@ -12,36 +9,36 @@ from services.qwen_client import chat
 from agents._json import parse_json
 
 SYSTEM = (
-    "Eres control de calidad de video. Decides si un episodio pasa o si hay que "
-    "regenerar por incoherencia visual, error de continuidad o problema técnico. "
-    "Eres estricto pero no perfeccionista. Respondes SIEMPRE en JSON válido."
+    "You are a video QA reviewer. You decide whether an episode is valid to publish, or "
+    "must be regenerated due to visual incoherence, continuity errors or technical issues. "
+    "You are strict but not a perfectionist. You ALWAYS answer in valid JSON, in English."
 )
 
-USER_TMPL = """Guion original:
+USER_TMPL = """Original script:
 {script}
 
-Prompt de video usado:
+Motion prompt used:
 {video_prompt}
 
-LO QUE REALMENTE SE VE EN EL VIDEO (análisis de visión):
+WHAT THE VIDEO ACTUALLY SHOWS (vision analysis):
 {video_description}
 
-¿El video refleja razonablemente la intención del guion (personajes y acción
-principal presentes)? No exijas perfección; rechaza solo si hay incoherencia
-grave o el video está roto/vacío. Devuelve JSON exacto:
-{{"qa_status": "approved"|"rejected", "qa_notes": "<motivo breve>"}}"""
+Does the video reasonably reflect the script's intent (main characters and action
+present)? Don't demand perfection; reject only on serious incoherence or a broken/empty
+video. Return exactly this JSON:
+{{"qa_status": "approved"|"rejected", "qa_notes": "<brief reason>"}}"""
 
 
 def _mock(video_url: str) -> str:
     return json.dumps(
         {"qa_status": "approved",
-         "qa_notes": "Coherencia visual y continuidad correctas; timing cómico adecuado."},
+         "qa_notes": "Visual coherence and continuity are correct; comedic timing works."},
         ensure_ascii=False,
     )
 
 
 def run(video_url: str, script: str, video_prompt: str = "", video_description: str = "") -> dict:
-    desc = video_description.strip() or "(no disponible — video en modo placeholder)"
+    desc = video_description.strip() or "(unavailable — video in placeholder mode)"
     text = chat(
         SYSTEM,
         USER_TMPL.format(script=script, video_prompt=video_prompt, video_description=desc),

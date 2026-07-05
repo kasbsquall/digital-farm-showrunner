@@ -27,11 +27,11 @@ def describe_video(video_url: str) -> str:
                 "content": [
                     {"type": "video_url", "video_url": {"url": video_url}},
                     {"type": "text", "text": (
-                        "Narra en español, en 2-4 frases, la SECUENCIA CRONOLÓGICA exacta de "
-                        "acciones de este video corto: qué hace cada personaje, en qué orden, y "
-                        "qué CAUSA qué (quién golpea, empuja, lanza o mueve algo, y cómo reacciona "
-                        "el otro). Sé preciso con la relación causa-efecto del gag. Solo lo "
-                        "observable en pantalla; no inventes diálogo ni intención interna."
+                        "In English, in 2-4 sentences, narrate the exact CHRONOLOGICAL SEQUENCE "
+                        "of actions in this short video: what each character does, in what order, "
+                        "and what CAUSES what (who hits, pushes, throws or moves something, and how "
+                        "the other reacts). Be precise about the gag's cause-and-effect. Only what "
+                        "is observable on screen; do not invent dialogue or inner intent."
                     )},
                 ],
             }

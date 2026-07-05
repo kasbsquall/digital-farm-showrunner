@@ -40,7 +40,7 @@ export default function Home() {
           </div>
         </div>
         <span className="pill">
-          <span className="dot" /> 4 agentes IA · producción autónoma
+          <span className="dot" /> 4 AI agents · fully autonomous
         </span>
       </div>
 
@@ -49,12 +49,12 @@ export default function Home() {
         <div className="inner">
           <span className="eyebrow">Qwen Cloud · AI Showrunner</span>
           <h1>
-            Un drama de granja<br />
-            en arcilla, <span className="em">cada día</span>.
+            A claymation farm drama,<br />
+            <span className="em">every single day</span>.
           </h1>
           <p>
-            Cuatro agentes de IA inventan la historia, pintan la escena, la filman, revisan
-            lo que de verdad pasó en pantalla y publican el episodio. Sin guionistas humanos.
+            Four AI agents invent the story, paint the scene, film it, check what really
+            happened on screen, and publish the episode. No human writers on set.
           </p>
         </div>
       </header>
@@ -62,8 +62,8 @@ export default function Home() {
       <section className="section">
         <div className="section-head">
           <div>
-            <span className="eyebrow">En vivo</span>
-            <h2>El Estudio</h2>
+            <span className="eyebrow">Live</span>
+            <h2>The Studio</h2>
           </div>
         </div>
         <Studio onDone={refresh} />
@@ -72,10 +72,10 @@ export default function Home() {
       <section className="section">
         <div className="section-head">
           <div>
-            <span className="eyebrow">Cartelera</span>
-            <h2>Lo último del corral</h2>
+            <span className="eyebrow">Now showing</span>
+            <h2>Fresh from the barn</h2>
           </div>
-          <span className="count">{episodes.length} episodios</span>
+          <span className="count">{episodes.length} episodes</span>
         </div>
         {error && <p className="err">⚠ {error}</p>}
         <CinemaFeed episodes={episodes} chars={charMap} />
@@ -84,8 +84,8 @@ export default function Home() {
       <section className="section">
         <div className="section-head">
           <div>
-            <span className="eyebrow">Reparto</span>
-            <h2>El elenco</h2>
+            <span className="eyebrow">Cast</span>
+            <h2>Meet the barnyard</h2>
           </div>
         </div>
         <CastGrid characters={characters} />

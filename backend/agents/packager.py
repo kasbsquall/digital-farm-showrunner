@@ -1,7 +1,7 @@
 """Agent 4 — Packager.
 
-Takes the approved episode and produces a publish-ready title, thumbnail hint
-and description — as if launching a daily channel drop.
+Produces a publish-ready title and description that match the gag actually seen in
+the video (cause and effect). English output.
 """
 import json
 
@@ -9,42 +9,42 @@ from services.qwen_client import chat
 from agents._json import parse_json
 
 SYSTEM = (
-    "Eres el editor de un canal viral de micro-dramas de granja en arcilla. "
-    "Escribes títulos y descripciones CON GANCHO, en español, que capturan el gag "
-    "EXACTO que ocurre en el video (la acción y su causa-efecto), con humor y ritmo. "
-    "Nada de relleno genérico: si el gallo golpea el pan, dilo. Respondes SIEMPRE en JSON válido."
+    "You are the editor of a viral channel of claymation farm micro-dramas. You write "
+    "hooky titles and descriptions in ENGLISH that capture the EXACT gag that happens in "
+    "the video (the action and its cause-effect), with humor and rhythm. No generic filler: "
+    "if the rooster punches the bread, say so. You ALWAYS answer in valid JSON."
 )
 
-USER_TMPL = """Evento del episodio: {event}
+USER_TMPL = """Episode event: {event}
 
-Guion:
+Script:
 {script}
 
-LO QUE REALMENTE SE VE EN EL VIDEO (prioriza esto para que el texto coincida):
+WHAT THE VIDEO ACTUALLY SHOWS (prioritize this so the text matches):
 {video_description}
 
-Genera el paquete de publicación. El título y la descripción deben reflejar lo
-que de verdad se ve en el video (arriba), no solo el guion. Devuelve JSON exacto:
-{{"title": "<título viral, con 1-2 emojis>",
-  "thumbnail_hint": "<descripción visual del thumbnail sugerido>",
-  "description": "<2-3 frases + 3 hashtags>"}}"""
+Write the publishing package. Title and description must reflect what is really seen in
+the video (above), not just the script. Return exactly this JSON:
+{{"title": "<viral title, with 1-2 emojis>",
+  "thumbnail_hint": "<visual description of the suggested thumbnail>",
+  "description": "<2-3 sentences + 3 hashtags>"}}"""
 
 
 def _mock(event: str, script: str) -> str:
     return json.dumps(
         {
-            "title": "🐔 El día que la granja se rebeló",
-            "thumbnail_hint": ("Primer plano de Bruno el gallo con expresión indignada "
-                               "sosteniendo una pancarta, colores saturados, fondo del corral."),
-            "description": (f"{event} Un nuevo capítulo del drama diario más absurdo del corral. "
-                            "#GranjaDigital #IA #MicroDrama"),
+            "title": "🐔 The day the farm revolted",
+            "thumbnail_hint": ("Close-up of Bruno the rooster looking outraged holding a "
+                               "placard, saturated colors, barnyard background."),
+            "description": (f"{event} Another chapter of the barnyard's most absurd daily drama. "
+                            "#DigitalFarm #AI #MicroDrama"),
         },
         ensure_ascii=False,
     )
 
 
 def run(event: str, script: str, video_description: str = "") -> dict:
-    desc = video_description.strip() or "(no disponible — usa el guion)"
+    desc = video_description.strip() or "(unavailable — use the script)"
     text = chat(
         SYSTEM,
         USER_TMPL.format(event=event, script=script, video_description=desc),

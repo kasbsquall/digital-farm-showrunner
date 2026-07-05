@@ -1,11 +1,15 @@
 import { type Character, ossThumb } from "@/lib/api";
 
 const ROLE: Record<string, string> = {
-  gallo: "El líder sindical",
-  vaca: "La romántica",
-  tractor: "El indiferente",
-  cerdo: "El filósofo",
-  gallina: "La reportera",
+  rooster: "The union leader",
+  cow: "The romantic",
+  pig: "The philosopher",
+  hen: "The reporter",
+  goat: "The troublemaker",
+  duck: "The drama queen",
+  sheep: "The overthinker",
+  donkey: "The pessimist",
+  goose: "The bouncer",
 };
 
 export function CastGrid({ characters }: { characters: Character[] }) {

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { API, Character, Episode, getCharacters, getEpisodes } from "@/lib/api";
-import { CharacterRail } from "@/components/CharacterRail";
+import { CinemaFeed } from "@/components/CinemaFeed";
+import { CastGrid } from "@/components/CastGrid";
 import { Studio } from "@/components/Studio";
-import { EpisodeCard } from "@/components/EpisodeCard";
 
 export default function Home() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -33,50 +33,66 @@ export default function Home() {
     <div className="shell">
       <div className="topbar">
         <div className="brand">
-          <div className="logo">🐔</div>
-          <div className="name">
-            The Digital Farm
-            <small>Qwen Cloud · AI Showrunner</small>
+          <img src="/logo.png" alt="MUCKFLIX" />
+          <div className="word">
+            MUCK<b>FLIX</b>
+            <small>The Digital Farm Showrunner</small>
           </div>
         </div>
         <span className="pill">
-          <span className="dot" /> pipeline de 4 agentes · autónomo
+          <span className="dot" /> 4 agentes IA · producción autónoma
         </span>
       </div>
 
       <header className="hero">
-        <h1>
-          Dramas de granja<br />
-          escritos, dirigidos y <span className="em">filmados</span> por IA.
-        </h1>
-        <p>
-          Cuatro agentes autónomos inventan la historia, generan el video, revisan lo que
-          realmente se ve en pantalla y publican el episodio. Sin humanos en el set.
-        </p>
-        <CharacterRail characters={characters} />
+        <div className="bg" style={{ backgroundImage: "url(/hero.png)" }} />
+        <div className="inner">
+          <span className="eyebrow">Qwen Cloud · AI Showrunner</span>
+          <h1>
+            Un drama de granja<br />
+            en arcilla, <span className="em">cada día</span>.
+          </h1>
+          <p>
+            Cuatro agentes de IA inventan la historia, pintan la escena, la filman, revisan
+            lo que de verdad pasó en pantalla y publican el episodio. Sin guionistas humanos.
+          </p>
+        </div>
       </header>
 
-      <Studio onDone={refresh} />
+      <section className="section">
+        <div className="section-head">
+          <div>
+            <span className="eyebrow">En vivo</span>
+            <h2>El Estudio</h2>
+          </div>
+        </div>
+        <Studio onDone={refresh} />
+      </section>
 
-      <section>
-        <div className="feed-head">
-          <h2>El feed del corral</h2>
-          <span className="count">{episodes.length} EPISODIOS</span>
+      <section className="section">
+        <div className="section-head">
+          <div>
+            <span className="eyebrow">Cartelera</span>
+            <h2>Lo último del corral</h2>
+          </div>
+          <span className="count">{episodes.length} episodios</span>
         </div>
         {error && <p className="err">⚠ {error}</p>}
-        {episodes.length === 0 ? (
-          <p className="empty">// aún no hay episodios — produce el primero arriba</p>
-        ) : (
-          <div className="grid">
-            {episodes.map((ep) => (
-              <EpisodeCard key={ep.id} ep={ep} chars={charMap} />
-            ))}
+        <CinemaFeed episodes={episodes} chars={charMap} />
+      </section>
+
+      <section className="section">
+        <div className="section-head">
+          <div>
+            <span className="eyebrow">Reparto</span>
+            <h2>El elenco</h2>
           </div>
-        )}
+        </div>
+        <CastGrid characters={characters} />
       </section>
 
       <footer>
-        The Digital Farm Showrunner · Qwen Cloud Hackathon 2026 · Kevin Soto Burgos · AVANC3
+        MUCKFLIX · The Digital Farm Showrunner · Qwen Cloud Hackathon 2026 · Kevin Soto Burgos · AVANC3
       </footer>
     </div>
   );

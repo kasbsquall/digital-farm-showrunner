@@ -106,7 +106,7 @@ export function Studio({ onDone }: { onDone: () => void }) {
   return (
     <section className="studio">
       <div className="panel">
-        <h2>El Estudio</h2>
+        <h3>El Estudio</h3>
         <p className="hint">Escribe una idea o déjalo en blanco y deja que los agentes improvisen.</p>
         <div className="field">
           <label>Idea del episodio (opcional)</label>
@@ -129,7 +129,7 @@ export function Studio({ onDone }: { onDone: () => void }) {
           return (
             <div className="stage" key={st.key} data-state={s} data-n={i + 1}>
               <div className="role">
-                {st.role} <span className="tag">{st.tag}</span>
+                {st.role} <span className="rtag">{st.tag}</span>
               </div>
               <StageBody k={st.key} data={data} regen={regen} />
             </div>

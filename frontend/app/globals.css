@@ -193,9 +193,10 @@ img { max-width: 100%; }
 .cast-card:hover { transform: translateY(-6px) rotate(-0.5deg); border-color: var(--amber); box-shadow: 0 26px 50px -26px #000; }
 .cast-card .pic { position: relative; aspect-ratio: 1; background: var(--bg-2); overflow: hidden; }
 .cast-card .pic { line-height: 0; }
-.cast-card .pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; transition: transform .3s var(--ease); }
+.cast-card .pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform .3s var(--ease); }
 .cast-card:hover .pic img { transform: scale(1.05); }
-.cast-card .count { position: absolute; bottom: 0.6rem; right: 0.6rem; font-size: 0.68rem; font-weight: 700; background: rgba(10,7,4,.8); color: var(--amber); border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.22rem 0.6rem; }
+.cast-card .count { position: absolute; top: 0.7rem; left: 0.7rem; display: inline-flex; align-items: center; gap: 0.3rem; font-family: var(--font-display); font-size: 0.82rem; font-weight: 800; color: #3a2410; background: linear-gradient(135deg, var(--amber-soft), var(--amber)); border: 2px solid #1a1206; border-radius: 999px; padding: 0.28rem 0.7rem; box-shadow: 0 3px 0 #1a1206; }
+.cast-card .count .ic { font-size: 0.9rem; filter: saturate(0); }
 .cast-card .info { padding: 0.95rem 1rem 1.15rem; }
 .cast-card .info b { font-family: var(--font-display); font-size: 1.4rem; }
 .cast-card .info .role { font-size: 0.72rem; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin: 2px 0 0.5rem; font-weight: 700; }

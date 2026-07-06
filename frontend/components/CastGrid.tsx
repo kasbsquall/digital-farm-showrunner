@@ -36,7 +36,11 @@ export function CastGrid({
             <button className="cast-card" key={c.name} onClick={() => setSel(c)}>
               <div className="pic">
                 {c.image_url && <img src={ossThumb(c.image_url, 500)} alt={c.name} />}
-                {n > 0 && <span className="count">★ {n}</span>}
+                {n > 0 && (
+                  <span className="count">
+                    <span className="ic">🎬</span> {n} {n === 1 ? "ep" : "eps"}
+                  </span>
+                )}
               </div>
               <div className="info">
                 <b>{c.name}</b>

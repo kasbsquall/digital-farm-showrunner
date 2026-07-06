@@ -9,9 +9,10 @@ from services.image_gen_client import generate_image
 from services import oss_client
 
 STYLE = (
-    "charming claymation / stop-motion character portrait, soft studio lighting, "
-    "warm neutral background, expressive face, centered, high detail, cohesive "
-    "children's animated film style"
+    "charming claymation / stop-motion CLOSE-UP BUST portrait, the character fills "
+    "almost the entire frame with the head near the top edge, tight crop, minimal "
+    "plain warm background, soft studio lighting, expressive face, high detail, "
+    "cohesive children's animated film style"
 )
 
 

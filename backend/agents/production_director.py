@@ -12,24 +12,31 @@ from services.qwen_client import chat
 from agents._json import parse_json
 
 SYSTEM = (
-    "You are an AI video production director. A clip is only ~5 SECONDS, so you design "
-    "ONE instant visual gag: a single action that reads at a glance and is funny in the "
-    "moment. You describe the characters faithfully to their established look. You ALWAYS "
-    "answer in valid JSON, with the prompts written in English."
+    "You are the production director of a claymation stop-motion channel. You turn a "
+    "script into TWO things: (1) a KEYFRAME image prompt — a single frozen frame of the "
+    "FUNNIEST split-second of the gag, clearly composed and instantly readable; and (2) a "
+    "MOTION prompt — the ONE simple continuous movement that animates that exact frame over "
+    "~5 seconds. The motion must be a single physical action an image-to-video model can "
+    "animate smoothly (a fall, a squish, a splash, a launch, a big head-turn reaction, an "
+    "object dropping) — never multiple actions or scene cuts. Describe every character on "
+    "screen faithfully to their given look so they stay consistent. You ALWAYS answer in "
+    "valid JSON, prompts written in English."
 )
 
-USER_TMPL = """Script (concept):
+USER_TMPL = """Script (the gag):
 {script}
 
-FAITHFUL character appearance (respect it exactly for consistency):
+FAITHFUL character appearance (match it exactly for consistency):
 {visuals}
 
-Design the 5-second episode. Return exactly this JSON:
-{{"keyframe_prompt": "<English prompt for ONE still image: the funniest instant,
-   claymation stop-motion style, characters exactly as described, cinematic framing,
-   farm background>",
-  "motion_prompt": "<English prompt for the SINGLE ~5s action that animates that image:
-   one simple comedic movement, subtle camera>",
+Return exactly this JSON:
+{{"keyframe_prompt": "<English: the single funniest FROZEN instant of the gag. Name and
+   faithfully describe each character present (using their look above), mid-reaction with
+   exaggerated expressive faces, clear staging with one obvious focal action. Claymation
+   plasticine stop-motion, Aardman style, visible clay fingerprints, farm background with
+   wooden fences and hay, bright natural daylight, cinematic slightly-wide shot>",
+  "motion_prompt": "<English: ONE simple continuous ~5-second motion that animates that
+   frame, with exaggerated cartoon physics and a subtle camera push-in. One action only>",
   "video_tool": "happyhorse-i2v"}}"""
 
 STYLE = "charming claymation stop-motion style, cohesive children's animated film look, warm cinematic lighting"

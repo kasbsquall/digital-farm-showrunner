@@ -173,12 +173,6 @@ export function Studio({ onDone, characters }: { onDone: () => void; characters:
           />
           <span className="sub-hint">Just the gag — no names needed. Leave blank and the agents improvise.</span>
         </div>
-        <div className="brief">
-          🎬 <b>Today's brief:</b>{" "}
-          {picked.length ? <>Starring <b>{picked.join(" & ")}</b></> : "A random lineup"}
-          {" — "}
-          {idea.trim() ? <>“{idea.trim()}”</> : "anything goes"}
-        </div>
         <div className="field">
           <label htmlFor="creator">Your name (optional — we'll credit you)</label>
           <input

@@ -81,7 +81,7 @@ img { max-width: 100%; }
 .sec-crate { background-image: linear-gradient(rgba(20,13,7,.52), rgba(15,10,5,.7)), url(/tex/crate.png); }
 
 /* The Studio = one open plasticine scroll (torn transparent edges). */
-.sec-scroll { background: url(/tex/scroll.png) center/100% 100% no-repeat; filter: drop-shadow(0 22px 30px rgba(0,0,0,.45)); padding: clamp(3rem, 6vw, 5rem) clamp(5rem, 13vw, 11rem); }
+.sec-scroll { background: url(/tex/scroll.png) center/100% 100% no-repeat; filter: drop-shadow(0 22px 30px rgba(0,0,0,.45)); padding: clamp(2.2rem, 6vw, 5rem) clamp(2.2rem, 12vw, 11rem); }
 /* On the cream scroll the inner panels turn into warm wood tags for contrast. */
 .sec-scroll .panel, .sec-scroll .wstep { background: linear-gradient(rgba(52,34,18,.92), rgba(38,24,12,.94)); border-color: rgba(120,72,30,.55); backdrop-filter: none; }
 .sec-scroll .wstep[data-state="active"] { background: linear-gradient(rgba(30,60,42,.92), rgba(20,44,30,.94)); }
@@ -183,7 +183,10 @@ img { max-width: 100%; }
 .btn:disabled { cursor: progress; filter: drop-shadow(0 6px 8px rgba(0,0,0,.4)) grayscale(0.25); opacity: 0.85; }
 .err { color: var(--barn); font-size: 0.85rem; margin-top: 0.8rem; }
 
-.wizard { display: grid; gap: 0.9rem; }
+.wizard { display: grid; gap: 0.9rem; max-height: min(600px, 74vh); overflow-y: auto; overflow-x: hidden; padding: 2px 8px 2px 2px; scrollbar-width: thin; scrollbar-color: var(--amber) transparent; }
+.wizard::-webkit-scrollbar { width: 8px; }
+.wizard::-webkit-scrollbar-thumb { background: rgba(244,165,33,.55); border-radius: 999px; }
+.wizard::-webkit-scrollbar-track { background: transparent; }
 .wstep { position: relative; display: grid; grid-template-columns: 60px 1fr; gap: 0.95rem; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); backdrop-filter: blur(7px); padding: 1rem 1.1rem; transition: border-color .3s, background .3s, opacity .3s, transform .3s var(--ease); opacity: 0.92; }
 .wstep-av { position: relative; width: 60px; height: 60px; }
 .wstep-av img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--line-strong); transition: border-color .3s; }

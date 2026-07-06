@@ -139,7 +139,7 @@ export function Studio({ onDone, characters }: { onDone: () => void; characters:
     <section className="studio">
       <div className="panel">
         <h3>New episode</h3>
-        <p className="hint">Type an idea, or leave it blank and let the agents improvise.</p>
+        <p className="hint">Cast your stars, set the gag, and hit produce — or just roll the dice.</p>
         <div className="field">
           <label>
             <span><b>1.</b> Who stars?</span>

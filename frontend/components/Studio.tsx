@@ -3,13 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { type Character, streamEpisode, ossThumb } from "@/lib/api";
 
-const SUGGESTIONS = [
-  "Dora the duck shows up with a tiny bazooka and blows the hay bale into confetti.",
-  "Kiki the goose bodyslams a scarecrow clean off the fence.",
-  "Pepe the pig discovers gravity by faceplanting into the mud.",
-  "Gus the goat eats the last fence post and the whole barn tips over.",
-  "Momo the donkey wins the lottery and remains completely unimpressed.",
-  "Bex the sheep panics and headbutts a bucket into orbit.",
+// Each suggestion fills BOTH the cast and the action, so it's always coherent.
+const SUGGESTIONS: { who: string[]; text: string }[] = [
+  { who: ["Dora"], text: "shows up with a tiny bazooka and blows a hay bale into confetti" },
+  { who: ["Kiki"], text: "bodyslams a scarecrow clean off the fence" },
+  { who: ["Pepe"], text: "discovers gravity by faceplanting into the mud" },
+  { who: ["Gus"], text: "eats the last fence post and the whole barn tips over" },
+  { who: ["Momo"], text: "wins the lottery and remains completely unimpressed" },
+  { who: ["Bex"], text: "panics and headbutts a bucket into orbit" },
+  { who: ["Nina", "Gus"], text: "reports live as the goat detonates the mailbox" },
 ];
 
 type Status = "idle" | "active" | "done" | "reject";
@@ -45,7 +47,9 @@ export function Studio({ onDone, characters }: { onDone: () => void; characters:
     setPicked((p) => (p.includes(name) ? p.filter((n) => n !== name) : [...p, name]));
   }
   function surprise() {
-    setIdea(SUGGESTIONS[Math.floor(Math.random() * SUGGESTIONS.length)]);
+    const s = SUGGESTIONS[Math.floor(Math.random() * SUGGESTIONS.length)];
+    setPicked(s.who);
+    setIdea(s.text);
   }
   const [status, setStatus] = useState<Record<string, Status>>({});
   const [data, setData] = useState<Data>({});
@@ -68,8 +72,11 @@ export function Studio({ onDone, characters }: { onDone: () => void; characters:
     setData({});
     setStatus({ scriptwriter: "active" });
 
-    const featuring = picked.length ? `Featuring ${picked.join(", ")}. ` : "";
-    const es = streamEpisode((featuring + idea).trim(), creator);
+    const stars = picked.join(" and ");
+    let brief = idea.trim();
+    if (stars && brief) brief = `Starring ${stars}: ${brief}`;
+    else if (stars) brief = `Starring ${stars}`;
+    const es = streamEpisode(brief, creator);
     esRef.current = es;
 
     // Ignore events from a stale connection (a newer run replaced this one).
@@ -134,7 +141,10 @@ export function Studio({ onDone, characters }: { onDone: () => void; characters:
         <h3>New episode</h3>
         <p className="hint">Type an idea, or leave it blank and let the agents improvise.</p>
         <div className="field">
-          <label>Pick who stars (optional)</label>
+          <label>
+            <span><b>1.</b> Who stars?</span>
+            <button type="button" className="dice" onClick={surprise} disabled={running}>🎲 Surprise me</button>
+          </label>
           <div className="cast-picker">
             {characters.map((c) => (
               <button
@@ -150,19 +160,24 @@ export function Studio({ onDone, characters }: { onDone: () => void; characters:
               </button>
             ))}
           </div>
+          <span className="sub-hint">Tap to cast them — or leave empty for a random lineup.</span>
         </div>
         <div className="field">
-          <label htmlFor="episode-idea">
-            Episode idea (optional)
-            <button type="button" className="dice" onClick={surprise} disabled={running}>🎲 Surprise me</button>
-          </label>
+          <label htmlFor="episode-idea"><span><b>2.</b> What happens?</span></label>
           <textarea
             id="episode-idea"
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
-            placeholder="e.g. Kiki the goose starts a strike against the sunrise…"
+            placeholder="e.g. throws a tantrum over a puddle, finds a mysterious hole, tries to fly…"
             disabled={running}
           />
+          <span className="sub-hint">Just the gag — no names needed. Leave blank and the agents improvise.</span>
+        </div>
+        <div className="brief">
+          🎬 <b>Today's brief:</b>{" "}
+          {picked.length ? <>Starring <b>{picked.join(" & ")}</b></> : "A random lineup"}
+          {" — "}
+          {idea.trim() ? <>“{idea.trim()}”</> : "anything goes"}
         </div>
         <div className="field">
           <label htmlFor="creator">Your name (optional — we'll credit you)</label>

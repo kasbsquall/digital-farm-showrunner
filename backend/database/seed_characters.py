@@ -57,7 +57,7 @@ BASE_CAST = [
         "name": "Kiki",
         "species": "goose",
         "personality": "The self-appointed, extremely aggressive security guard of the pond. Honks first, asks questions never.",
-        "visual_desc": f"A white goose mid-honk with wings flared, {CLAY}, furious tiny eyes, neck stretched forward menacingly.",
+        "visual_desc": f"A big grey-and-white goose with a long S-curved neck and a chunky bright-orange knob-billed beak, {CLAY}, wearing a tiny navy security cap, furious tiny eyes, neck stretched forward menacingly mid-honk.",
     },
 ]
 

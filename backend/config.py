@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     oss_bucket: str = ""
     oss_endpoint: str = ""
 
+    # ElevenLabs (voiceover for the demo video).
+    elevenlabs_api_key: str = ""
+
     # Force mock mode even if a key is present (handy for tests/demo).
     force_mock: bool = False
 

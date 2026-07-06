@@ -65,7 +65,9 @@ export default function Home() {
             <h2>The Studio</h2>
           </div>
         </div>
-        <Studio onDone={refresh} />
+        <div className="sec-tex sec-cork">
+          <Studio onDone={refresh} />
+        </div>
       </section>
 
       <section className="section">
@@ -77,7 +79,9 @@ export default function Home() {
           <span className="count">{episodes.length} episodes</span>
         </div>
         {error && <p className="err">⚠ {error}</p>}
-        <CinemaFeed episodes={episodes} chars={charMap} />
+        <div className="sec-tex sec-crate">
+          <CinemaFeed episodes={episodes} chars={charMap} />
+        </div>
       </section>
 
       <section className="section">

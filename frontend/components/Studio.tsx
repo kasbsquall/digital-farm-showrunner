@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { streamEpisode } from "@/lib/api";
+import { type Character, streamEpisode, ossThumb } from "@/lib/api";
+
+const SUGGESTIONS = [
+  "Dora the duck shows up with a tiny bazooka and blows the hay bale into confetti.",
+  "Kiki the goose bodyslams a scarecrow clean off the fence.",
+  "Pepe the pig discovers gravity by faceplanting into the mud.",
+  "Gus the goat eats the last fence post and the whole barn tips over.",
+  "Momo the donkey wins the lottery and remains completely unimpressed.",
+  "Bex the sheep panics and headbutts a bucket into orbit.",
+];
 
 type Status = "idle" | "active" | "done" | "reject";
 
@@ -26,10 +35,18 @@ type Data = {
   pack?: { title: string; description: string; thumbnail_url: string };
 };
 
-export function Studio({ onDone }: { onDone: () => void }) {
+export function Studio({ onDone, characters }: { onDone: () => void; characters: Character[] }) {
   const [idea, setIdea] = useState("");
   const [creator, setCreator] = useState("");
+  const [picked, setPicked] = useState<string[]>([]);
   const [running, setRunning] = useState(false);
+
+  function toggle(name: string) {
+    setPicked((p) => (p.includes(name) ? p.filter((n) => n !== name) : [...p, name]));
+  }
+  function surprise() {
+    setIdea(SUGGESTIONS[Math.floor(Math.random() * SUGGESTIONS.length)]);
+  }
   const [status, setStatus] = useState<Record<string, Status>>({});
   const [data, setData] = useState<Data>({});
   const [regen, setRegen] = useState(0);
@@ -51,7 +68,8 @@ export function Studio({ onDone }: { onDone: () => void }) {
     setData({});
     setStatus({ scriptwriter: "active" });
 
-    const es = streamEpisode(idea, creator);
+    const featuring = picked.length ? `Featuring ${picked.join(", ")}. ` : "";
+    const es = streamEpisode((featuring + idea).trim(), creator);
     esRef.current = es;
 
     // Ignore events from a stale connection (a newer run replaced this one).
@@ -116,7 +134,28 @@ export function Studio({ onDone }: { onDone: () => void }) {
         <h3>New episode</h3>
         <p className="hint">Type an idea, or leave it blank and let the agents improvise.</p>
         <div className="field">
-          <label htmlFor="episode-idea">Episode idea (optional)</label>
+          <label>Pick who stars (optional)</label>
+          <div className="cast-picker">
+            {characters.map((c) => (
+              <button
+                type="button"
+                key={c.name}
+                className={`cpick ${picked.includes(c.name) ? "on" : ""}`}
+                onClick={() => toggle(c.name)}
+                disabled={running}
+                title={c.personality}
+              >
+                {c.image_url && <img src={ossThumb(c.image_url, 60)} alt="" />}
+                {c.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field">
+          <label htmlFor="episode-idea">
+            Episode idea (optional)
+            <button type="button" className="dice" onClick={surprise} disabled={running}>🎲 Surprise me</button>
+          </label>
           <textarea
             id="episode-idea"
             value={idea}

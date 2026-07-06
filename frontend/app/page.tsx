@@ -66,7 +66,7 @@ export default function Home() {
           </div>
         </div>
         <div className="sec-scroll">
-          <Studio onDone={refresh} />
+          <Studio onDone={refresh} characters={characters} />
         </div>
       </section>
 

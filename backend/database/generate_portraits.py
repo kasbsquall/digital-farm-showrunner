@@ -9,10 +9,11 @@ from services.image_gen_client import generate_image
 from services import oss_client
 
 STYLE = (
-    "charming claymation / stop-motion CLOSE-UP BUST portrait, the character fills "
-    "almost the entire frame with the head near the top edge, tight crop, minimal "
-    "plain warm background, soft studio lighting, expressive face, high detail, "
-    "cohesive children's animated film style"
+    "charming claymation / stop-motion EXTREME CLOSE-UP portrait, the animal's head "
+    "and face FILL THE ENTIRE FRAME edge to edge, cropped very tight with the top of "
+    "the head touching the top edge, absolutely NO empty background or headroom above, "
+    "soft studio lighting, big expressive face, high detail, cohesive children's "
+    "animated film style"
 )
 
 

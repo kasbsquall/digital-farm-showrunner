@@ -78,8 +78,13 @@ img { max-width: 100%; }
 
 /* Textured section panels — one big claymation surface per section, framed. */
 .sec-tex { border: 3px solid #1c1005; border-radius: 24px; padding: clamp(1.2rem, 3vw, 2rem); background-size: cover; background-position: center; box-shadow: 0 22px 55px -26px #000, inset 0 0 0 2px rgba(120,72,30,.4); }
-.sec-cork { background-image: linear-gradient(rgba(20,13,7,.58), rgba(15,10,5,.74)), url(/tex/cork.png); }
 .sec-crate { background-image: linear-gradient(rgba(20,13,7,.52), rgba(15,10,5,.7)), url(/tex/crate.png); }
+
+/* The Studio = one open plasticine scroll (torn transparent edges). */
+.sec-scroll { background: url(/tex/scroll.png) center/100% 100% no-repeat; filter: drop-shadow(0 24px 34px rgba(0,0,0,.55)); padding: clamp(2.4rem, 5vw, 4rem) clamp(3.5rem, 8vw, 7rem); }
+/* On the cream scroll the inner panels turn into warm wood tags for contrast. */
+.sec-scroll .panel, .sec-scroll .wstep { background: linear-gradient(rgba(52,34,18,.92), rgba(38,24,12,.94)); border-color: rgba(120,72,30,.55); backdrop-filter: none; }
+.sec-scroll .wstep[data-state="active"] { background: linear-gradient(rgba(30,60,42,.92), rgba(20,44,30,.94)); }
 
 /* ---------- Cinema ---------- */
 .cinema { display: grid; gap: 1.4rem; grid-template-columns: 1fr; }

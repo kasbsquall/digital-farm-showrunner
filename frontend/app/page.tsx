@@ -65,7 +65,7 @@ export default function Home() {
             <h2>The Studio</h2>
           </div>
         </div>
-        <div className="sec-tex sec-cork">
+        <div className="sec-scroll">
           <Studio onDone={refresh} />
         </div>
       </section>

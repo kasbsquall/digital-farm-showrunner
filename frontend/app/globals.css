@@ -81,7 +81,7 @@ img { max-width: 100%; }
 .sec-crate { background-image: linear-gradient(rgba(20,13,7,.52), rgba(15,10,5,.7)), url(/tex/crate.png); }
 
 /* The Studio = one open plasticine scroll (torn transparent edges). */
-.sec-scroll { background: url(/tex/scroll.png) center/100% 100% no-repeat; filter: drop-shadow(0 24px 34px rgba(0,0,0,.55)); padding: clamp(2.4rem, 5vw, 4rem) clamp(3.5rem, 8vw, 7rem); }
+.sec-scroll { background: url(/tex/scroll.png) center/100% 100% no-repeat; filter: drop-shadow(0 22px 30px rgba(0,0,0,.45)); padding: clamp(3rem, 6vw, 5rem) clamp(5rem, 13vw, 11rem); }
 /* On the cream scroll the inner panels turn into warm wood tags for contrast. */
 .sec-scroll .panel, .sec-scroll .wstep { background: linear-gradient(rgba(52,34,18,.92), rgba(38,24,12,.94)); border-color: rgba(120,72,30,.55); backdrop-filter: none; }
 .sec-scroll .wstep[data-state="active"] { background: linear-gradient(rgba(30,60,42,.92), rgba(20,44,30,.94)); }
@@ -200,6 +200,7 @@ img { max-width: 100%; }
 @media (min-width: 560px) { .cast-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 960px) { .cast-grid { grid-template-columns: repeat(4, 1fr); } }
 .cast-card { text-align: left; font: inherit; color: inherit; cursor: pointer; border: 3px solid #1c1005; border-radius: 18px; overflow: hidden; background-image: linear-gradient(rgba(28,18,9,.30), rgba(22,14,7,.66)), url(/tex/wood.png); background-size: cover; background-position: center; box-shadow: 0 14px 30px -14px #000, inset 0 0 0 2px rgba(120,72,30,.5), inset 0 2px 6px rgba(0,0,0,.4); transition: transform .25s var(--ease), box-shadow .25s; padding: 8px; }
+.cast-card { padding: 13px; }
 .cast-card:hover { transform: translateY(-6px) rotate(-0.6deg); box-shadow: 0 30px 55px -26px #000, inset 0 0 0 2px rgba(244,165,33,.6); }
 .cast-card .pic { position: relative; aspect-ratio: 1; background: var(--bg-2); overflow: hidden; border-radius: 12px; border: 2px solid rgba(0,0,0,.45); }
 .cast-card .pic { line-height: 0; }
@@ -207,7 +208,7 @@ img { max-width: 100%; }
 .cast-card:hover .pic img { transform: scale(1.05); }
 .cast-card .count { position: absolute; top: 0.7rem; left: 0.7rem; display: inline-flex; align-items: center; gap: 0.3rem; font-family: var(--font-display); font-size: 0.82rem; font-weight: 800; color: #3a2410; background: linear-gradient(135deg, var(--amber-soft), var(--amber)); border: 2px solid #1a1206; border-radius: 999px; padding: 0.28rem 0.7rem; box-shadow: 0 3px 0 #1a1206; }
 .cast-card .count .ic { font-size: 0.9rem; filter: saturate(0); }
-.cast-card .info { padding: 0.95rem 1rem 1.15rem; }
+.cast-card .info { padding: 1.1rem 0.85rem 1.3rem; }
 .cast-card .info b { font-family: var(--font-display); font-size: 1.4rem; }
 .cast-card .info .role { font-size: 0.72rem; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin: 2px 0 0.5rem; font-weight: 700; }
 .cast-card .info p { font-size: 0.85rem; color: var(--muted); margin: 0; line-height: 1.45; }

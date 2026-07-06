@@ -113,7 +113,7 @@ export function Studio({ onDone }: { onDone: () => void }) {
   return (
     <section className="studio">
       <div className="panel">
-        <h3>The Studio</h3>
+        <h3>New episode</h3>
         <p className="hint">Type an idea, or leave it blank and let the agents improvise.</p>
         <div className="field">
           <label htmlFor="episode-idea">Episode idea (optional)</label>

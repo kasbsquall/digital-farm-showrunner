@@ -33,9 +33,9 @@ the video (above), not just the script. Return exactly this JSON:
 def _mock(event: str, script: str) -> str:
     return json.dumps(
         {
-            "title": "🐔 The day the farm revolted",
-            "thumbnail_hint": ("Close-up of Bruno the rooster looking outraged holding a "
-                               "placard, saturated colors, barnyard background."),
+            "title": "🐔 The day the farm lost its mind",
+            "thumbnail_hint": ("Close-up of a barnyard animal mid-reaction, wide-eyed, "
+                               "saturated colors, hay and wooden fences behind."),
             "description": (f"{event} Another chapter of the barnyard's most absurd daily drama. "
                             "#DigitalFarm #AI #MicroDrama"),
         },
@@ -53,7 +53,7 @@ def run(event: str, script: str, video_description: str = "") -> dict:
     )
     data = parse_json(text)
     return {
-        "title": data["title"],
-        "thumbnail_hint": data["thumbnail_hint"],
-        "description": data["description"],
+        "title": data.get("title", "A brand-new barnyard episode 🐔"),
+        "thumbnail_hint": data.get("thumbnail_hint", ""),
+        "description": data.get("description", event),
     }

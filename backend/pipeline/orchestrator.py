@@ -78,7 +78,7 @@ def _video_is_real() -> bool:
 def video_node(state: FarmState) -> FarmState:
     d = state["direction"]
     if not _video_is_real():
-        # Modo demo: video placeholder, sin keyframe ni visión.
+        # Demo mode: placeholder video, no keyframe or vision step.
         return {"video_url": generate_video(d.get("motion_prompt", "farm"), "happyhorse"),
                 "video_description": "", "thumbnail_url": ""}
 
@@ -107,7 +107,7 @@ def video_node(state: FarmState) -> FarmState:
 
 def qa_node(state: FarmState) -> FarmState:
     attempt = state.get("attempt", 0) + 1
-    # Sin video real (modo placeholder) no hay nada que revisar: aprobamos.
+    # No real video (placeholder mode) → nothing to review: auto-approve.
     if not _video_is_real():
         return {"qa": {"qa_status": "approved", "qa_notes": "Video en modo demo (placeholder)."},
                 "attempt": attempt}
@@ -119,7 +119,7 @@ def qa_node(state: FarmState) -> FarmState:
 
 
 def packager_node(state: FarmState) -> FarmState:
-    # El thumbnail ya es el keyframe (primer frame del video) desde video_node.
+    # The thumbnail is already the keyframe (frame 0 of the video) from video_node.
     pack = packager.run(
         state["story"]["event"], state["story"]["script"], state.get("video_description", "")
     )

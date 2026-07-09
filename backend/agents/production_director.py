@@ -40,6 +40,8 @@ Return exactly this JSON:
   "video_tool": "happyhorse-i2v"}}"""
 
 STYLE = "charming claymation stop-motion style, cohesive children's animated film look, warm cinematic lighting"
+# Appended to every keyframe so the image model avoids the tells that scream "AI".
+NEGATIVE = "no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts"
 
 
 def _mock(script: str, characters: list[dict]) -> str:
@@ -70,12 +72,13 @@ def run(script: str, characters: list[dict], qa_notes: str = "") -> dict:
         mock=_mock(script, characters),
     )
     data = parse_json(text)
-    # Refuerza el estilo consistente en el keyframe.
-    kf = data["keyframe_prompt"]
+    # Reinforce a consistent style + anti-artifact guardrails on the keyframe.
+    kf = data.get("keyframe_prompt") or f"A funny claymation barnyard moment, {STYLE}"
     if "claymation" not in kf.lower():
         kf = f"{kf}, {STYLE}"
+    kf = f"{kf}. {NEGATIVE}"
     return {
         "keyframe_prompt": kf,
-        "motion_prompt": data["motion_prompt"],
+        "motion_prompt": data.get("motion_prompt", "one quick exaggerated comedic beat, subtle camera push-in"),
         "video_tool": data.get("video_tool", "happyhorse-i2v"),
     }

@@ -22,12 +22,21 @@ SYSTEM = (
     "continuity between episodes is a bonus. You ALWAYS answer in valid JSON, no extra text."
 )
 
+# Few-shot tone anchors — the model should MATCH the voice/format, not copy the gags.
+EXAMPLES = """Study the TONE and FORMAT of these (do NOT reuse them):
+- event: "Lola falls head-over-heels for a shiny bucket and tries to serenade it."
+  script: "LOLA: My love, you reflect my soul!\\nMOMO: It's a bucket.\\nLOLA: Don't ruin this for us."
+- event: "Kiki the goose honks so hard the recoil launches Bex the sheep clean over the fence."
+  script: "KIKI: HONK! No trespassing!\\nBEX: I wasn't even— AAAH!\\nDORA: I KNEW the pond was a trap."
+"""
+
 USER_TMPL = """Farm cast available (use 2, maybe 3):
 {cast}
 
 Recent episodes (don't repeat these, light continuity is welcome):
 {recent}
 {idea}
+{examples}
 Write TODAY'S episode as ONE instant physical gag that can be shown in ~5 seconds, with a
 clear cause and effect (who does what to whom, and the funny result).
 
@@ -70,13 +79,15 @@ def run(characters: list[dict], recent_events: list[str], idea: str = "") -> dic
     idea_block = f"\nUSER-SUGGESTED idea (respect it as the base): {idea}\n" if idea.strip() else ""
     text = chat(
         SYSTEM,
-        USER_TMPL.format(cast=cast, recent=recent, idea=idea_block),
+        USER_TMPL.format(cast=cast, recent=recent, idea=idea_block, examples=EXAMPLES),
         temperature=0.9,
         mock=_mock(characters, recent_events),
     )
     data = parse_json(text)
+    # Defensive access: an LLM formatting slip must not crash the whole pipeline.
+    used = data.get("characters_used") or [c["name"] for c in characters[:2]]
     return {
-        "event": data["event"],
-        "script": data["script"],
-        "characters_used": data["characters_used"],
+        "event": data.get("event", "The farm erupts into sudden, inexplicable chaos."),
+        "script": data.get("script", ""),
+        "characters_used": used if isinstance(used, list) else [str(used)],
     }

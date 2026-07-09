@@ -8,31 +8,31 @@ class Settings(BaseSettings):
     # Database: SQLite by default, swap to Alibaba Cloud RDS (PostgreSQL) via env.
     database_url: str = "sqlite:///./farm.db"
 
-    # Qwen Cloud — OpenAI-compatible. Two account types exist (ver PDF pág. 7):
-    #  - Pay-as-you-go: key "sk-..."     → dashscope-intl base URL
-    #  - Token Plan (créditos hackathon): key "sk-sp-..." → token-plan base URL
-    # NUNCA mezclar key con el endpoint equivocado → 401 InvalidApiKey.
+    # Qwen Cloud — OpenAI-compatible. Two account types exist:
+    #  - Pay-as-you-go: key "sk-..."        → dashscope-intl base URL
+    #  - Token Plan (hackathon credits): key "sk-sp-..." → token-plan base URL
+    # NEVER mix a key with the wrong endpoint → 401 InvalidApiKey.
     qwen_api_key: str = ""
     qwen_base_url_payg: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
     qwen_base_url_token_plan: str = "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
-    # Endpoint específico de workspace (Model Studio, keys "sk-ws-..."). Si se
-    # define, tiene prioridad sobre la auto-selección por prefijo.
+    # Workspace-specific endpoint (Model Studio, "sk-ws-..." keys). If set, it
+    # takes priority over the prefix-based auto-selection.
     qwen_base_url_override: str = ""
-    qwen_text_model: str = "qwen3.7-plus"   # razonamiento/coherencia: qwen3.7-max
-    vision_model: str = "qwen3-vl-plus"     # entiende video (concordancia texto↔video)
+    qwen_text_model: str = "qwen3.7-plus"   # reasoning/coherence: qwen3.7-max
+    vision_model: str = "qwen3-vl-plus"     # understands video (text↔video concordance)
 
-    # Generación de video: HappyHorse o Wan (t2v). Wan2.6-t2i es texto→IMAGEN.
-    video_model: str = "happyhorse-1.1-t2v"   # texto→video (fallback)
-    video_model_i2v: str = "happyhorse-1.1-i2v"  # imagen→video (keyframe animado)
+    # Video generation: HappyHorse or Wan (t2v). Wan2.6-t2i is text→IMAGE.
+    video_model: str = "happyhorse-1.1-t2v"   # text→video (fallback)
+    video_model_i2v: str = "happyhorse-1.1-i2v"  # image→video (animated keyframe)
     video_model_wan: str = "wan2.7-t2v"       # tool "wan"
-    image_model: str = "qwen-image-2.0"       # retratos de personajes + thumbnails
-    video_poll_seconds: int = 10              # intervalo de sondeo de la tarea
-    video_timeout_seconds: int = 600          # tope de espera por un video
-    # Duración del clip. 0 = usar el default del modelo (~5s). Pon p.ej. 10 para
-    # intentar clips más largos (VERIFICAR que el modelo lo acepte; cuesta más).
+    image_model: str = "qwen-image-2.0"       # character portraits + thumbnails
+    video_poll_seconds: int = 10              # task polling interval
+    video_timeout_seconds: int = 600          # max wait for one video
+    # Clip duration. 0 = use the model default (~5s). Set e.g. 10 to attempt
+    # longer clips (VERIFY the model accepts it; costs more).
     video_duration: int = 0
-    # Mantener el video en mock aunque Qwen texto sea real (hasta implementar
-    # el submit/poll real de generación de video).
+    # Keep video in mock even when Qwen text is real (until the real video
+    # submit/poll is enabled).
     mock_video: bool = True
 
     # Alibaba Cloud OSS (video storage).
@@ -54,7 +54,7 @@ class Settings(BaseSettings):
 
     @property
     def qwen_base_url(self) -> str:
-        """Override de workspace si existe; si no, auto-selecciona por prefijo."""
+        """Workspace override if present; otherwise auto-select by key prefix."""
         if self.qwen_base_url_override:
             return self.qwen_base_url_override
         return (
@@ -65,7 +65,7 @@ class Settings(BaseSettings):
 
     @property
     def dashscope_base(self) -> str:
-        """Endpoint DashScope nativo (async video/imagen). Deriva del base OpenAI."""
+        """Native DashScope endpoint (async video/image). Derived from the OpenAI base."""
         return self.qwen_base_url.replace("/compatible-mode/v1", "/api/v1")
 
 

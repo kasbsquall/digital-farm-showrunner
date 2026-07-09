@@ -89,13 +89,18 @@ stored per take as `consistency`. Because the `qwen-image` endpoint accepts no r
 image, identity consistency is enforced by *scoring* the result (vision), not by
 conditioning the image generator.
 
-On real Alibaba Cloud generation it calibrated correctly. Two distinct comparisons (they are not the same number — don't conflate them):
+On real Alibaba Cloud generation it calibrates cleanly. The score is a *stochastic*
+`qwen3-vl` judgment (≈±0.1 across calls), but it separates on-model from off-model
+unambiguously. A committed real run over committed OSS images lives in
+[`deploy_proof/identity_calibration.json`](deploy_proof/identity_calibration.json):
 
 | Comparison | Score | What it shows |
 |---|---|---|
-| Pepe keyframe vs. Pepe portrait (match) | **0.9** | the production gate: on-model |
+| Pepe keyframe vs. Pepe portrait (match) | **0.8–0.9** | the production gate: on-model |
 | Pepe keyframe vs. a *different* character's portrait (mismatch) | **0.0** | the gate cleanly rejects off-model |
-| Pepe keyframe vs. Pepe keyframe, **two different episodes** | **1.00** | cross-episode consistency (shown in the demo) |
+| Pepe keyframe vs. Pepe keyframe, **two different episodes** | **0.9–1.0** | cross-episode consistency (shown in the demo) |
+
+(These are not the same comparison — don't conflate the portrait gate with cross-episode drift.)
 
 ## Honest caveats
 

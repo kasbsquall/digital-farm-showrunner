@@ -1,0 +1,25 @@
+{
+  "model": "qwen3-vl-plus",
+  "method": "backend/services/vision_client.py::consistency_score() — qwen3-vl scores 0.0-1.0 how well the character in image 1 matches image 2 (species, colors, distinctive features). These are REAL scores over committed OSS images, not prose.",
+  "identity_min_gate": 0.55,
+  "results": [
+    {
+      "comparison": "Pepe keyframe vs. Pepe canonical portrait (MATCH — the production gate)",
+      "image_1": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/1e24a6200c3f.png",
+      "image_2": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/2b68d5a53c12.png",
+      "score": 0.8
+    },
+    {
+      "comparison": "Pepe keyframe vs. Kiki's portrait (MISMATCH — gate rejects off-model)",
+      "image_1": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/1e24a6200c3f.png",
+      "image_2": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/bd4ab6082f71.png",
+      "score": 0.0
+    },
+    {
+      "comparison": "Pepe keyframe vs. Pepe keyframe, two different episodes (cross-episode consistency)",
+      "image_1": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/1e24a6200c3f.png",
+      "image_2": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/0bdb29bcb285.png",
+      "score": 0.9
+    }
+  ]
+}

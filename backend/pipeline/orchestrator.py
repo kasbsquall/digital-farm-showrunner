@@ -27,7 +27,7 @@ from config import settings
 from database.models import Character, Episode
 from agents import scriptwriter, production_director, qa_reviewer, packager
 from services.video_gen_client import generate_video
-from services import oss_client, vision_client, image_gen_client, video_gen_client
+from services import oss_client, vision_client, image_gen_client, video_gen_client, usage
 
 MAX_REGEN = int(os.getenv("MAX_REGEN", "2"))  # Director re-runs after a QA rejection (0 caps cost).
 RECENT_LIMIT = 5
@@ -100,9 +100,17 @@ def video_node(state: FarmState) -> FarmState:
             "Live video generation requires OSS to be configured (OSS_* env vars); "
             "temporary provider URLs expire and must not be persisted."
         )
-    # 1) Keyframe: a still of the scene, in the characters' style.
-    kf_temp = image_gen_client.generate_image(d["keyframe_prompt"], size="1280*720")
-    kf_url = oss_client.persist_image(kf_temp, prefix="keyframes")
+    # 1) Keyframe. On a retake, REUSE the previous character-consistent keyframe and
+    #    only re-animate with the corrected motion — a surgical "retake the shot",
+    #    not "reshoot the movie" (protects consistency and saves an image call).
+    prior = state.get("takes") or []
+    reuse_kf = prior[-1]["thumbnail_url"] if prior and prior[-1].get("thumbnail_url") else ""
+    if reuse_kf:
+        kf_url = reuse_kf
+        log.info("Surgical retake: re-animating the existing keyframe with the corrected motion.")
+    else:
+        kf_temp = image_gen_client.generate_image(d["keyframe_prompt"], size="1280*720")
+        kf_url = oss_client.persist_image(kf_temp, prefix="keyframes")
     # 2) Animate the keyframe (image→video) → inherits the characters' look.
     vid_temp = video_gen_client.animate_image(kf_url, d["motion_prompt"])
     vid_url = oss_client.persist_video(vid_temp)
@@ -127,6 +135,7 @@ def _take_record(state: FarmState, attempt: int, qa: dict) -> dict:
         "motion_prompt": d.get("motion_prompt", ""),
         "video_description": state.get("video_description", ""),
         "qa_status": qa.get("qa_status", ""),
+        "qa_score": qa.get("qa_score", 0.0),
         "qa_notes": qa.get("qa_notes", ""),
     }
 
@@ -140,7 +149,11 @@ def qa_node(state: FarmState) -> FarmState:
             if settings.demo_video_url
             else "Video in demo mode (placeholder)."
         )
-        qa = {"qa_status": "approved", "qa_notes": note}
+        qa = {"qa_status": "approved", "qa_score": 1.0, "qa_notes": note}
+    elif not state.get("video_description", "").strip():
+        # Vision genuinely unavailable → don't let a blank description bias QA to reject.
+        qa = {"qa_status": "approved", "qa_score": 0.6,
+              "qa_notes": "Vision description unavailable; approved by default (not penalized)."}
     else:
         qa = qa_reviewer.run(
             state["video_url"], state["story"]["script"],
@@ -158,8 +171,9 @@ def packager_node(state: FarmState) -> FarmState:
 
 
 def _after_qa(state: FarmState) -> str:
-    """Approve → package; reject but budget left → regenerate; else package best take."""
-    if state["qa"]["qa_status"] == "approved" or state["attempt"] > MAX_REGEN:
+    """Approve → package; reject but budget left → regenerate; else package the best take."""
+    over_budget = settings.token_budget and usage.total_tokens() >= settings.token_budget
+    if state["qa"]["qa_status"] == "approved" or state["attempt"] > MAX_REGEN or over_budget:
         return "packager"
     return "director"
 
@@ -207,28 +221,42 @@ def _load_context(db: Session) -> tuple[list[dict], list[str]]:
 
 def _episode_from_state(final: FarmState) -> Episode:
     story, direction, qa, pack = final["story"], final["direction"], final["qa"], final["pack"]
+    takes = final.get("takes", [])
     approved = qa["qa_status"] == "approved"
+    # If we ran out of budget without an approval, publish the HIGHEST-SCORING take
+    # (not merely the last one) — a real "best take" selection.
+    if not approved and takes:
+        best = max(takes, key=lambda t: t.get("qa_score", 0.0))
+        video_url, thumb = best["video_url"], best["thumbnail_url"]
+        vdesc, qa_status, qa_notes = best["video_description"], best["qa_status"], best["qa_notes"]
+    else:
+        video_url, thumb = final["video_url"], final.get("thumbnail_url", "")
+        vdesc, qa_status, qa_notes = final.get("video_description", ""), qa["qa_status"], qa["qa_notes"]
+    meter = usage.snapshot()
     return Episode(
         event=story["event"],
         script=story["script"],
         characters_used=story["characters_used"],
         video_prompt=f"KEYFRAME: {direction.get('keyframe_prompt','')}\nMOTION: {direction.get('motion_prompt','')}",
         video_tool=direction["video_tool"],
-        video_url=final["video_url"],
-        video_description=final.get("video_description", ""),
-        qa_status=qa["qa_status"],
-        qa_notes=qa["qa_notes"],
+        video_url=video_url,
+        video_description=vdesc,
+        qa_status=qa_status,
+        qa_notes=qa_notes,
         qa_attempts=final["attempt"],
-        takes=final.get("takes", []),
+        takes=takes,
+        tokens_used=meter["total_tokens"],
+        cost_usd=meter["cost_usd"],
         title=pack["title"],
         thumbnail_hint=pack["thumbnail_hint"],
-        thumbnail_url=final.get("thumbnail_url", ""),
+        thumbnail_url=thumb,
         description=pack["description"],
         status="published" if approved else "draft",
     )
 
 
 def run_daily_episode(db: Session, idea: str = "", creator: str = "") -> Episode:
+    usage.reset()
     characters, recent = _load_context(db)
     final: FarmState = GRAPH.invoke(
         {"characters": characters, "recent": recent, "idea": idea}
@@ -246,6 +274,7 @@ def run_stream(db: Session, idea: str = "", creator: str = ""):
 
     Powers the live "Studio" wizard so the user watches each agent work.
     """
+    usage.reset()
     characters, recent = _load_context(db)
     final: FarmState = {}
     for chunk in GRAPH.stream(

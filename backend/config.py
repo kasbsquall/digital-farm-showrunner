@@ -58,6 +58,11 @@ class Settings(BaseSettings):
     # Force mock mode even if a key is present (handy for tests/demo).
     force_mock: bool = False
 
+    # Token budget & cost: the pipeline meters tokens and estimates cost per
+    # episode; token_budget (0 = unlimited) also gates whether another retake fits.
+    token_cost_per_1k: float = 0.002
+    token_budget: int = 0
+
     @property
     def use_mock(self) -> bool:
         """Mock when no Qwen key is configured, or when explicitly forced."""

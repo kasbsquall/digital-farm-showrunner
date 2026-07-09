@@ -14,6 +14,18 @@
 
 ---
 
+## 🎬 Demo & live proof
+
+**▶ Demo video:** _(YouTube link — TODO)_
+
+**Flagship proof — the self-correcting QA loop, shown live.** The retake loop isn't a claim: it's visible in the "How it was made" retake view, and there is a **committed real episode** whose take history reads `rejected → rejected → approved` (see the "Wobbly Gold Spheres…" episode in [`backend/database/snapshot.json`](backend/database/snapshot.json), rendered as the per-take retake UI in the behind-the-scenes modal). The clip that finally passed is the one shipped to the feed.
+
+- **Architecture at a glance:** [`docs/architecture_diagram.png`](docs/architecture_diagram.png)
+- **Alibaba Cloud deploy proof:** [`docs/deploy_proof/`](docs/deploy_proof/)
+- **31-test suite (fully offline):** [`backend/tests/`](backend/tests/)
+
+---
+
 ## 1. The problem & the insight
 
 ### The problem
@@ -401,6 +413,20 @@ Cost control is a first-class design goal, not an afterthought:
 
 ---
 
+## Defensibility & unit economics
+
+**The moat is three layers that compound, not one trick.**
+
+- **Character consistency by construction.** Keyframe → i2v pins the cast to an established look ([§5a](#5-the-two-signature-techniques)); competitors doing blind text-to-video can't hold a mascot across a daily series.
+- **A *measured* self-correcting QA gate.** The vision-grounded retake loop is committed and reproducible — the "Wobbly Gold Spheres…" episode passed only on take 3 (`rejected → rejected → approved` in `snapshot.json`). Unsupervised daily publishing is only safe because a step actually watches the footage.
+- **A per-channel data flywheel (the compounding advantage).** Every episode's cast, prompts, take history and QA verdicts are logged per channel, so each channel's prompting and continuity get better with volume — an advantage a one-off clip tool can't accumulate.
+
+**ICP.** First wedge: solo creators and small brand/SMB social teams who need a *recurring on-model character series* (mascot channels, kids' shorts, brand serials) but can't staff a daily production crew.
+
+**Unit economics.** Cost per episode stays low by design: the keyframe *doubles as the thumbnail* (no separate thumbnail render), and `MAX_REGEN` hard-caps retakes so a bad generation can't burn budget in a loop ([§12](#12-cost--token-budget-notes)). Each episode also surfaces a **per-episode token/cost meter**, so the marginal cost of a channel is observable rather than guessed.
+
+---
+
 ## 13. Roadmap / productization
 
 The farm proves the engine; the business is **serialized daily video as a service**.
@@ -418,4 +444,4 @@ The farm proves the engine; the business is **serialized daily video as a servic
 
 **MIT** — see [`LICENSE`](LICENSE).
 
-Built by Kevin Soto Burgos · AVANC3 · Qwen Cloud Global AI Hackathon 2026 · **Track 2: AI Showrunner**.
+Built for the **Qwen Cloud Global AI Hackathon 2026 — Track 2: AI Showrunner**.

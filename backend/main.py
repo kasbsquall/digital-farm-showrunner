@@ -54,6 +54,8 @@ def _episode_dict(e: Episode) -> dict:
         "qa_notes": e.qa_notes,
         "qa_attempts": e.qa_attempts,
         "takes": e.takes or [],
+        "tokens_used": e.tokens_used or 0,
+        "cost_usd": e.cost_usd or 0.0,
         "thumbnail_hint": e.thumbnail_hint,
         "thumbnail_url": e.thumbnail_url,
         "description": e.description,

@@ -35,12 +35,13 @@ Reject if any check clearly fails or is ambiguous; approve when the gag reads.
 
 Return exactly this JSON:
 {{"qa_status": "approved"|"rejected",
+  "qa_score": <0.0-1.0 confidence that the take delivers the gag: 1.0 = perfect, ~0.5 = borderline, 0.0 = broken/off>,
   "qa_notes": "<one concrete sentence: what passed, or exactly what to fix on the retake>"}}"""
 
 
 def _mock(video_url: str) -> str:
     return json.dumps(
-        {"qa_status": "approved",
+        {"qa_status": "approved", "qa_score": 0.9,
          "qa_notes": "Visual coherence and continuity are correct; comedic timing works."},
         ensure_ascii=False,
     )
@@ -58,4 +59,8 @@ def run(video_url: str, script: str, video_prompt: str = "", video_description: 
     status = data.get("qa_status", "rejected")
     if status not in ("approved", "rejected"):
         status = "rejected"
-    return {"qa_status": status, "qa_notes": data.get("qa_notes", "")}
+    try:
+        score = max(0.0, min(1.0, float(data.get("qa_score", 1.0 if status == "approved" else 0.0))))
+    except (TypeError, ValueError):
+        score = 1.0 if status == "approved" else 0.0
+    return {"qa_status": status, "qa_score": score, "qa_notes": data.get("qa_notes", "")}

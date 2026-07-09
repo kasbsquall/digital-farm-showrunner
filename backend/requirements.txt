@@ -9,3 +9,4 @@ httpx==0.28.1
 python-dotenv==1.0.1
 oss2==2.19.1
 psycopg2-binary==2.9.10
+mcp==1.2.0

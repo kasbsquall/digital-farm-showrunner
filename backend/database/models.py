@@ -1,7 +1,7 @@
 """Data models: Character, Episode. Kept minimal for the MVP pipeline."""
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, Integer, String, Text, DateTime, JSON
+from sqlalchemy import Column, Integer, Float, String, Text, DateTime, JSON
 
 from database.db import Base
 
@@ -47,7 +47,11 @@ class Episode(Base):
     qa_attempts = Column(Integer, default=0)
     # Auditable take history: each attempt's clip + what vision saw + the QA verdict,
     # so the self-correcting loop (rejected take → corrected take) is provable.
-    takes = Column(JSON)  # list[dict]: attempt, video_url, thumbnail_url, vision, qa_status, qa_notes
+    takes = Column(JSON)  # list[dict]: attempt, video_url, thumbnail_url, vision, qa_status, qa_notes, qa_score
+
+    # Token/cost receipt — makes "quality under a token budget" measurable.
+    tokens_used = Column(Integer, default=0)
+    cost_usd = Column(Float, default=0.0)
 
     # Agent 4 — Packager
     title = Column(String(200))

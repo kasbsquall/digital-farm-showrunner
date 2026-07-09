@@ -27,9 +27,11 @@ def chat(system: str, user: str, temperature: float = 0.8, mock: str | None = No
     In mock mode returns `mock` (each agent supplies a canned response derived
     from its own inputs, so the pipeline stays deterministic and testable).
     """
+    from services import usage
     if settings.use_mock:
         if mock is None:
             raise RuntimeError("Mock mode active but caller provided no mock response.")
+        usage.add(usage.estimate_tokens(system + user), usage.estimate_tokens(mock))
         return mock
 
     last_err = None
@@ -43,6 +45,9 @@ def chat(system: str, user: str, temperature: float = 0.8, mock: str | None = No
                     {"role": "user", "content": user},
                 ],
             )
+            u = getattr(resp, "usage", None)
+            if u is not None:
+                usage.add(getattr(u, "prompt_tokens", 0), getattr(u, "completion_tokens", 0))
             return resp.choices[0].message.content.strip()
         except Exception as e:  # transient API/network errors → backoff and retry
             last_err = e

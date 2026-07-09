@@ -13,10 +13,12 @@ Graph:
 `run_daily_episode(db)` keeps the same signature the API depends on: it loads
 context from the DB, runs the graph, and persists the resulting Episode.
 """
+import json
 import logging
+import operator
 import os
 import time
-from typing import TypedDict
+from typing import Annotated, TypedDict
 
 from langgraph.graph import StateGraph, START, END
 from sqlalchemy.orm import Session
@@ -48,6 +50,8 @@ class FarmState(TypedDict, total=False):
     # Agent 3
     qa: dict
     attempt: int
+    # Auditable history: one entry per take, accumulated across regen attempts.
+    takes: Annotated[list[dict], operator.add]
     # Agent 4
     pack: dict
     thumbnail_url: str
@@ -112,6 +116,21 @@ def video_node(state: FarmState) -> FarmState:
     return {"video_url": vid_url, "video_description": description, "thumbnail_url": kf_url}
 
 
+def _take_record(state: FarmState, attempt: int, qa: dict) -> dict:
+    """A single, auditable production take (clip + what vision saw + QA verdict)."""
+    d = state.get("direction", {})
+    return {
+        "attempt": attempt,
+        "video_url": state.get("video_url", ""),
+        "thumbnail_url": state.get("thumbnail_url", ""),
+        "keyframe_prompt": d.get("keyframe_prompt", ""),
+        "motion_prompt": d.get("motion_prompt", ""),
+        "video_description": state.get("video_description", ""),
+        "qa_status": qa.get("qa_status", ""),
+        "qa_notes": qa.get("qa_notes", ""),
+    }
+
+
 def qa_node(state: FarmState) -> FarmState:
     attempt = state.get("attempt", 0) + 1
     # No real video (placeholder mode) → nothing to review: auto-approve.
@@ -121,12 +140,13 @@ def qa_node(state: FarmState) -> FarmState:
             if settings.demo_video_url
             else "Video in demo mode (placeholder)."
         )
-        return {"qa": {"qa_status": "approved", "qa_notes": note}, "attempt": attempt}
-    qa = qa_reviewer.run(
-        state["video_url"], state["story"]["script"],
-        state["direction"].get("motion_prompt", ""), state.get("video_description", ""),
-    )
-    return {"qa": qa, "attempt": attempt}
+        qa = {"qa_status": "approved", "qa_notes": note}
+    else:
+        qa = qa_reviewer.run(
+            state["video_url"], state["story"]["script"],
+            state["direction"].get("motion_prompt", ""), state.get("video_description", ""),
+        )
+    return {"qa": qa, "attempt": attempt, "takes": [_take_record(state, attempt, qa)]}
 
 
 def packager_node(state: FarmState) -> FarmState:
@@ -199,6 +219,7 @@ def _episode_from_state(final: FarmState) -> Episode:
         qa_status=qa["qa_status"],
         qa_notes=qa["qa_notes"],
         qa_attempts=final["attempt"],
+        takes=final.get("takes", []),
         title=pack["title"],
         thumbnail_hint=pack["thumbnail_hint"],
         thumbnail_url=final.get("thumbnail_url", ""),

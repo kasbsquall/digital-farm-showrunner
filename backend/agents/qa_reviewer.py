@@ -9,24 +9,32 @@ from services.qwen_client import chat
 from agents._json import parse_json
 
 SYSTEM = (
-    "You are a video QA reviewer. You decide whether an episode is valid to publish, or "
-    "must be regenerated due to visual incoherence, continuity errors or technical issues. "
-    "You are strict but not a perfectionist. You ALWAYS answer in valid JSON, in English."
+    "You are the quality-control reviewer of an autonomous video showrunner. You gate "
+    "whether a generated take is fit to publish or must be regenerated. You judge ONLY "
+    "from the vision analysis of what the clip ACTUALLY shows, against the script's intent. "
+    "You are fair but rigorous: a take must clearly deliver the gag to pass. You ALWAYS "
+    "answer in valid JSON, in English."
 )
 
-USER_TMPL = """Original script:
+USER_TMPL = """Original script (the intended gag):
 {script}
 
-Motion prompt used:
+Intended 5-second action:
 {video_prompt}
 
-WHAT THE VIDEO ACTUALLY SHOWS (vision analysis):
+WHAT THE VIDEO ACTUALLY SHOWS (Qwen vision analysis of the real clip):
 {video_description}
 
-Does the video reasonably reflect the script's intent (main characters and action
-present)? Don't demand perfection; reject only on serious incoherence or a broken/empty
-video. Return exactly this JSON:
-{{"qa_status": "approved"|"rejected", "qa_notes": "<brief reason>"}}"""
+Judge the take against this rubric — ALL must hold to APPROVE:
+1. Characters: the main character(s) from the script are clearly present.
+2. Action: the core action / cause→effect of the gag is clearly happening (not a static
+   or unrelated scene).
+3. Integrity: the clip is not broken, empty, blurred-beyond-recognition, or off-topic.
+Reject if any check clearly fails or is ambiguous; approve when the gag reads.
+
+Return exactly this JSON:
+{{"qa_status": "approved"|"rejected",
+  "qa_notes": "<one concrete sentence: what passed, or exactly what to fix on the retake>"}}"""
 
 
 def _mock(video_url: str) -> str:

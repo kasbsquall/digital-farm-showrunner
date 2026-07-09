@@ -53,6 +53,7 @@ def _episode_dict(e: Episode) -> dict:
         "qa_status": e.qa_status,
         "qa_notes": e.qa_notes,
         "qa_attempts": e.qa_attempts,
+        "takes": e.takes or [],
         "thumbnail_hint": e.thumbnail_hint,
         "thumbnail_url": e.thumbnail_url,
         "description": e.description,

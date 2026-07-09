@@ -45,11 +45,14 @@ class Episode(Base):
     qa_status = Column(String(16), default="pending")  # approved | rejected | pending
     qa_notes = Column(Text)
     qa_attempts = Column(Integer, default=0)
+    # Auditable take history: each attempt's clip + what vision saw + the QA verdict,
+    # so the self-correcting loop (rejected take → corrected take) is provable.
+    takes = Column(JSON)  # list[dict]: attempt, video_url, thumbnail_url, vision, qa_status, qa_notes
 
     # Agent 4 — Packager
     title = Column(String(200))
     thumbnail_hint = Column(Text)
-    thumbnail_url = Column(Text)  # thumbnail generado por IA (en OSS)
+    thumbnail_url = Column(Text)  # AI-generated thumbnail (on OSS)
     description = Column(Text)
 
     status = Column(String(16), default="draft")  # draft | published

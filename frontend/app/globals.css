@@ -76,6 +76,21 @@ img { max-width: 100%; }
 .section-head h2 { font-family: var(--font-display); font-size: clamp(1.7rem, 1rem + 2.2vw, 2.6rem); margin: 0.25rem 0 0; font-weight: 800; letter-spacing: -0.01em; }
 .section-head .count { font-size: 0.8rem; color: var(--muted); margin-top: 0.35rem; }
 
+/* How it works */
+.how { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+@media (min-width: 780px) { .how { grid-template-columns: repeat(3, 1fr); } }
+.how-step { position: relative; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); backdrop-filter: blur(7px); padding: 1.3rem 1.3rem 1.4rem; }
+.how-step .how-n { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--amber-soft), var(--amber)); color: #1a1206; font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; border: 2px solid #1a1206; margin-bottom: 0.7rem; }
+.how-step b { font-family: var(--font-display); font-size: 1.25rem; }
+.how-step p { color: var(--muted); font-size: 0.9rem; margin: 0.35rem 0 0; line-height: 1.5; }
+
+/* Impact strip */
+.impact { border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(135deg, rgba(244,165,33,.12), rgba(239,91,60,.08)); backdrop-filter: blur(7px); padding: clamp(1.6rem, 4vw, 2.6rem); text-align: center; }
+.impact h2 { font-family: var(--font-display); font-size: clamp(1.5rem, 1rem+2vw, 2.2rem); margin: 0 0 0.6rem; }
+.impact p { color: var(--text); opacity: 0.9; max-width: 62ch; margin: 0 auto; font-size: 1.02rem; line-height: 1.6; }
+.impact .who { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-top: 1.1rem; }
+.impact .who span { border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.3rem 0.85rem; font-size: 0.82rem; font-weight: 700; color: var(--amber-soft); }
+
 /* Textured section panels — one big claymation surface per section, framed. */
 .sec-tex { border: 3px solid #1c1005; border-radius: 24px; padding: clamp(1.2rem, 3vw, 2rem); background-size: cover; background-position: center; box-shadow: 0 22px 55px -26px #000, inset 0 0 0 2px rgba(120,72,30,.4); }
 .sec-crate { background-image: linear-gradient(rgba(20,13,7,.52), rgba(15,10,5,.7)), url(/tex/crate.png); }
@@ -267,5 +282,8 @@ footer { margin-top: 4rem; }
 .foot-stack .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .foot-chip { border: 1px solid var(--line); border-radius: 999px; padding: 0.28rem 0.7rem; color: var(--muted); font-weight: 600; font-size: 0.78rem; }
 .foot-legal { text-align: center; color: var(--faint); font-size: 0.78rem; margin-top: 1.2rem; padding-bottom: 2.5rem; }
+
+.toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 60; background: linear-gradient(135deg, var(--amber-soft), var(--amber)); color: #1a1206; font-weight: 800; padding: 0.7rem 1.2rem; border-radius: 999px; border: 2px solid #1a1206; box-shadow: 0 8px 24px -8px #000; animation: toastin .25s var(--ease); }
+@keyframes toastin { from { opacity: 0; transform: translate(-50%, 12px); } }
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

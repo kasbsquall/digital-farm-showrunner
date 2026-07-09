@@ -46,17 +46,38 @@ export default function Home() {
 
       <header className="hero">
         <div className="inner">
-          <span className="eyebrow">Qwen Cloud · AI Showrunner</span>
+          <span className="eyebrow">The autonomous AI content studio</span>
           <h1>
-            A claymation farm drama,<br />
-            <span className="em">every single day</span>.
+            Your own claymation show,<br />
+            <span className="em">a new episode every day</span>.
           </h1>
           <p>
-            Four AI agents invent the story, paint the scene, film it, check what really
-            happened on screen, and publish the episode. No human writers on set.
+            Four AI agents write, film, quality-check and publish a brand-new claymation
+            episode — with zero production team. Bring your own character and run your own
+            daily show.
           </p>
         </div>
       </header>
+
+      <section className="section">
+        <div className="how">
+          <div className="how-step">
+            <span className="how-n">1</span>
+            <b>Cast &amp; pitch</b>
+            <p>Pick a character (or create your own) and toss in a one-line gag. Or just roll the dice.</p>
+          </div>
+          <div className="how-step">
+            <span className="how-n">2</span>
+            <b>4 agents produce it</b>
+            <p>Writer → director → keyframe → image-to-video → a vision QA that watches the real clip and retakes if it misses.</p>
+          </div>
+          <div className="how-step">
+            <span className="how-n">3</span>
+            <b>A finished episode</b>
+            <p>Title, thumbnail and a publish-ready video — consistent characters, every single day.</p>
+          </div>
+        </div>
+      </section>
 
       <section className="section">
         <div className="section-head">
@@ -87,11 +108,29 @@ export default function Home() {
       <section className="section">
         <div className="section-head">
           <div>
-            <span className="eyebrow">Cast</span>
+            <span className="eyebrow">Cast · bring your own</span>
             <h2>Meet the barnyard</h2>
           </div>
         </div>
         <CastGrid characters={characters} episodes={episodes} onCreated={refresh} />
+      </section>
+
+      <section className="section">
+        <div className="impact">
+          <h2>Daily video shouldn't need a studio</h2>
+          <p>
+            Consistent short-form video every day is the price of staying relevant online —
+            and it's slow, expensive, and needs a team. MUCKFLIX turns one idea into a
+            finished, on-brand, character-consistent episode for pennies, and lets your
+            audience co-create the next one. The farm is our demo; the engine is the product.
+          </p>
+          <div className="who">
+            <span>Creators</span>
+            <span>Brand mascots</span>
+            <span>Educators</span>
+            <span>Kids' channels</span>
+          </div>
+        </div>
       </section>
 
       <footer>

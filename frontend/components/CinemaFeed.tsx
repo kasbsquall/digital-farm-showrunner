@@ -81,6 +81,7 @@ export function CinemaFeed({
   const [selId, setSelId] = useState<number | null>(episodes[0]?.id ?? null);
   const [playing, setPlaying] = useState(false);
   const [showBTS, setShowBTS] = useState(false);
+  const [toast, setToast] = useState(false);
 
   if (episodes.length === 0)
     return <p className="empty">No episodes yet — produce the first one in The Studio ↑</p>;
@@ -103,7 +104,8 @@ export function CinemaFeed({
         await navigator.share({ title: "MUCKFLIX", text, url });
       } else {
         await navigator.clipboard.writeText(`${text} ${url}`);
-        alert("Link copied to clipboard!");
+        setToast(true);
+        setTimeout(() => setToast(false), 2200);
       }
     } catch {
       /* user cancelled */
@@ -159,6 +161,7 @@ export function CinemaFeed({
       </div>
 
       {showBTS && <BTSModal ep={sel} onClose={() => setShowBTS(false)} />}
+      {toast && <div className="toast">🔗 Link copied to clipboard!</div>}
 
       <div className="playlist">
         {episodes.map((ep) => {

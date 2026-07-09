@@ -22,7 +22,8 @@
 
 - **Architecture at a glance:** [`docs/architecture_diagram.png`](docs/architecture_diagram.png)
 - **Alibaba Cloud deploy proof:** [`docs/deploy_proof/`](docs/deploy_proof/)
-- **31-test suite (fully offline):** [`backend/tests/`](backend/tests/)
+- **Test suite (fully offline):** [`backend/tests/`](backend/tests/)
+- **QA-gate evaluation (100% on a labeled set):** [`docs/EVALUATION.md`](docs/EVALUATION.md)
 
 ---
 

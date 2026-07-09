@@ -67,10 +67,9 @@ function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
             <div className="bts-step" key={i}>
               <div className="bts-avatar">
                 {s.img ? <img src={s.img} alt="" /> : <span>🎬</span>}
-                <span className="bts-n">{i + 1}</span>
               </div>
               <div className="bts-content">
-                <div className="bts-name">{s.who} <span className="bts-model">{s.model}</span></div>
+                <div className="bts-name"><span className="bts-num">{i + 1}</span>{s.who} <span className="bts-model">{s.model}</span></div>
                 <div className="bts-out">{s.body}</div>
               </div>
             </div>

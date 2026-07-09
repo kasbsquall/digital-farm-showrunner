@@ -162,7 +162,7 @@ def create_character(req: CreateCharacter, db: Session = Depends(get_db)):
     visual_desc = f"{look}. claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions."
 
     image_url = None
-    if not settings.use_mock:
+    if not settings.use_mock or settings.create_real_portraits:
         try:
             temp = image_gen_client.generate_image(f"{look}. {STYLE}")
             image_url = oss_client.persist_image(temp, prefix="characters") if oss_client.is_configured() else temp

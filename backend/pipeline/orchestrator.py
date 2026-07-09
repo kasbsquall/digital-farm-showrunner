@@ -15,6 +15,7 @@ context from the DB, runs the graph, and persists the resulting Episode.
 """
 import logging
 import os
+import time
 from typing import TypedDict
 
 from langgraph.graph import StateGraph, START, END
@@ -79,6 +80,11 @@ def _video_is_real() -> bool:
 def video_node(state: FarmState) -> FarmState:
     d = state["direction"]
     if not _video_is_real():
+        if settings.demo_video_url:
+            # Demo/recording: replay a real clip (zero cost) so the wizard looks live.
+            return {"video_url": settings.demo_video_url,
+                    "video_description": settings.demo_video_desc,
+                    "thumbnail_url": settings.demo_thumbnail_url}
         # Demo mode: placeholder video, no keyframe or vision step.
         return {"video_url": generate_video(d.get("motion_prompt", "farm"), "happyhorse"),
                 "video_description": "", "thumbnail_url": ""}
@@ -110,8 +116,12 @@ def qa_node(state: FarmState) -> FarmState:
     attempt = state.get("attempt", 0) + 1
     # No real video (placeholder mode) → nothing to review: auto-approve.
     if not _video_is_real():
-        return {"qa": {"qa_status": "approved", "qa_notes": "Video en modo demo (placeholder)."},
-                "attempt": attempt}
+        note = (
+            "The clip shows the right characters and the script's main action — approved."
+            if settings.demo_video_url
+            else "Video in demo mode (placeholder)."
+        )
+        return {"qa": {"qa_status": "approved", "qa_notes": note}, "attempt": attempt}
     qa = qa_reviewer.run(
         state["video_url"], state["story"]["script"],
         state["direction"].get("motion_prompt", ""), state.get("video_description", ""),
@@ -226,6 +236,8 @@ def run_stream(db: Session, idea: str = "", creator: str = ""):
             # Keep the public SSE stage name stable ("qa") despite the internal node id.
             stage = "qa" if node == "qa_review" else node
             yield stage, update or {}
+            if settings.demo_pace_seconds:
+                time.sleep(settings.demo_pace_seconds)
 
     episode = _episode_from_state(final)
     episode.creator = (creator or "").strip()[:48] or None

@@ -35,6 +35,17 @@ class Settings(BaseSettings):
     # submit/poll is enabled).
     mock_video: bool = True
 
+    # Demo/recording mode (all optional, off by default): in mock, replay a real
+    # clip so the pipeline can be recorded end-to-end at zero cost, and pace the
+    # SSE so each stage is visible on screen.
+    demo_video_url: str = ""
+    demo_thumbnail_url: str = ""
+    demo_video_desc: str = ""
+    demo_pace_seconds: float = 0.0
+    # Generate a real portrait for user-created characters even in mock mode
+    # (cheap image call — lets the "bring your own character" flow look real).
+    create_real_portraits: bool = False
+
     # Alibaba Cloud OSS (video storage).
     oss_access_key_id: str = ""
     oss_access_key_secret: str = ""

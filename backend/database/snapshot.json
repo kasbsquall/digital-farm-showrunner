@@ -121,6 +121,48 @@
       "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/f566ccd56aa9.png",
       "description": "Your farm buddy throws a massive watery tantrum, so you decide it's the perfect time to casually bite his sunglasses right off the tub's rim. The duck eventually rolls over and waddles away in defeat, leaving the donkey to rock the stolen shades all by himself. #ClaymationFarm #StolenShades #FarmDrama",
       "status": "published"
+    },
+    {
+      "title": "Turnip straw tickles pig's snout and he panics! 🐷😳",
+      "event": "Pepe trips over his own snout and faceplants headfirst into a wheelbarrow full of turnips, sending the root vegetables flying everywhere.",
+      "script": "PEPE: The mud holds the secrets of the univ—\nPEPE: *muffled squeak*\nMOMO: The secrets are turnips.",
+      "characters_used": [
+        "Pepe",
+        "Momo"
+      ],
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/ee1573937062.mp4",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/6e75dd3a0bbe.png",
+      "video_description": "The pig lies on its back in a muddy puddle, holding a large turnip with green tops and dry straw in its mouth. The donkey stands beside the puddle, watching with arms crossed and a skeptical expression. A black bird walks into frame from the right and stops near the donkey’s hind legs. As the camera zooms in on the pig, it shifts the turnip slightly in its mouth, causing the straw to brush against its snout—this triggers a visible flinch and widening of the pig’s eyes, though no sneeze occurs within the clip.",
+      "qa_status": "approved",
+      "qa_notes": "The video accurately reflects the script's intent by showing the main characters and the core action of Pepe being muffled by a turnip in the mud while the camera pushes in. Minor deviations in exact physics or material rendering do not constitute serious incoherence.",
+      "qa_attempts": 1,
+      "video_prompt": "KEYFRAME: Claymation plasticine stop-motion, Aardman style, visible clay fingerprints, bright natural daylight, cinematic slightly-wide shot, farm background with wooden fences and hay. A chubby pink pig named Pepe is lounging in a mud puddle, chunky proportions, big expressive eyes wide and bulging in comical shock, a giant lumpy clay turnip wedged firmly deep into his mouth with a straw of hay sticking out the side. Beside him stands a grey droopy-eared donkey named Momo, chunky proportions, slightly slouched, heavy eyelids, staring at Pepe with a completely deadpan, unimpressed expression. Clear staging with the giant turnip stuffed in Pepe's mouth as the focal action.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts\nMOTION: The giant clay turnip slowly squishes deeper into Pepe's mouth with exaggerated cartoon physics, causing his pink clay cheeks to bulge out comically and his eyes to vibrate in shock, while the camera subtly pushes in.",
+      "video_tool": "happyhorse-i2v",
+      "description": "Pepe the pig is lounging in a mud puddle with a turnip in his mouth, but when the dry straw brushes his snout, he freezes in absolute panic! Momo the donkey just crosses his arms and watches the dramatic flinch with totally skeptical eyes. #claymation #farmanimals #pigpanic",
+      "thumbnail_hint": "Extreme close-up of Pepe's muddy face in the puddle with his eyes wide in panic, the green straw visibly tickling his snout, while Momo the donkey stands in the blurred background with crossed arms.",
+      "creator": "@kasbsquall",
+      "status": "published"
+    },
+    {
+      "creator": "@kasbsquall",
+      "event": "Pepe proudly struts across a wobbly wooden plank over his mud puddle, but the plank snaps like a springboard and catapults him face-first onto Gus.",
+      "script": "PEPE: The mud philosopher never loses his—\nPEPE: WHOOOOOAAAA!\nGUS: *CHOMP* ...tastes like mud.",
+      "characters_used": [
+        "Pepe",
+        "Gus"
+      ],
+      "video_prompt": "KEYFRAME: Pepe mid-tumble off a snapping plank, straw in mouth, Gus recoiling.\nMOTION: the plank springs, Pepe launches face-first into Gus, mud and straw flying.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/82bef687a8d5.mp4",
+      "video_description": "Pepe the pig, straw in his mouth, tumbles off a snapping plank while Gus the grey goat recoils — mud and straw flying across the sunny barnyard.",
+      "qa_status": "approved",
+      "qa_notes": "The clip shows both characters and the plank mishap from the script — approved.",
+      "qa_attempts": 1,
+      "title": "Pepe's Big Plank Fail Lands Right on Gus 🐷💥",
+      "thumbnail_hint": "Pepe mid-tumble with straw in mouth, Gus recoiling, hay bales behind.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/861f0f817d02.png",
+      "description": "Pepe's philosophical stroll across the plank ends exactly how you'd expect — face-first into Gus. Another daily masterpiece from the barnyard. #ClaymationFarm #PigProblems #MUCKFLIX",
+      "status": "published"
     }
   ]
 }

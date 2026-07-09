@@ -55,6 +55,24 @@ the **highest-scoring take** is published rather than the last one. Retakes are 
 **surgical**: a rejected take re-animates the *existing* character-consistent keyframe with
 the corrected motion, so a retake costs one video call, not a full re-render.
 
+## The loop firing on live infrastructure
+
+The accuracy eval above isolates the QA *judgment*. Separately, the full loop has been run
+**end-to-end on real Alibaba Cloud generation** (real keyframes, i2v clips, Qwen3-VL vision,
+blended cost), exercising both outcomes:
+
+- **A real 3-attempt regeneration loop.** A deliberately hard gag — "the mud oozes off
+  Pepe's squished-flat pancake body", a deformation i2v can't render — was rejected on all
+  three takes; on each rejection the Director received the vision-grounded `qa_notes` and
+  regenerated (attempt 2's note asked to recast the sheep as the goat and change the action).
+  Identity-lock held Pepe on-model across all three takes (consistency **0.8**), the blended
+  meter totaled **$0.84** over 3 real video generations, and because QA was never satisfied
+  the loop published the **best take as a draft** — the fail-safe that stops unverified
+  footage going live. Regeneration + feedback + budget + safe-fallback, all on real infra.
+- **A real approved episode.** A 3-shot multi-shot episode was **approved on the first take**
+  (consistency **0.9**, blended cost **$0.86**) and is committed to `snapshot.json`
+  (published) — the convergence outcome, on real infra.
+
 ## Identity-lock — a second measured gate
 
 Character consistency is also measured, not just asserted. With `IDENTITY_CHECK` enabled,
@@ -64,19 +82,22 @@ stored per take as `consistency`. Because the `qwen-image` endpoint accepts no r
 image, identity consistency is enforced by *scoring* the result (vision), not by
 conditioning the image generator.
 
-On real Alibaba Cloud generation it calibrated correctly at the two extremes:
+On real Alibaba Cloud generation it calibrated correctly. Two distinct comparisons (they are not the same number — don't conflate them):
 
-| Comparison | Score |
-|---|---|
-| Pepe keyframe vs. Pepe portrait (match) | **0.9** |
-| Pepe keyframe vs. a different character's portrait (mismatch) | **0.0** |
+| Comparison | Score | What it shows |
+|---|---|---|
+| Pepe keyframe vs. Pepe portrait (match) | **0.9** | the production gate: on-model |
+| Pepe keyframe vs. a *different* character's portrait (mismatch) | **0.0** | the gate cleanly rejects off-model |
+| Pepe keyframe vs. Pepe keyframe, **two different episodes** | **1.00** | cross-episode consistency (shown in the demo) |
 
 ## Honest caveats
 
 - 14 labeled cases is a smoke-scale eval, not a benchmark; the descriptions are curated to
   probe clear pass/fail and two borderlines.
-- Vision descriptions here are hand-written to isolate the *QA judgment*; end-to-end the
-  descriptions come from Qwen3-VL on the real clip (see the committed 3-take
-  `rejected → rejected → approved` episode in `snapshot.json` for a real end-to-end example).
+- Vision descriptions in *this fixture* are hand-written to isolate the *QA judgment*.
+  End-to-end, the descriptions come from Qwen3-VL on the real clip — see "The loop firing on
+  live infrastructure" above for real runs (a real 3-attempt regeneration loop and a real
+  approved episode). The `rejected → rejected → approved` episode seeded in `snapshot.json`
+  is a *mock-mode* illustration of the take-history shape, not a real-infra run.
 - Next step: scale the fixture to ~50 cases with real Qwen3-VL descriptions and report a
   precision/recall curve across the QA confidence threshold.

@@ -60,3 +60,4 @@ class Episode(Base):
     description = Column(Text)
 
     status = Column(String(16), default="draft")  # draft | published
+    votes = Column(Integer, default=0)  # audience signal → feeds tomorrow's Scriptwriter (data flywheel)

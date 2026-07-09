@@ -35,6 +35,7 @@ USER_TMPL = """Farm cast available (use 2, maybe 3):
 
 Recent episodes (don't repeat these, light continuity is welcome):
 {recent}
+{favorites}
 {idea}
 {examples}
 Write TODAY'S episode as ONE instant physical gag that can be shown in ~5 seconds, with a
@@ -73,13 +74,19 @@ def _mock(characters: list[dict], recent_events: list[str]) -> str:
     return json.dumps(ideas[len(recent_events) % len(ideas)], ensure_ascii=False)
 
 
-def run(characters: list[dict], recent_events: list[str], idea: str = "") -> dict:
+def run(characters: list[dict], recent_events: list[str], idea: str = "",
+        favorites: list[str] | None = None) -> dict:
     cast = "\n".join(f"- {c['name']} ({c['species']}): {c['personality']}" for c in characters)
     recent = "\n".join(f"- {e}" for e in recent_events) or "- (none yet)"
+    fav_block = ""
+    if favorites:
+        fav = "\n".join(f"- {e}" for e in favorites)
+        fav_block = ("\nAUDIENCE FAVORITES (past episodes the viewers up-voted the most — lean into "
+                     f"the characters, energy and comedic style that clearly WORKED):\n{fav}\n")
     idea_block = f"\nUSER-SUGGESTED idea (respect it as the base): {idea}\n" if idea.strip() else ""
     text = chat(
         SYSTEM,
-        USER_TMPL.format(cast=cast, recent=recent, idea=idea_block, examples=EXAMPLES),
+        USER_TMPL.format(cast=cast, recent=recent, favorites=fav_block, idea=idea_block, examples=EXAMPLES),
         temperature=0.9,
         mock=_mock(characters, recent_events),
     )

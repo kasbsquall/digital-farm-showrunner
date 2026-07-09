@@ -39,6 +39,7 @@ class FarmState(TypedDict, total=False):
     # Inputs
     characters: list[dict]
     recent: list[str]
+    favorites: list[str]  # audience-favorite past events (data flywheel)
     idea: str
     # Agent 1
     story: dict
@@ -60,7 +61,8 @@ class FarmState(TypedDict, total=False):
 # --- Nodes -----------------------------------------------------------------
 
 def scriptwriter_node(state: FarmState) -> FarmState:
-    story = scriptwriter.run(state["characters"], state["recent"], state.get("idea", ""))
+    story = scriptwriter.run(state["characters"], state["recent"], state.get("idea", ""),
+                             favorites=state.get("favorites", []))
     # Case-insensitive name match so a stray space/casing doesn't silently drop the
     # chosen cast (which would defeat character consistency).
     wanted = {n.strip().lower() for n in story.get("characters_used", [])}
@@ -201,7 +203,7 @@ GRAPH = _build_graph()
 
 # --- Public entry ----------------------------------------------------------
 
-def _load_context(db: Session) -> tuple[list[dict], list[str]]:
+def _load_context(db: Session) -> tuple[list[dict], list[str], list[str]]:
     characters = [
         {
             "name": c.name,
@@ -216,7 +218,14 @@ def _load_context(db: Session) -> tuple[list[dict], list[str]]:
         for e in db.query(Episode).order_by(Episode.created_at.desc()).limit(RECENT_LIMIT)
         if e.event
     ]
-    return characters, recent
+    # Data flywheel: the episodes the audience upvoted most bias tomorrow's writing.
+    favorites = [
+        e.event
+        for e in db.query(Episode).filter(Episode.votes > 0)
+        .order_by(Episode.votes.desc()).limit(3)
+        if e.event
+    ]
+    return characters, recent, favorites
 
 
 def _episode_from_state(final: FarmState) -> Episode:
@@ -257,9 +266,9 @@ def _episode_from_state(final: FarmState) -> Episode:
 
 def run_daily_episode(db: Session, idea: str = "", creator: str = "") -> Episode:
     usage.reset()
-    characters, recent = _load_context(db)
+    characters, recent, favorites = _load_context(db)
     final: FarmState = GRAPH.invoke(
-        {"characters": characters, "recent": recent, "idea": idea}
+        {"characters": characters, "recent": recent, "favorites": favorites, "idea": idea}
     )
     episode = _episode_from_state(final)
     episode.creator = (creator or "").strip()[:48] or None
@@ -275,10 +284,11 @@ def run_stream(db: Session, idea: str = "", creator: str = ""):
     Powers the live "Studio" wizard so the user watches each agent work.
     """
     usage.reset()
-    characters, recent = _load_context(db)
+    characters, recent, favorites = _load_context(db)
     final: FarmState = {}
     for chunk in GRAPH.stream(
-        {"characters": characters, "recent": recent, "idea": idea}, stream_mode="updates"
+        {"characters": characters, "recent": recent, "favorites": favorites, "idea": idea},
+        stream_mode="updates",
     ):
         for node, update in chunk.items():
             if update:

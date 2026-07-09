@@ -210,6 +210,9 @@ img { max-width: 100%; }
 .byline b { color: var(--amber-soft); }
 .share-btn { font: inherit; font-weight: 700; font-size: 0.82rem; cursor: pointer; color: #3a2410; background: linear-gradient(135deg, var(--amber-soft), var(--amber)); border: none; border-radius: 999px; padding: 0.45rem 1rem; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 3px 10px -3px rgba(0,0,0,.6); transition: transform .12s var(--ease); }
 .share-btn:hover { transform: translateY(-1px); }
+.vote-btn { font: inherit; font-weight: 700; font-size: 0.82rem; cursor: pointer; color: var(--text); background: rgba(0,0,0,.28); border: 1.5px solid var(--line-strong); border-radius: 999px; padding: 0.4rem 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; transition: border-color .15s, color .15s, transform .12s var(--ease); }
+.vote-btn:hover:not(:disabled) { border-color: var(--barn); color: var(--barn); transform: translateY(-1px); }
+.vote-btn.on { border-color: var(--barn); color: var(--barn); background: rgba(200,72,50,.14); cursor: default; }
 /* Button = the cut-out claymation wooden plank (transparent bg) with carved label. */
 .btn { position: relative; width: 100%; margin-top: 1.2rem; min-height: 92px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: 0.02em; cursor: pointer; border: none; background: url(/set/plank_btn.png) center/100% 100% no-repeat; color: #3a2410; text-shadow: 0 1px 0 rgba(255,240,210,.6); filter: drop-shadow(0 8px 10px rgba(0,0,0,.5)); transition: transform .12s var(--ease), filter .12s; }
 .btn > span { position: relative; z-index: 1; }

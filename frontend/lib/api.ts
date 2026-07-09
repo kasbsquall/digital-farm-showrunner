@@ -35,6 +35,7 @@ export type Episode = {
   qa_attempts: number | null;
   tokens_used: number | null;
   cost_usd: number | null;
+  votes: number | null;
   thumbnail_hint: string | null;
   thumbnail_url: string | null;
   description: string | null;
@@ -83,6 +84,13 @@ export function ossThumb(url: string | null | undefined, w: number): string | un
   if (!url) return undefined;
   if (!url.includes("aliyuncs.com")) return url;
   return `${url}?x-oss-process=image/resize,w_${w}/quality,q_80/format,webp`;
+}
+
+export async function voteEpisode(id: number): Promise<number> {
+  const res = await fetch(`${API}/episodes/${id}/vote`, { method: "POST" });
+  if (!res.ok) throw new Error("Vote failed");
+  const data = await res.json();
+  return data.votes as number;
 }
 
 export function streamEpisode(idea: string, creator: string) {

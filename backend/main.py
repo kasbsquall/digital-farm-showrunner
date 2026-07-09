@@ -56,6 +56,7 @@ def _episode_dict(e: Episode) -> dict:
         "takes": e.takes or [],
         "tokens_used": e.tokens_used or 0,
         "cost_usd": e.cost_usd or 0.0,
+        "votes": e.votes or 0,
         "thumbnail_hint": e.thumbnail_hint,
         "thumbnail_url": e.thumbnail_url,
         "description": e.description,
@@ -143,6 +144,17 @@ def list_characters(db: Session = Depends(get_db)):
 def list_episodes(db: Session = Depends(get_db)):
     rows = db.query(Episode).order_by(Episode.created_at.desc()).all()
     return [_episode_dict(e) for e in rows]
+
+
+@app.post("/episodes/{episode_id}/vote")
+def vote_episode(episode_id: int, db: Session = Depends(get_db)):
+    """Audience upvote — the data flywheel: top-voted events bias tomorrow's Scriptwriter."""
+    ep = db.get(Episode, episode_id)
+    if ep is None:
+        raise HTTPException(status_code=404, detail="Episode not found.")
+    ep.votes = (ep.votes or 0) + 1
+    db.commit()
+    return {"id": ep.id, "votes": ep.votes}
 
 
 class CreateCharacter(BaseModel):

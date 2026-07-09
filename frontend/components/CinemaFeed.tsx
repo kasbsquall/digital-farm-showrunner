@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type KeyboardEvent } from "react";
-import { type Episode, ossThumb } from "@/lib/api";
+import { type Episode, ossThumb, voteEpisode } from "@/lib/api";
 
 function activateOnKey(fn: () => void) {
   return (e: KeyboardEvent) => {
@@ -125,6 +125,7 @@ export function CinemaFeed({
   const [playing, setPlaying] = useState(false);
   const [showBTS, setShowBTS] = useState(false);
   const [toast, setToast] = useState(false);
+  const [voted, setVoted] = useState<Record<number, number>>({});
 
   if (episodes.length === 0)
     return <p className="empty">No episodes yet — produce the first one in The Studio ↑</p>;
@@ -192,6 +193,21 @@ export function CinemaFeed({
           <h3>{selTitle}</h3>
           <div className="byline">
             {sel.creator ? <span>Idea by <b>{sel.creator}</b></span> : <span>Auto-generated</span>}
+            <button
+              className={`vote-btn ${voted[sel.id] != null ? "on" : ""}`}
+              title="Upvote — favorites steer tomorrow's episode"
+              disabled={voted[sel.id] != null}
+              onClick={async () => {
+                try {
+                  const n = await voteEpisode(sel.id);
+                  setVoted((v) => ({ ...v, [sel.id]: n }));
+                } catch {
+                  /* ignore */
+                }
+              }}
+            >
+              ♥ {voted[sel.id] ?? sel.votes ?? 0}
+            </button>
             <button className="share-btn" onClick={share}>↗ Share</button>
           </div>
           {sel.description && <p>{sel.description}</p>}

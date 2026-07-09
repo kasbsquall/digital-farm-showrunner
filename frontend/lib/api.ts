@@ -33,6 +33,24 @@ export async function getCharacters(): Promise<Character[]> {
   return res.json();
 }
 
+export async function createCharacter(payload: {
+  name: string;
+  species: string;
+  personality: string;
+  look: string;
+}): Promise<Character> {
+  const res = await fetch(`${API}/characters`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? "Could not create character");
+  }
+  return res.json();
+}
+
 export async function getEpisodes(): Promise<Episode[]> {
   const res = await fetch(`${API}/episodes`, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el feed");

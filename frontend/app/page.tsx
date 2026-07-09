@@ -91,7 +91,7 @@ export default function Home() {
             <h2>Meet the barnyard</h2>
           </div>
         </div>
-        <CastGrid characters={characters} episodes={episodes} />
+        <CastGrid characters={characters} episodes={episodes} onCreated={refresh} />
       </section>
 
       <footer>

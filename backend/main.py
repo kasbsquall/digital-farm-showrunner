@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 
 import json
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -15,7 +15,9 @@ from sqlalchemy.orm import Session
 
 from database.db import Base, engine, get_db, SessionLocal
 from database.models import Character, Episode
+from database.generate_portraits import STYLE
 from pipeline.orchestrator import run_daily_episode, run_stream
+from services import image_gen_client, oss_client
 from config import settings
 
 
@@ -116,3 +118,43 @@ def list_characters(db: Session = Depends(get_db)):
 def list_episodes(db: Session = Depends(get_db)):
     rows = db.query(Episode).order_by(Episode.created_at.desc()).all()
     return [_episode_dict(e) for e in rows]
+
+
+class CreateCharacter(BaseModel):
+    name: str
+    species: str = "creature"
+    personality: str
+    look: str = ""
+
+
+@app.post("/characters")
+def create_character(req: CreateCharacter, db: Session = Depends(get_db)):
+    """Let anyone add their own claymation character to the cast (with an AI portrait)."""
+    name = req.name.strip()[:32]
+    if not name:
+        raise HTTPException(status_code=400, detail="A name is required.")
+    if db.query(Character).filter_by(name=name).first():
+        raise HTTPException(status_code=409, detail=f"'{name}' is already in the cast.")
+
+    look = (req.look.strip() or f"a {req.species}, {req.personality}")
+    visual_desc = f"{look}. claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions."
+
+    image_url = None
+    if not settings.use_mock:
+        try:
+            temp = image_gen_client.generate_image(f"{look}. {STYLE}")
+            image_url = oss_client.persist_image(temp, prefix="characters") if oss_client.is_configured() else temp
+        except Exception as e:  # out of image quota / API error → character still created
+            print(f"[create_character] portrait generation failed: {e}")
+
+    c = Character(
+        name=name,
+        species=req.species.strip()[:32] or "creature",
+        personality=req.personality.strip()[:400],
+        visual_desc=visual_desc,
+        image_url=image_url,
+    )
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return {"name": c.name, "species": c.species, "personality": c.personality, "image_url": c.image_url}

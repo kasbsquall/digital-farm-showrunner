@@ -125,7 +125,7 @@ export function Studio({ onDone, characters }: { onDone: () => void; characters:
     on("failed", (d) => {
       es.close();
       setRunning(false);
-      setError(d.message ?? "Falló la generación");
+      setError(d.message ?? "Generation failed. Please try again.");
     });
     es.onerror = () => {
       if (esRef.current !== es) return;

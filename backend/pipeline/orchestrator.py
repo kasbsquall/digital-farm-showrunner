@@ -14,6 +14,7 @@ Graph:
 context from the DB, runs the graph, and persists the resulting Episode.
 """
 import logging
+import os
 from typing import TypedDict
 
 from langgraph.graph import StateGraph, START, END
@@ -25,7 +26,7 @@ from agents import scriptwriter, production_director, qa_reviewer, packager
 from services.video_gen_client import generate_video
 from services import oss_client, vision_client, image_gen_client, video_gen_client
 
-MAX_REGEN = 2  # Director can be re-run this many times after a QA rejection.
+MAX_REGEN = int(os.getenv("MAX_REGEN", "2"))  # Director re-runs after a QA rejection (0 caps cost).
 RECENT_LIMIT = 5
 
 log = logging.getLogger("showrunner")

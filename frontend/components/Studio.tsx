@@ -206,6 +206,8 @@ export function Studio({ onDone, characters }: { onDone: () => void; characters:
                 </div>
                 {s === "idle" ? (
                   <p className="wstep-about">{st.about}</p>
+                ) : s === "active" && !hasStageData(st.key, data) ? (
+                  <Working k={st.key} />
                 ) : (
                   <StageBody k={st.key} data={data} regen={regen} />
                 )}
@@ -215,6 +217,36 @@ export function Studio({ onDone, characters }: { onDone: () => void; characters:
         })}
       </div>
     </section>
+  );
+}
+
+function hasStageData(k: string, data: Data): boolean {
+  return Boolean(
+    (k === "scriptwriter" && data.script) ||
+      (k === "director" && data.director) ||
+      (k === "video" && data.video) ||
+      (k === "qa" && data.qa) ||
+      (k === "packager" && data.pack),
+  );
+}
+
+const WORKING_MSG: Record<string, string> = {
+  scriptwriter: "Dreaming up today's disaster…",
+  director: "Framing the funniest split-second…",
+  video: "Sculpting the clay and rolling the camera — this is the slow, real part (up to a few minutes)…",
+  qa: "Watching the footage back to check it matches…",
+  packager: "Writing the title and description…",
+};
+
+function Working({ k }: { k: string }) {
+  return (
+    <div>
+      <div className="wstep-working">
+        <span className="dots" aria-hidden><i /><i /><i /></span>
+        <span>{WORKING_MSG[k] ?? "Working…"}</span>
+      </div>
+      <div className="work-bar" />
+    </div>
   );
 }
 

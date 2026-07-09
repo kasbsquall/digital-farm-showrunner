@@ -61,6 +61,14 @@ function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
           </div>
           <button className="modal-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
+        {(ep.tokens_used ?? 0) > 0 && (
+          <div className="bts-receipt">
+            <span><b>{(ep.tokens_used ?? 0).toLocaleString()}</b> tokens</span>
+            <span>~<b>${(ep.cost_usd ?? 0).toFixed(4)}</b></span>
+            <span><b>{ep.qa_attempts ?? 1}</b> take{(ep.qa_attempts ?? 1) === 1 ? "" : "s"}</span>
+            <span className="rcp-note">measured per episode · budget-capped</span>
+          </div>
+        )}
         <img className="modal-hero" src={ossThumb(ep.thumbnail_url, 900)} alt={heroTitle} />
         <div className="bts-timeline">
           {steps.map((s, i) => (

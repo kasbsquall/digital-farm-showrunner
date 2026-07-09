@@ -159,7 +159,7 @@ export default function Home() {
           </div>
         </div>
         <div className="foot-legal">
-          Built by Kevin Soto Burgos · AVANC3 · Qwen Cloud Global AI Hackathon 2026 · Track 2: AI Showrunner
+          Built for the Qwen Cloud Global AI Hackathon 2026 · Track 2: AI Showrunner
         </div>
       </footer>
     </div>

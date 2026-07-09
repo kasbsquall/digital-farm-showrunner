@@ -10,3 +10,5 @@ python-dotenv==1.0.1
 oss2==2.19.1
 psycopg2-binary==2.9.10
 mcp==1.2.0
+respx==0.23.1
+pytest-cov==7.1.0

@@ -33,6 +33,8 @@ export type Episode = {
   qa_status: string;
   qa_notes: string | null;
   qa_attempts: number | null;
+  tokens_used: number | null;
+  cost_usd: number | null;
   thumbnail_hint: string | null;
   thumbnail_url: string | null;
   description: string | null;

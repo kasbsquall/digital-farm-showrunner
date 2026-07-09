@@ -156,6 +156,11 @@ img { max-width: 100%; }
 .bts-out .k { display: block; color: var(--amber); font-size: 0.7rem; font-weight: 700; margin: 0.5rem 0 0.1rem; }
 .bts-out b { color: var(--amber-soft); }
 
+/* Per-episode token/cost receipt in the BTS modal. */
+.bts-receipt { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; margin: 0 1.5rem 0.9rem; padding: 0.5rem 0.9rem; border: 1px solid var(--line); border-radius: 10px; background: rgba(0,0,0,.22); font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+.bts-receipt b { color: var(--amber-soft); }
+.bts-receipt .rcp-note { color: var(--faint); font-size: 0.68rem; margin-left: auto; }
+
 /* Self-correcting QA: the rejected take → corrected take, side by side. */
 .bts-retakes { padding: 0 1.5rem 1.8rem; }
 .bts-retakes .bts-name { margin-bottom: 0.8rem; }

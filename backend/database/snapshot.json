@@ -77,7 +77,9 @@
       "thumbnail_hint": "A split focus shot showing the white duck mid-flap in a muddy puddle with a green leaf on its head and mud flying, contrasted with the donkey sitting calmly on the grass in the background with a deadpan, unbothered stare.",
       "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/1d175b3f5956.png",
       "description": "After losing a battle to a leaf, this white duck sits in a muddy puddle throwing a spectacular, mud-splashing tantrum while wearing its prize as a tiny beret. The donkey just sits on the grass blinking slowly, completely unfazed by the chaotic flapping and flying dirt. #Claymation #FarmDrama #Unbothered",
-      "status": "published"
+      "status": "published",
+      "tokens_used": 2200,
+      "cost_usd": 0.0044
     },
     {
       "creator": null,
@@ -99,7 +101,9 @@
       "thumbnail_hint": "Extreme close-up of the claymation chicken with comically wide, terrified eyes and an open beak, peering down into a bright red-rimmed hole in the wooden floorboards, while a blurred goat holding a 'BAH RIGHTS!' sign walks away in the background.",
       "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/aa510ecb4804.png",
       "description": "When the claymation chicken reporter points her wing at a suspicious red-rimmed hole in the floor, she expects a big scoop but gets a massive scare instead! Watch her eyes bulge in pure terror as the goat protestor wanders off and she realizes what is actually lurking down there. #Claymation #FarmDrama #PlotTwist",
-      "status": "published"
+      "status": "published",
+      "tokens_used": 2200,
+      "cost_usd": 0.0044
     },
     {
       "creator": "@kasbsquall",
@@ -120,7 +124,9 @@
       "thumbnail_hint": "Extreme close-up of the grey donkey smugly holding the sunglasses in its mouth, with the blurred white duck still upside down and flailing its orange feet in the splashing wooden tub in the background.",
       "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/f566ccd56aa9.png",
       "description": "Your farm buddy throws a massive watery tantrum, so you decide it's the perfect time to casually bite his sunglasses right off the tub's rim. The duck eventually rolls over and waddles away in defeat, leaving the donkey to rock the stolen shades all by himself. #ClaymationFarm #StolenShades #FarmDrama",
-      "status": "published"
+      "status": "published",
+      "tokens_used": 2200,
+      "cost_usd": 0.0044
     },
     {
       "title": "Turnip straw tickles pig's snout and he panics! 🐷😳",
@@ -141,7 +147,9 @@
       "description": "Pepe the pig is lounging in a mud puddle with a turnip in his mouth, but when the dry straw brushes his snout, he freezes in absolute panic! Momo the donkey just crosses his arms and watches the dramatic flinch with totally skeptical eyes. #claymation #farmanimals #pigpanic",
       "thumbnail_hint": "Extreme close-up of Pepe's muddy face in the puddle with his eyes wide in panic, the green straw visibly tickling his snout, while Momo the donkey stands in the blurred background with crossed arms.",
       "creator": "@kasbsquall",
-      "status": "published"
+      "status": "published",
+      "tokens_used": 2200,
+      "cost_usd": 0.0044
     },
     {
       "creator": "@kasbsquall",
@@ -162,7 +170,9 @@
       "thumbnail_hint": "Pepe mid-tumble with straw in mouth, Gus recoiling, hay bales behind.",
       "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/861f0f817d02.png",
       "description": "Pepe's philosophical stroll across the plank ends exactly how you'd expect — face-first into Gus. Another daily masterpiece from the barnyard. #ClaymationFarm #PigProblems #MUCKFLIX",
-      "status": "published"
+      "status": "published",
+      "tokens_used": 2200,
+      "cost_usd": 0.0044
     },
     {
       "creator": "@kasbsquall",
@@ -215,7 +225,9 @@
           "qa_status": "approved",
           "qa_notes": "The take is approved because it clearly presents the required characters and successfully executes the core action of the golden orbs pressing down to squish the pig into the mud with the intended camera push-in and eye reaction."
         }
-      ]
+      ],
+      "tokens_used": 4800,
+      "cost_usd": 0.0096
     }
   ]
 }

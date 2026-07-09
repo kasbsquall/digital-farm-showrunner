@@ -33,7 +33,7 @@ fi
 echo "==> 4/5 Building & running the container…"
 docker build -t muckflix-backend .
 docker rm -f muckflix >/dev/null 2>&1 || true
-docker run -d --name muckflix --restart unless-stopped -p 8000:8000 --env-file .env muckflix-backend
+docker run -d --name muckflix --restart unless-stopped -p 80:8000 --env-file .env muckflix-backend
 
 echo "==> 5/5 Seeding cast + real episodes from snapshot…"
 sleep 6
@@ -42,8 +42,8 @@ docker exec muckflix python -m database.seed_from_snapshot
 IP=$(curl -fsS https://api.ipify.org 2>/dev/null || echo "<this-server-ip>")
 echo
 echo "✅ Done. The MUCKFLIX backend is live on this Alibaba Cloud instance:"
-echo "   http://${IP}:8000/health"
-echo "   http://${IP}:8000/episodes"
+echo "   http://${IP}/health"
+echo "   http://${IP}/episodes"
 echo
 echo "Proof of Alibaba services (OSS) from ON this instance:"
 echo "   docker exec muckflix python -m deploy.alibaba_deploy_proof   # needs OSS_* in .env"

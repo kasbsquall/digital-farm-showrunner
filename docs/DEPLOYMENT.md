@@ -12,7 +12,7 @@ videos/images in **Alibaba Cloud OSS**. This page is the required *proof of depl
 
 1. **ECS → Create Instance** → Pay-As-You-Go (or use your ECS free-trial credit) →
    cheapest burstable type (~1 vCPU / 1–2 GB) → **Ubuntu 22.04** → assign a **public IP**.
-2. **Security Group** → allow inbound TCP **22** (SSH) and **8000** (the API).
+2. **Security Group** → allow inbound TCP **22** (SSH) and **80** (HTTP — the API).
 3. Launch and note the **public IP**.
 
 ## 2. Deploy (one command)
@@ -28,8 +28,8 @@ with `FORCE_MOCK=true` by default, so **it needs no API keys and costs nothing**
 
 **Verify:**
 ```bash
-curl http://localhost:8000/health      # {"status":"ok", ...}
-curl http://localhost:8000/episodes    # the real episodes
+curl http://localhost/health      # {"status":"ok", ...}
+curl http://localhost/episodes    # the real episodes
 ```
 
 ### (Optional) enable live generation + prove OSS from the instance
@@ -37,7 +37,7 @@ Edit `/opt/digital-farm-showrunner/backend/.env`, set `FORCE_MOCK=false`, add
 `QWEN_API_KEY`, `QWEN_BASE_URL_OVERRIDE` and the `OSS_*` vars, then:
 ```bash
 cd /opt/digital-farm-showrunner/backend && docker rm -f muckflix
-docker run -d --name muckflix --restart unless-stopped -p 8000:8000 --env-file .env muckflix-backend
+docker run -d --name muckflix --restart unless-stopped -p 80:8000 --env-file .env muckflix-backend
 docker exec muckflix python -m deploy.alibaba_deploy_proof   # OSS upload ok=True url=...
 ```
 
@@ -46,7 +46,7 @@ docker exec muckflix python -m deploy.alibaba_deploy_proof   # OSS upload ok=Tru
 Screenshot **all** of these into `docs/deploy_proof/`:
 
 1. **ECS console** — the instance list showing status **Running**, its **public IP**, region.
-2. **Browser** at `http://<ECS_PUBLIC_IP>:8000/health` and `/episodes` returning JSON —
+2. **Browser** at `http://<ECS_PUBLIC_IP>/health` and `/episodes` returning JSON —
    with the Alibaba public IP visible in the address bar.
 3. **Terminal** (SSH'd into the instance, so the prompt shows the Alibaba host) running
    `docker ps` (container up) and, if OSS is configured, the `alibaba_deploy_proof`
@@ -54,7 +54,7 @@ Screenshot **all** of these into `docs/deploy_proof/`:
 
 ## 4. Frontend (optional, for the full demo)
 
-Point the Next.js app at the deployed API by setting `NEXT_PUBLIC_API_URL=http://<ECS_PUBLIC_IP>:8000`,
+Point the Next.js app at the deployed API by setting `NEXT_PUBLIC_API_URL=http://<ECS_PUBLIC_IP>`,
 or run it locally against the deployed backend. The frontend can be hosted anywhere
 (Vercel/static) — the *backend on Alibaba Cloud* is what the requirement asks for.
 

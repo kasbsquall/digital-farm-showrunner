@@ -33,9 +33,21 @@ from services import oss_client, vision_client, image_gen_client, video_gen_clie
 MAX_REGEN = int(os.getenv("MAX_REGEN", "2"))  # Director re-runs after a QA rejection (0 caps cost).
 RECENT_LIMIT = 5
 
-# Single-flight guard shared by the API and the unattended scheduler: the pipeline
-# does long blocking I/O and the module-level usage meter assumes one run at a time.
-generation_lock = threading.Lock()
+# Per-channel single-flight: one generation at a time *per channel* (so a channel's
+# ordered history stays consistent), but different channels run concurrently — the
+# usage meter is thread-local, so their receipts don't collide. Shared by the API and
+# the unattended scheduler.
+_channel_locks: dict[str, threading.Lock] = {}
+_channel_locks_guard = threading.Lock()
+
+
+def channel_lock(channel_id: str = DEFAULT_CHANNEL) -> threading.Lock:
+    """Return the single-flight lock for a channel (created on first use)."""
+    with _channel_locks_guard:
+        lock = _channel_locks.get(channel_id)
+        if lock is None:
+            lock = _channel_locks[channel_id] = threading.Lock()
+        return lock
 
 log = logging.getLogger("showrunner")
 
@@ -110,6 +122,7 @@ def video_node(state: FarmState) -> FarmState:
             "temporary provider URLs expire and must not be persisted."
         )
     shots = d.get("shots") or [{"keyframe_prompt": d["keyframe_prompt"], "motion_prompt": d["motion_prompt"]}]
+    shot_kfs: list[str] = []   # per-shot keyframes (multi-shot) → cross-shot consistency
 
     if len(shots) == 1:
         # 1) Keyframe. On a retake, REUSE the previous character-consistent keyframe and
@@ -132,26 +145,34 @@ def video_node(state: FarmState) -> FarmState:
         vid_url = oss_client.persist_video(vid_temp)
     else:
         # Multi-shot: one keyframe→clip per beat, then stitch into a single episode.
-        clips, kf_url = [], ""
+        clips, kf_url, shot_kfs = [], "", []
         for i, s in enumerate(shots):
             kf_temp = image_gen_client.generate_image(s["keyframe_prompt"], size="1280*720")
             shot_kf = oss_client.persist_image(kf_temp, prefix="keyframes")
+            shot_kfs.append(shot_kf)
             kf_url = kf_url or shot_kf  # first shot's keyframe is the thumbnail
             clips.append(video_gen_client.animate_image(shot_kf, s["motion_prompt"]))
             log.info("Multi-shot: rendered shot %d/%d", i + 1, len(shots))
         vid_url = oss_client.persist_local(video_gen_client.stitch(clips))
-    # 2b) Identity-lock: score how well the keyframe's character matches its canonical
-    #     portrait (measurable consistency gate).
+    # 2b) Identity-lock (measurable consistency gate). Two things are scored and the
+    #     WORST is kept, so the gate catches either failure mode:
+    #       - the character drifting from its canonical portrait, and
+    #       - the character drifting BETWEEN shots of a multi-shot episode.
     consistency = None
     if settings.identity_check:
         used = state.get("used") or []
         ref = next((c.get("image_url") for c in used if c.get("image_url")), None)
-        if ref:
-            try:
-                consistency = vision_client.consistency_score(kf_url, ref)
-                log.info("Identity-lock: character consistency %.2f", consistency)
-            except Exception as e:
-                log.warning("Consistency check failed: %s", e)
+        try:
+            scores = []
+            if ref:
+                scores.append(vision_client.consistency_score(kf_url, ref))  # vs canonical portrait
+            for i, sk in enumerate(shot_kfs[1:], start=1):  # each later shot vs shot 0 (drift)
+                scores.append(vision_client.consistency_score(sk, shot_kfs[0]))
+            if scores:
+                consistency = min(scores)
+                log.info("Identity-lock: character consistency %.2f (min of %d checks)", consistency, len(scores))
+        except Exception as e:
+            log.warning("Consistency check failed: %s", e)
     # 3) Vision: describe what actually happens on screen.
     description = ""
     try:

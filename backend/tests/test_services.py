@@ -215,6 +215,23 @@ def test_usage_reset_zeroes_state():
     }
 
 
+def test_usage_meter_is_thread_local():
+    """Concurrent runs (different threads) must not clobber each other's receipt."""
+    import threading
+    results = {}
+
+    def worker(name, images):
+        usage.reset()
+        for _ in range(images):
+            usage.add_image()
+        results[name] = usage.snapshot()["media_calls"]
+
+    t1 = threading.Thread(target=worker, args=("a", 2))
+    t2 = threading.Thread(target=worker, args=("b", 5))
+    t1.start(); t2.start(); t1.join(); t2.join()
+    assert results == {"a": 2, "b": 5}   # isolated, not 7 in both
+
+
 def test_usage_blended_cost_includes_media():
     """cost_usd = text tokens + image + video, not just the cheap text half."""
     usage.reset()

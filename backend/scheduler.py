@@ -18,7 +18,8 @@ import time
 
 from config import settings
 from database.db import SessionLocal
-from pipeline.orchestrator import run_daily_episode, generation_lock
+from database.models import DEFAULT_CHANNEL
+from pipeline.orchestrator import run_daily_episode, channel_lock
 
 log = logging.getLogger("scheduler")
 
@@ -36,28 +37,29 @@ _state = {"n": 0}
 _thread: threading.Thread | None = None
 
 
-def run_once(db=None):
-    """Generate exactly one episode unattended. Publishes iff QA approves.
+def run_once(db=None, channel_id: str = DEFAULT_CHANNEL):
+    """Generate exactly one episode unattended for a channel. Publishes iff QA approves.
 
-    Uses the shared single-flight lock so it never collides with an API run.
-    Returns the Episode, or None if a generation was already in flight.
+    Uses that channel's single-flight lock so it never collides with an API run on the
+    same channel. Returns the Episode, or None if a generation was already in flight.
     """
-    if not generation_lock.acquire(blocking=False):
-        log.info("Scheduler: a generation is already running; skipping this tick.")
+    lock = channel_lock(channel_id)
+    if not lock.acquire(blocking=False):
+        log.info("Scheduler: a generation is already running for %s; skipping this tick.", channel_id)
         return None
     own_session = db is None
     db = db or SessionLocal()
     try:
         idea = _IDEA_BANK[_state["n"] % len(_IDEA_BANK)]
         _state["n"] += 1
-        ep = run_daily_episode(db, idea=idea, creator="@showrunner")
+        ep = run_daily_episode(db, idea=idea, creator="@showrunner", channel_id=channel_id)
         log.info("Scheduler produced episode #%s '%s' → %s (qa=%s)",
                  ep.id, ep.title, ep.status, ep.qa_status)
         return ep
     finally:
         if own_session:
             db.close()
-        generation_lock.release()
+        lock.release()
 
 
 def start_background() -> bool:

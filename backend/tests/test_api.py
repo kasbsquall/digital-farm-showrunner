@@ -1,5 +1,6 @@
 """API tests via FastAPI TestClient (mock mode, temp sqlite DB)."""
 import main
+from pipeline.orchestrator import channel_lock
 
 
 def test_health_reports_mock_flags(client):
@@ -81,22 +82,37 @@ def test_episodes_are_scoped_by_channel(seeded_db, client):
     assert other == []                                               # another channel sees none of it
 
 
-def test_generate_conflicts_when_lock_held(client):
-    # Simulate a concurrent in-flight generation by holding the lock directly.
-    assert main._generation_lock.acquire(blocking=False)
+def test_generate_conflicts_when_channel_lock_held(client):
+    # Simulate a concurrent in-flight generation on the default channel by holding its lock.
+    lock = channel_lock("farm")
+    assert lock.acquire(blocking=False)
     try:
         resp = client.post("/episodes/generate", json={"idea": "x"})
         assert resp.status_code == 409
         assert "already running" in resp.json()["detail"].lower()
     finally:
-        main._generation_lock.release()
+        lock.release()
+
+
+def test_channels_have_independent_locks(client):
+    # Per-channel concurrency: a busy "farm" must NOT block a different channel.
+    farm = channel_lock("farm")
+    space = channel_lock("space")
+    assert farm is not space
+    assert farm.acquire(blocking=False)
+    try:
+        assert space.acquire(blocking=False)   # not blocked by the busy farm channel
+        space.release()
+    finally:
+        farm.release()
 
 
 def test_stream_reports_failed_event_when_lock_held(client):
-    assert main._generation_lock.acquire(blocking=False)
+    lock = channel_lock("farm")
+    assert lock.acquire(blocking=False)
     try:
         resp = client.get("/episodes/generate/stream")
         assert resp.status_code == 200
         assert "event: failed" in resp.text
     finally:
-        main._generation_lock.release()
+        lock.release()

@@ -18,7 +18,7 @@ from sqlalchemy.exc import IntegrityError
 from database.db import Base, engine, get_db, SessionLocal
 from database.models import Character, Episode, Vote, DEFAULT_CHANNEL
 from database.generate_portraits import STYLE
-from pipeline.orchestrator import run_daily_episode, run_stream, generation_lock
+from pipeline.orchestrator import run_daily_episode, run_stream, channel_lock
 from services import image_gen_client, oss_client
 from config import settings
 import scheduler
@@ -84,20 +84,16 @@ class GenerateRequest(BaseModel):
     channel: str = DEFAULT_CHANNEL
 
 
-# Only one generation may run at a time: the pipeline does long, blocking I/O and
-# holds a threadpool worker; a second concurrent run could starve /health & friends.
-# Shared with the scheduler so unattended runs never collide with API runs.
-_generation_lock = generation_lock
-
-
 @app.post("/episodes/generate")
 def generate_episode(req: GenerateRequest | None = None, db: Session = Depends(get_db)):
     """Run the full 4-agent pipeline and return the new episode."""
     idea = (req.idea if req else "")[:500]
     creator = (req.creator if req else "")[:48]
     channel = ((req.channel if req else "") or DEFAULT_CHANNEL).strip()[:48] or DEFAULT_CHANNEL
-    if not _generation_lock.acquire(blocking=False):
-        raise HTTPException(status_code=409, detail="A generation is already running. Try again shortly.")
+    # Per-channel single-flight: this channel serializes, but other channels run concurrently.
+    lock = channel_lock(channel)
+    if not lock.acquire(blocking=False):
+        raise HTTPException(status_code=409, detail=f"A generation is already running for channel '{channel}'. Try again shortly.")
     try:
         episode = run_daily_episode(db, idea=idea, creator=creator, channel_id=channel)
         return _episode_dict(episode)
@@ -105,7 +101,7 @@ def generate_episode(req: GenerateRequest | None = None, db: Session = Depends(g
         db.rollback()
         raise HTTPException(status_code=502, detail=f"Generation failed: {e}")
     finally:
-        _generation_lock.release()
+        lock.release()
 
 
 @app.get("/episodes/generate/stream")
@@ -118,8 +114,9 @@ def generate_episode_stream(
     channel_id = (channel or DEFAULT_CHANNEL).strip()[:48] or DEFAULT_CHANNEL
 
     def event_source():
-        if not _generation_lock.acquire(blocking=False):
-            yield f"event: failed\ndata: {json.dumps({'message': 'A generation is already running. Please wait for it to finish.'})}\n\n"
+        lock = channel_lock(channel_id)
+        if not lock.acquire(blocking=False):
+            yield f"event: failed\ndata: {json.dumps({'message': f'A generation is already running for channel {channel_id!r}. Please wait for it to finish.'})}\n\n"
             return
         db = SessionLocal()
         try:
@@ -130,7 +127,7 @@ def generate_episode_stream(
             yield f"event: failed\ndata: {json.dumps({'message': str(e)})}\n\n"
         finally:
             db.close()
-            _generation_lock.release()
+            lock.release()
 
     return StreamingResponse(
         event_source(),

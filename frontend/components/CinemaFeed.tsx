@@ -25,6 +25,8 @@ function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
   const { keyframe, motion } = splitPrompt(ep.video_prompt);
   const approved = ep.qa_status === "approved";
   const heroTitle = ep.title ?? ep.event ?? `Episode ${ep.id}`;
+  const takes = ep.takes ?? [];
+  const hadRetake = takes.length > 1;
 
   // Close on Escape, like any well-behaved modal.
   useEffect(() => {
@@ -74,6 +76,32 @@ function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
             </div>
           ))}
         </div>
+
+        {hadRetake && (
+          <div className="bts-retakes">
+            <div className="bts-name">
+              🔁 Self-correcting QA — {takes.length} takes
+              <span className="bts-model">the vision agent rejected a take; the director fixed it</span>
+            </div>
+            <div className="retake-row">
+              {takes.map((t) => {
+                const ok = t.qa_status === "approved";
+                return (
+                  <div className={`retake-card ${ok ? "ok" : "bad"}`} key={t.attempt}>
+                    <span className="retake-tag">
+                      Take {t.attempt} · {ok ? "✓ approved" : "✗ retake"}
+                    </span>
+                    {t.thumbnail_url && <img src={ossThumb(t.thumbnail_url, 360)} alt={`take ${t.attempt}`} />}
+                    <span className="k">Vision saw</span>
+                    <p>{t.video_description || "—"}</p>
+                    <span className="k">QA verdict</span>
+                    <p>{t.qa_notes}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

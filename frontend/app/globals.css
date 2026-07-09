@@ -155,6 +155,21 @@ img { max-width: 100%; }
 .bts-out { margin-top: 0.4rem; font-size: 0.88rem; color: var(--muted); line-height: 1.55; white-space: pre-wrap; }
 .bts-out .k { display: block; color: var(--amber); font-size: 0.7rem; font-weight: 700; margin: 0.5rem 0 0.1rem; }
 .bts-out b { color: var(--amber-soft); }
+
+/* Self-correcting QA: the rejected take → corrected take, side by side. */
+.bts-retakes { padding: 0 1.5rem 1.8rem; }
+.bts-retakes .bts-name { margin-bottom: 0.8rem; }
+.retake-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.retake-card { border: 1.5px solid var(--line); border-radius: 12px; padding: 0.75rem; background: rgba(0,0,0,.22); font-size: 0.82rem; color: var(--muted); }
+.retake-card.bad { border-color: rgba(200,72,50,.6); }
+.retake-card.ok { border-color: rgba(95,230,160,.55); }
+.retake-card img { width: 100%; border-radius: 8px; margin: 0.45rem 0; display: block; }
+.retake-card p { margin: 0.1rem 0 0.3rem; line-height: 1.45; }
+.retake-card .k { display: block; color: var(--amber); font-size: 0.66rem; font-weight: 700; margin-top: 0.4rem; }
+.retake-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 999px; }
+.retake-card.bad .retake-tag { background: rgba(200,72,50,.2); color: #ff9a86; }
+.retake-card.ok .retake-tag { background: rgba(95,230,160,.16); color: var(--live); }
+@media (max-width: 640px) { .retake-row { grid-template-columns: 1fr; } }
 .badge { font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid; }
 .badge.ok { color: var(--live); border-color: rgba(95,230,160,.4); background: rgba(95,230,160,.08); }
 .badge.draft { color: var(--barn); border-color: rgba(239,91,60,.4); background: rgba(239,91,60,.08); }

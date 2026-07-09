@@ -7,10 +7,22 @@ export type Character = {
   image_url: string | null;
 };
 
+export type Take = {
+  attempt: number;
+  video_url: string;
+  thumbnail_url: string;
+  keyframe_prompt: string;
+  motion_prompt: string;
+  video_description: string;
+  qa_status: string;
+  qa_notes: string;
+};
+
 export type Episode = {
   id: number;
   creator: string | null;
   title: string | null;
+  takes: Take[] | null;
   event: string | null;
   script: string | null;
   characters_used: string[] | null;

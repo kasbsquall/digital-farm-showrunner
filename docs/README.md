@@ -1,41 +1,44 @@
 # Architecture — The Digital Farm Showrunner
 
-![Arquitectura](architecture_diagram.png)
+![Architecture](architecture_diagram.png)
 
-> Fuente editable: [`architecture_diagram.svg`](architecture_diagram.svg).
+> Editable source: [`architecture_diagram.svg`](architecture_diagram.svg).
 
-## Flujo de agentes
+## Agent flow
 
 ```
-                 recent_events + base cast (PostgreSQL / SQLite)
+                 recent_events + base cast (SQLite / Alibaba RDS)
                                  │
                                  ▼
    ┌─────────────────── LangGraph orchestrator ───────────────────┐
    │                                                              │
    │  Agent 1  Scriptwriter ─► Agent 2  Production Director        │
-   │  (Qwen text)             (Qwen text → video prompt)          │
+   │  (Qwen text)             (Qwen text → keyframe + motion)     │
    │                                 │                            │
    │                                 ▼                            │
-   │                         Wan / HappyHorse  (video gen)        │
+   │            Keyframe → Image-to-Video → Vision                │
+   │            (Qwen-Image · HappyHorse i2v · Qwen3-VL)          │
    │                                 │                            │
    │                                 ▼                            │
-   │                     Agent 3  QA Reviewer ──reject──┐         │
-   │                          │ approve                 │         │
-   │                          ▼            regen loop ◄─┘         │
+   │                     Agent 3  Quality Control ──reject──┐     │
+   │                          │ approve                     │     │
+   │                          ▼            retake loop  ◄────┘     │
    │                     Agent 4  Packager                        │
    └──────────────────────────────┬───────────────────────────────┘
                                    ▼
-             Episode row (PostgreSQL) + video en Alibaba Cloud OSS
+             Episode row (DB) + video & keyframe on Alibaba Cloud OSS
                                    │
                                    ▼
                      Next.js feed  ◄── FastAPI /episodes
 ```
 
-## Servicios de Alibaba Cloud
-- **ECS / Function Compute** — corre el backend FastAPI.
-- **RDS (PostgreSQL)** — persistencia de episodios y personajes.
-- **OSS** — almacenamiento de videos generados (ver `backend/deploy/alibaba_deploy_proof.py`).
+## Alibaba Cloud services
+- **ECS (Docker)** — runs the FastAPI backend (one-command deploy in [`deploy/deploy.sh`](../backend/deploy/deploy.sh)).
+- **RDS (PostgreSQL)** — optional production persistence for episodes and characters (SQLite by default).
+- **OSS** — storage for generated videos and keyframes (see [`backend/services/oss_client.py`](../backend/services/oss_client.py) and [`backend/deploy/alibaba_deploy_proof.py`](../backend/deploy/alibaba_deploy_proof.py)).
 
 ## Qwen Cloud (DashScope)
-- Modelos de texto (agentes 1-4) vía endpoint OpenAI-compatible.
-- Generación de video (Wan / HappyHorse).
+- Text models (agents 1-4): `qwen3.7-plus` via the OpenAI-compatible endpoint.
+- Image (keyframes + character portraits): `qwen-image-2.0` via the native multimodal endpoint.
+- Video (image-to-video): `happyhorse-1.1-i2v` via the native async submit/poll endpoint.
+- Video understanding (QA vision): `qwen3-vl-plus`.

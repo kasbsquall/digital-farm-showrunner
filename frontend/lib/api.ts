@@ -15,6 +15,8 @@ export type Take = {
   motion_prompt: string;
   video_description: string;
   qa_status: string;
+  qa_score?: number | null;
+  consistency?: number | null;   // identity-lock: keyframe vs canonical portrait, 0–1
   qa_notes: string;
 };
 
@@ -44,7 +46,7 @@ export type Episode = {
 
 export async function getCharacters(): Promise<Character[]> {
   const res = await fetch(`${API}/characters`, { cache: "no-store" });
-  if (!res.ok) throw new Error("No se pudieron cargar los personajes");
+  if (!res.ok) throw new Error("Could not load the cast");
   return res.json();
 }
 
@@ -68,14 +70,14 @@ export async function createCharacter(payload: {
 
 export async function getEpisodes(): Promise<Episode[]> {
   const res = await fetch(`${API}/episodes`, { cache: "no-store" });
-  if (!res.ok) throw new Error("No se pudo cargar el feed");
+  if (!res.ok) throw new Error("Could not load the feed");
   return res.json();
 }
 
 export async function getEpisode(id: number): Promise<Episode> {
   const list = await getEpisodes();
   const found = list.find((e) => e.id === id);
-  if (!found) throw new Error("Episodio no encontrado");
+  if (!found) throw new Error("Episode not found");
   return found;
 }
 

@@ -27,6 +27,9 @@ function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
   const heroTitle = ep.title ?? ep.event ?? `Episode ${ep.id}`;
   const takes = ep.takes ?? [];
   const hadRetake = takes.length > 1;
+  // Identity-lock score of the take that shipped (0–1). Only present when the run
+  // actually scored character consistency (IDENTITY_CHECK on).
+  const finalConsistency = takes.length ? takes[takes.length - 1].consistency : null;
 
   // Close on Escape, like any well-behaved modal.
   useEffect(() => {
@@ -42,7 +45,12 @@ function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
       <><span className="k">Keyframe (seed image)</span>{keyframe}<span className="k">5-second action</span>{motion}</>
     ) },
     { img: "/set/clapper.png", who: "Keyframe → Video → Vision", model: "qwen-image · happyhorse-i2v · qwen3-vl", body: (
-      <><span className="k">What the AI actually sees</span>{ep.video_description || "—"}</>
+      <>
+        {finalConsistency != null && (
+          <><span className="k">Identity-lock (character vs. canonical portrait)</span>{finalConsistency.toFixed(2)} / 1.00</>
+        )}
+        <span className="k">What the AI actually sees</span>{ep.video_description || "—"}
+      </>
     ) },
     { img: "/agents/qa.png", who: "Quality Control", model: "qwen3.7", body: (
       <><span className="k">Verdict</span>{approved ? "✓ Approved" : "✗ Rejected"} — {ep.qa_notes} <i>({ep.qa_attempts} attempt{ep.qa_attempts === 1 ? "" : "s"})</i></>
@@ -66,6 +74,7 @@ function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
             <span><b>{(ep.tokens_used ?? 0).toLocaleString()}</b> tokens</span>
             <span>~<b>${(ep.cost_usd ?? 0).toFixed(4)}</b></span>
             <span><b>{ep.qa_attempts ?? 1}</b> take{(ep.qa_attempts ?? 1) === 1 ? "" : "s"}</span>
+            {finalConsistency != null && <span>identity <b>{finalConsistency.toFixed(2)}</b></span>}
             <span className="rcp-note">measured per episode · budget-capped</span>
           </div>
         )}
@@ -97,6 +106,7 @@ function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
                   <div className={`retake-card ${ok ? "ok" : "bad"}`} key={t.attempt}>
                     <span className="retake-tag">
                       Take {t.attempt} · {ok ? "✓ approved" : "✗ retake"}
+                      {t.consistency != null && <em className="retake-id"> · identity {t.consistency.toFixed(2)}</em>}
                     </span>
                     {t.thumbnail_url && <img src={ossThumb(t.thumbnail_url, 360)} alt={`take ${t.attempt}`} />}
                     <span className="k">Vision saw</span>

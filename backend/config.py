@@ -63,6 +63,14 @@ class Settings(BaseSettings):
     token_cost_per_1k: float = 0.002
     token_budget: int = 0
 
+    # Multi-shot: episodes of N chained shots (setup → escalation → punchline),
+    # stitched into one video. 1 = the classic single-gag micro-drama.
+    shots_per_episode: int = 1
+    # Identity-lock: after generating a keyframe, a Qwen3-VL check scores how well the
+    # character matches its canonical portrait (0-1), stored per take — a measurable
+    # consistency gate (the qwen-image endpoint does not accept a reference image).
+    identity_check: bool = False
+
     @property
     def use_mock(self) -> bool:
         """Mock when no Qwen key is configured, or when explicitly forced."""

@@ -8,7 +8,7 @@ def _stub_real_media(monkeypatch):
     """Make the 'real' video path deterministic and offline."""
     monkeypatch.setattr(orch, "_video_is_real", lambda: True)
     monkeypatch.setattr(orch.oss_client, "is_configured", lambda: True)
-    monkeypatch.setattr(orch.image_gen_client, "generate_image", lambda p, size="": "http://x/kf.png")
+    monkeypatch.setattr(orch.image_gen_client, "generate_image", lambda p, size="", reference_url=None: "http://x/kf.png")
     monkeypatch.setattr(orch.oss_client, "persist_image", lambda u, prefix="": u)
     monkeypatch.setattr(orch.video_gen_client, "animate_image", lambda kf, m: "http://x/take.mp4")
     monkeypatch.setattr(orch.oss_client, "persist_video", lambda u: u)

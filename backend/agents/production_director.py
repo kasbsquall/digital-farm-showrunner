@@ -44,19 +44,42 @@ STYLE = "charming claymation stop-motion style, cohesive children's animated fil
 NEGATIVE = "no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts"
 
 
-def _mock(script: str, characters: list[dict]) -> str:
+def _norm_kf(kf: str) -> str:
+    """Reinforce the consistent style + anti-artifact guardrails on a keyframe prompt."""
+    kf = kf or f"A funny claymation barnyard moment, {STYLE}"
+    if "claymation" not in kf.lower():
+        kf = f"{kf}, {STYLE}"
+    return f"{kf}. {NEGATIVE}"
+
+
+def _mock(script: str, characters: list[dict], shots: int = 1) -> str:
     names = ", ".join(c["name"] for c in characters)
-    return json.dumps({
+    one = {
         "keyframe_prompt": (f"A frozen comedic barnyard moment featuring {names}, {STYLE}, "
                             "expressive faces mid-reaction, medium shot, farm background"),
         "motion_prompt": "the characters react with one quick exaggerated comedic beat, subtle camera push-in",
         "video_tool": "happyhorse-i2v",
-    }, ensure_ascii=False)
+    }
+    if shots > 1:
+        one["shots"] = [
+            {"keyframe_prompt": one["keyframe_prompt"] + f" (beat {i+1})",
+             "motion_prompt": one["motion_prompt"]}
+            for i in range(shots)
+        ]
+    return json.dumps(one, ensure_ascii=False)
 
 
-def run(script: str, characters: list[dict], qa_notes: str = "") -> dict:
+def run(script: str, characters: list[dict], qa_notes: str = "", shots: int = 1) -> dict:
     visuals = "\n".join(f"- {c['name']}: {c.get('visual_desc', '')}" for c in characters)
     user = USER_TMPL.format(script=script, visuals=visuals)
+    if shots > 1:
+        user += (
+            f"\n\nThis episode is a {shots}-SHOT mini-arc (setup → escalation → punchline). "
+            f'ALSO return a "shots" array of exactly {shots} objects — each '
+            '{"keyframe_prompt": "...", "motion_prompt": "..."} — one per shot IN ORDER, '
+            "keeping the SAME characters in their exact established look across every shot, "
+            "so the arc reads as one continuous scene."
+        )
     if qa_notes.strip():
         # Closed feedback loop: the previous take was rejected — fix it specifically.
         user += (
@@ -65,20 +88,19 @@ def run(script: str, characters: list[dict], qa_notes: str = "") -> dict:
             "Redesign the keyframe and motion to directly FIX that problem: make the main "
             "action and the involved characters unmistakably clear and correct."
         )
-    text = chat(
-        SYSTEM,
-        user,
-        temperature=0.7,
-        mock=_mock(script, characters),
-    )
+    text = chat(SYSTEM, user, temperature=0.7, mock=_mock(script, characters, shots))
     data = parse_json(text)
-    # Reinforce a consistent style + anti-artifact guardrails on the keyframe.
-    kf = data.get("keyframe_prompt") or f"A funny claymation barnyard moment, {STYLE}"
-    if "claymation" not in kf.lower():
-        kf = f"{kf}, {STYLE}"
-    kf = f"{kf}. {NEGATIVE}"
+    kf = _norm_kf(data.get("keyframe_prompt"))
+    motion = data.get("motion_prompt", "one quick exaggerated comedic beat, subtle camera push-in")
+    raw_shots = data.get("shots")
+    if isinstance(raw_shots, list) and len(raw_shots) > 1:
+        shot_list = [{"keyframe_prompt": _norm_kf(s.get("keyframe_prompt")),
+                      "motion_prompt": s.get("motion_prompt", motion)} for s in raw_shots[:shots]]
+    else:
+        shot_list = [{"keyframe_prompt": kf, "motion_prompt": motion}]
     return {
         "keyframe_prompt": kf,
-        "motion_prompt": data.get("motion_prompt", "one quick exaggerated comedic beat, subtle camera push-in"),
+        "motion_prompt": motion,
         "video_tool": data.get("video_tool", "happyhorse-i2v"),
+        "shots": shot_list,
     }

@@ -12,3 +12,4 @@ psycopg2-binary==2.9.10
 mcp==1.2.0
 respx==0.23.1
 pytest-cov==7.1.0
+imageio-ffmpeg==0.5.1

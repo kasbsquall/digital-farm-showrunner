@@ -48,6 +48,7 @@ class FarmState(TypedDict, total=False):
     direction: dict
     video_url: str
     video_description: str
+    consistency: float
     # Agent 3
     qa: dict
     attempt: int
@@ -75,7 +76,8 @@ def scriptwriter_node(state: FarmState) -> FarmState:
 def director_node(state: FarmState) -> FarmState:
     # On a regeneration, feed the QA rejection notes back so the director corrects it.
     prev_notes = state.get("qa", {}).get("qa_notes", "") if state.get("attempt") else ""
-    direction = production_director.run(state["story"]["script"], state["used"], qa_notes=prev_notes)
+    direction = production_director.run(state["story"]["script"], state["used"],
+                                       qa_notes=prev_notes, shots=settings.shots_per_episode)
     return {"direction": direction}
 
 
@@ -102,20 +104,44 @@ def video_node(state: FarmState) -> FarmState:
             "Live video generation requires OSS to be configured (OSS_* env vars); "
             "temporary provider URLs expire and must not be persisted."
         )
-    # 1) Keyframe. On a retake, REUSE the previous character-consistent keyframe and
-    #    only re-animate with the corrected motion — a surgical "retake the shot",
-    #    not "reshoot the movie" (protects consistency and saves an image call).
-    prior = state.get("takes") or []
-    reuse_kf = prior[-1]["thumbnail_url"] if prior and prior[-1].get("thumbnail_url") else ""
-    if reuse_kf:
-        kf_url = reuse_kf
-        log.info("Surgical retake: re-animating the existing keyframe with the corrected motion.")
+    shots = d.get("shots") or [{"keyframe_prompt": d["keyframe_prompt"], "motion_prompt": d["motion_prompt"]}]
+
+    if len(shots) == 1:
+        # 1) Keyframe. On a retake, REUSE the previous character-consistent keyframe and
+        #    only re-animate with the corrected motion — a surgical "retake the shot",
+        #    not "reshoot the movie" (protects consistency and saves an image call).
+        prior = state.get("takes") or []
+        reuse_kf = prior[-1]["thumbnail_url"] if prior and prior[-1].get("thumbnail_url") else ""
+        if reuse_kf:
+            kf_url = reuse_kf
+            log.info("Surgical retake: re-animating the existing keyframe with the corrected motion.")
+        else:
+            kf_temp = image_gen_client.generate_image(shots[0]["keyframe_prompt"], size="1280*720")
+            kf_url = oss_client.persist_image(kf_temp, prefix="keyframes")
+        vid_temp = video_gen_client.animate_image(kf_url, shots[0]["motion_prompt"])
+        vid_url = oss_client.persist_video(vid_temp)
     else:
-        kf_temp = image_gen_client.generate_image(d["keyframe_prompt"], size="1280*720")
-        kf_url = oss_client.persist_image(kf_temp, prefix="keyframes")
-    # 2) Animate the keyframe (image→video) → inherits the characters' look.
-    vid_temp = video_gen_client.animate_image(kf_url, d["motion_prompt"])
-    vid_url = oss_client.persist_video(vid_temp)
+        # Multi-shot: one keyframe→clip per beat, then stitch into a single episode.
+        clips, kf_url = [], ""
+        for i, s in enumerate(shots):
+            kf_temp = image_gen_client.generate_image(s["keyframe_prompt"], size="1280*720")
+            shot_kf = oss_client.persist_image(kf_temp, prefix="keyframes")
+            kf_url = kf_url or shot_kf  # first shot's keyframe is the thumbnail
+            clips.append(video_gen_client.animate_image(shot_kf, s["motion_prompt"]))
+            log.info("Multi-shot: rendered shot %d/%d", i + 1, len(shots))
+        vid_url = oss_client.persist_local(video_gen_client.stitch(clips))
+    # 2b) Identity-lock: score how well the keyframe's character matches its canonical
+    #     portrait (measurable consistency gate).
+    consistency = None
+    if settings.identity_check:
+        used = state.get("used") or []
+        ref = next((c.get("image_url") for c in used if c.get("image_url")), None)
+        if ref:
+            try:
+                consistency = vision_client.consistency_score(kf_url, ref)
+                log.info("Identity-lock: character consistency %.2f", consistency)
+            except Exception as e:
+                log.warning("Consistency check failed: %s", e)
     # 3) Vision: describe what actually happens on screen.
     description = ""
     try:
@@ -123,7 +149,8 @@ def video_node(state: FarmState) -> FarmState:
     except Exception as e:
         log.warning("Could not describe the video with vision: %s", e)
     # The keyframe IS frame 0 → a perfectly coherent thumbnail.
-    return {"video_url": vid_url, "video_description": description, "thumbnail_url": kf_url}
+    return {"video_url": vid_url, "video_description": description, "thumbnail_url": kf_url,
+            "consistency": consistency}
 
 
 def _take_record(state: FarmState, attempt: int, qa: dict) -> dict:
@@ -138,6 +165,7 @@ def _take_record(state: FarmState, attempt: int, qa: dict) -> dict:
         "video_description": state.get("video_description", ""),
         "qa_status": qa.get("qa_status", ""),
         "qa_score": qa.get("qa_score", 0.0),
+        "consistency": state.get("consistency"),
         "qa_notes": qa.get("qa_notes", ""),
     }
 
@@ -210,6 +238,7 @@ def _load_context(db: Session) -> tuple[list[dict], list[str], list[str]]:
             "species": c.species,
             "personality": c.personality,
             "visual_desc": c.visual_desc,
+            "image_url": c.image_url,  # canonical portrait → identity-lock reference
         }
         for c in db.query(Character).all()
     ]

@@ -53,3 +53,28 @@ def describe_video(video_url: str) -> str:
             if attempt < _MAX_RETRIES - 1:
                 time.sleep(1.5 * (attempt + 1))
     raise RuntimeError(f"Vision description failed after {_MAX_RETRIES} attempts: {last_err}")
+
+
+def consistency_score(keyframe_url: str, portrait_url: str) -> float:
+    """Identity-lock check: how well does the character in the generated keyframe match
+    its canonical portrait? Returns 0.0-1.0 (species, colors, distinctive features)."""
+    resp = _get_client().chat.completions.create(
+        model=settings.vision_model,
+        messages=[{"role": "user", "content": [
+            {"type": "image_url", "image_url": {"url": keyframe_url}},
+            {"type": "image_url", "image_url": {"url": portrait_url}},
+            {"type": "text", "text": (
+                "Image 1 is a frame from a generated clip; image 2 is the character's canonical "
+                "reference portrait. Does the SAME character appear in image 1 — same species, "
+                "body colors, and distinctive features? Reply with ONLY a single number from 0.0 "
+                "(totally different) to 1.0 (clearly the same character)."
+            )},
+        ]}],
+    )
+    u = getattr(resp, "usage", None)
+    if u is not None:
+        usage.add(getattr(u, "prompt_tokens", 0), getattr(u, "completion_tokens", 0))
+    raw = resp.choices[0].message.content.strip()
+    import re
+    m = re.search(r"[01](?:\.\d+)?", raw)
+    return max(0.0, min(1.0, float(m.group()))) if m else 0.0

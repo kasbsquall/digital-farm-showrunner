@@ -44,3 +44,13 @@ def persist_video(src_url: str) -> str:
 def persist_image(src_url: str, prefix: str = "images") -> str:
     """Download an image from src_url and upload it to OSS. Returns the public URL."""
     return _persist(src_url, prefix, "png", "image/png")
+
+
+def persist_local(path: str, prefix: str = "episodes", ext: str = "mp4",
+                  content_type: str = "video/mp4") -> str:
+    """Upload a LOCAL file (e.g. a stitched multi-shot video) to OSS. Returns the URL."""
+    with open(path, "rb") as f:
+        data = f.read()
+    key = f"{prefix}/{hashlib.sha1(data).hexdigest()[:12]}.{ext}"
+    _bucket().put_object(key, data, headers={"Content-Type": content_type})
+    return public_url(key)

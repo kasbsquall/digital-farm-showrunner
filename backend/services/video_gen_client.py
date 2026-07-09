@@ -119,3 +119,37 @@ def generate_video(prompt: str, tool: str = "happyhorse") -> str:
     model = _TOOL_TO_MODEL.get(tool, _TOOL_TO_MODEL["happyhorse"])()
     task_id = _submit(model, prompt)
     return _poll(task_id)
+
+
+def stitch(clip_urls: list[str]) -> str:
+    """Download the per-shot clips and concatenate them into one mp4 (multi-shot episode).
+
+    Returns a LOCAL file path (upload it with oss_client.persist_local).
+    """
+    import os
+    import subprocess
+    import tempfile
+
+    import imageio_ffmpeg
+
+    ff = imageio_ffmpeg.get_ffmpeg_exe()
+    tmp = tempfile.mkdtemp(prefix="muckflix_stitch_")
+    files = []
+    for i, u in enumerate(clip_urls):
+        p = os.path.join(tmp, f"shot{i}.mp4")
+        r = httpx.get(u, timeout=120, follow_redirects=True)
+        r.raise_for_status()
+        with open(p, "wb") as fh:
+            fh.write(r.content)
+        files.append(p)
+    listfile = os.path.join(tmp, "list.txt")
+    with open(listfile, "w") as fh:
+        fh.write("".join(f"file '{f}'\n" for f in files))
+    out = os.path.join(tmp, "stitched.mp4")
+    # Re-encode on concat so clips with slightly different params join cleanly.
+    subprocess.run(
+        [ff, "-y", "-f", "concat", "-safe", "0", "-i", listfile,
+         "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-r", "24", out],
+        check=True, capture_output=True,
+    )
+    return out

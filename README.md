@@ -24,6 +24,7 @@
 - **Alibaba Cloud deploy proof:** [`docs/deploy_proof/`](docs/deploy_proof/)
 - **Test suite (fully offline):** [`backend/tests/`](backend/tests/)
 - **QA-gate evaluation (100% on a labeled set):** [`docs/EVALUATION.md`](docs/EVALUATION.md)
+- **Multi-shot & identity-lock, validated on real generation:** a 3-shot Pepe episode stitched into one **15.5-second** video on OSS, and an identity-lock check that scored **0.9** for a matching character vs. **0.0** for a mismatch (see [§5a](#5-the-two-signature-techniques)).
 
 ---
 
@@ -93,7 +94,7 @@ The backend is a **LangGraph `StateGraph`** wiring four agents plus a video sub-
 |---|---|---|---|---|---|
 | 1 | **Scriptwriter** | `backend/agents/scriptwriter.py` | `qwen3.7-plus` (text) | Full cast, recent episode events (for continuity), optional user idea | `event`, `script` (2–4 lines), `characters_used` |
 | 2 | **Production Director** | `backend/agents/production_director.py` | `qwen3.7-plus` (text) | The script + the *faithful visual description* of each cast member; on a retake, the QA rejection note | `keyframe_prompt` (a frozen funniest instant), `motion_prompt` (one 5s action), `video_tool` |
-| — | **Video sub-stage** | `backend/pipeline/orchestrator.py` → services | `qwen-image-2.0` → `happyhorse-1.1-i2v` → `qwen3-vl-plus` | Director's keyframe + motion prompts | Persisted `video_url`, `thumbnail_url` (= the keyframe), and a vision `video_description` |
+| — | **Video sub-stage** | `backend/pipeline/orchestrator.py` → services | `qwen-image-2.0` → `happyhorse-1.1-i2v` → `qwen3-vl-plus` | Director's keyframe + motion prompts (a `shots` list when `SHOTS_PER_EPISODE > 1`) | Persisted `video_url` (multi-shot clips stitched into one), `thumbnail_url` (= the keyframe), a vision `video_description`, and an optional identity-lock `consistency` score |
 | 3 | **QA Reviewer** | `backend/agents/qa_reviewer.py` | `qwen3.7-plus` (text), reasoning over `qwen3-vl-plus` output | Script, motion prompt, and **what the clip actually shows** | `qa_status` (`approved`/`rejected`), `qa_notes` |
 | 4 | **Packager** | `backend/agents/packager.py` | `qwen3.7-plus` (text) | Event, script, and the vision description | `title` (with emojis), `thumbnail_hint`, `description` (+ hashtags) |
 
@@ -156,6 +157,11 @@ Two consequences fall out for free:
 
 - **The keyframe *is* the thumbnail.** `thumbnail_url` is set to the keyframe URL — a thumbnail that is guaranteed to match frame 0 of the video, at no extra generation cost.
 - **A consistent clay universe.** A shared style string (Aardman plasticine, visible clay fingerprints, chunky proportions) plus an anti-artifact negative prompt (`no text, no watermark, no distorted limbs, no melted faces…`) is appended to every keyframe so episodes look like the same show and avoid the tells that scream "AI."
+
+**Two shipped extensions of this technique (both validated on real Alibaba Cloud generation):**
+
+- **Multi-shot episodes.** An episode can be *N* chained shots — **setup → escalation → punchline** — instead of a single gag. Each shot gets its own keyframe (`qwen-image-2.0`) → i2v clip (`happyhorse-1.1-i2v`), and all shots are stitched into one continuous video via ffmpeg (`video_gen_client.stitch()`, `oss_client.persist_local()`; the Director emits a `shots` list when `SHOTS_PER_EPISODE > 1`, and `video_node` takes the multi-shot branch). The first shot's keyframe becomes the thumbnail. Config flag `SHOTS_PER_EPISODE` (default **1** = the classic single-gag micro-drama). A real **3-shot Pepe episode** was generated and stitched into a single **15.5-second** video (3 × ~5s shots) and persisted to OSS.
+- **Identity-lock consistency check.** After a keyframe is generated, a `qwen3-vl-plus` vision pass (`vision_client.consistency_score()`) scores how well the character in the keyframe matches its canonical reference portrait, `0.0–1.0`, stored per take as `consistency` — a **measurable** character-consistency gate. Because the `qwen-image` endpoint does not accept a reference image, identity consistency is enforced by *scoring* the result (vision), not by conditioning the image generator. Config flag `IDENTITY_CHECK`. It calibrated correctly on real generation: a Pepe keyframe vs. the Pepe portrait scored **0.9**, and the same keyframe vs. a *different* character's portrait scored **0.0**.
 
 ### (b) The vision-grounded, self-correcting QA loop
 
@@ -302,6 +308,8 @@ All config is env-driven (`backend/config.py`). **Mock mode is the default** so 
 | `MOCK_VIDEO` | `true` | Keep video mocked even when text is live (flip to `false` for real video). |
 | `FORCE_MOCK` | `false` | Force full mock mode even with a key present. |
 | `MAX_REGEN` | `2` | Max Director retakes after a QA rejection (cost cap). |
+| `SHOTS_PER_EPISODE` | `1` | Shots per episode (setup→escalation→punchline); `>1` renders N keyframe→i2v shots stitched into one video. `1` = classic single-gag. |
+| `IDENTITY_CHECK` | `false` | Score each keyframe's character vs. its canonical portrait with `qwen3-vl-plus` (`0.0–1.0`), stored per take as a measurable consistency gate. |
 | `VIDEO_POLL_SECONDS` / `VIDEO_TIMEOUT_SECONDS` | `10` / `600` | Async video poll interval / timeout. |
 | `VIDEO_DURATION` | `0` | Clip length; `0` = model default (~5s). |
 | `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET` / `OSS_BUCKET` / `OSS_ENDPOINT` | *(empty)* | Alibaba Cloud OSS (**required for live video**). |
@@ -418,7 +426,7 @@ Cost control is a first-class design goal, not an afterthought:
 
 **The moat is three layers that compound, not one trick.**
 
-- **Character consistency by construction.** Keyframe → i2v pins the cast to an established look ([§5a](#5-the-two-signature-techniques)); competitors doing blind text-to-video can't hold a mascot across a daily series.
+- **Character consistency by construction — and now *measured*.** Keyframe → i2v pins the cast to an established look ([§5a](#5-the-two-signature-techniques)); competitors doing blind text-to-video can't hold a mascot across a daily series. An optional identity-lock check (`IDENTITY_CHECK`) scores each keyframe against its canonical portrait with `qwen3-vl-plus` (calibrated **0.9** for a matching character, **0.0** for a mismatch), so consistency is a number you can gate on, not a hope.
 - **A *measured* self-correcting QA gate.** The vision-grounded retake loop is committed and reproducible — the "Wobbly Gold Spheres…" episode passed only on take 3 (`rejected → rejected → approved` in `snapshot.json`). Unsupervised daily publishing is only safe because a step actually watches the footage.
 - **A per-channel data flywheel (the compounding advantage).** Every episode's cast, prompts, take history and QA verdicts are logged per channel, so each channel's prompting and continuity get better with volume — an advantage a one-off clip tool can't accumulate.
 
@@ -435,7 +443,8 @@ The farm proves the engine; the business is **serialized daily video as a servic
 - **Per-creator channels.** Point the pipeline at any cast + style to run a distinct daily show per creator/brand.
 - **Monetization.** Channel subscriptions + **microtransactions** to prioritize your submitted idea for tomorrow's episode (audience co-creation is already wired via the `creator` credit).
 - **Richer casts & continuity.** Deeper multi-episode story arcs and larger character rosters.
-- **Longer / multi-shot clips.** Extend beyond the ~5s single-gag format (`VIDEO_DURATION` is already a knob) toward multi-beat episodes.
+- **Multi-shot episodes — ✅ shipped.** Beyond the ~5s single-gag format: an episode can now be N chained shots (setup→escalation→punchline) stitched into one continuous video (`SHOTS_PER_EPISODE`; a real 3-shot Pepe episode stitched to 15.5s on OSS). Next: even longer multi-beat story arcs.
+- **Identity-lock consistency check — ✅ shipped.** A `qwen3-vl-plus` pass scores each keyframe's character against its canonical portrait (`IDENTITY_CHECK`), turning character consistency into a measurable per-take number.
 - **Scheduling & auto-publish.** A daily cron that runs the showrunner and publishes unsupervised — the QA loop is what makes this safe.
 - **Managed RDS + CDN.** Production Postgres on Alibaba Cloud RDS and OSS-backed CDN delivery for the feed.
 

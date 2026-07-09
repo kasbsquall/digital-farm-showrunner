@@ -17,12 +17,12 @@ Orchestrated as a **LangGraph `StateGraph`** with a real conditional self‑corr
 
 1. **Scriptwriter** *(Qwen3.7)* — invents today's absurd event and writes a tiny, punchy script.
 2. **Production Director** *(Qwen3.7)* — turns the script into a **keyframe prompt** (the funniest frozen split‑second) plus a single 5‑second **motion prompt**.
-3. **Keyframe → Video → Vision** — **Qwen‑Image** paints the keyframe, **HappyHorse image‑to‑video** animates *that exact still* into a 5‑second clip, and **Qwen3‑VL** watches the finished clip and describes what actually happens.
+3. **Keyframe → Video → Vision** — **Qwen‑Image** paints the keyframe, **HappyHorse image‑to‑video** animates *that exact still* into a 5‑second clip, and **Qwen3‑VL** watches the finished clip and describes what actually happens. An episode can also be **N chained shots** (setup→escalation→punchline) — one keyframe→clip per beat, stitched into one continuous video (a real 3‑shot Pepe episode was stitched to 15.5s).
 4. **Quality Control** *(Qwen3.7)* — compares the clip (via the vision description) to the script. On a mismatch it **rejects the take and feeds the reason back to the Director**, which regenerates — bounded by a `MAX_REGEN` token‑budget guard. Only an approved take moves on.
 5. **Packager** *(Qwen3.7)* — writes the viral title and description; the episode publishes to the feed.
 
 ## Two signature techniques
-- **Keyframe‑as‑frame‑0 for character consistency.** Instead of text‑to‑video (which drifts), we generate a still with Qwen‑Image and animate *that exact image* with image‑to‑video. The recurring character's look is locked across episodes — and the keyframe doubles as a perfectly coherent thumbnail. We show the **same character (Pepe) in two completely different episodes** to prove it.
+- **Keyframe‑as‑frame‑0 for character consistency.** Instead of text‑to‑video (which drifts), we generate a still with Qwen‑Image and animate *that exact image* with image‑to‑video. The recurring character's look is locked across episodes — and the keyframe doubles as a perfectly coherent thumbnail. We show the **same character (Pepe) in two completely different episodes** to prove it. An optional **identity‑lock** check makes this *measurable*: a Qwen3‑VL pass scores each keyframe's character against its canonical portrait (`0.0–1.0`) — enforced by *scoring* the result, since Qwen‑Image takes no reference image (calibrated 0.9 for a matching character, 0.0 for a mismatch).
 - **Vision‑grounded, self‑correcting QA.** A Qwen3‑VL vision pass describes what the video *actually* shows, and QA + Packager reason over that — not just the intended script — closing the text↔video mismatch that plagues AI video, and enabling an autonomous "retake" loop.
 
 ## Built on Qwen Cloud + Alibaba Cloud
@@ -36,7 +36,7 @@ FastAPI (SSE streaming) · LangGraph · SQLAlchemy · Next.js 14 (App Router) ·
 Describe any character — a name, a personality, a look — and Qwen‑Image sculpts an original claymation portrait on the spot. It joins the cast instantly and is ready to star in the next episode. This is the "creator economy" wedge: an autonomous studio for serialized, on‑brand short video.
 
 ## What's next
-Per‑creator channels, subscription + microtransaction monetization, longer multi‑shot episodes, and a growing library of user‑created characters — the same engine, scaled from one farm to every creator's daily show.
+Per‑creator channels, subscription + microtransaction monetization, and a growing library of user‑created characters — the same engine, scaled from one farm to every creator's daily show. (Multi‑shot episodes and the measurable identity‑lock consistency check already shipped; next is even longer multi‑beat story arcs.)
 
 ## Try it / repo
 Public, MIT‑licensed repository with a one‑command Alibaba Cloud deploy and a zero‑cost demo mode so anyone can stand it up. Architecture diagram and deployment proof included in `docs/`.

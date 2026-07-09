@@ -55,6 +55,22 @@ the **highest-scoring take** is published rather than the last one. Retakes are 
 **surgical**: a rejected take re-animates the *existing* character-consistent keyframe with
 the corrected motion, so a retake costs one video call, not a full re-render.
 
+## Identity-lock — a second measured gate
+
+Character consistency is also measured, not just asserted. With `IDENTITY_CHECK` enabled,
+a `qwen3-vl-plus` pass (`backend/services/vision_client.py::consistency_score()`) scores
+each generated keyframe's character against its canonical reference portrait, `0.0–1.0`,
+stored per take as `consistency`. Because the `qwen-image` endpoint accepts no reference
+image, identity consistency is enforced by *scoring* the result (vision), not by
+conditioning the image generator.
+
+On real Alibaba Cloud generation it calibrated correctly at the two extremes:
+
+| Comparison | Score |
+|---|---|
+| Pepe keyframe vs. Pepe portrait (match) | **0.9** |
+| Pepe keyframe vs. a different character's portrait (mismatch) | **0.0** |
+
 ## Honest caveats
 
 - 14 labeled cases is a smoke-scale eval, not a benchmark; the descriptions are curated to

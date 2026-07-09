@@ -1,0 +1,126 @@
+{
+  "characters": [
+    {
+      "name": "Lola",
+      "species": "cow",
+      "personality": "A hopeless romantic who falls head-over-hooves in love with the most random objects — a fencepost, a passing cloud, a shiny bucket.",
+      "visual_desc": "A white cow with black spots, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, big dreamy lovestruck eyes, a little daisy tucked behind one ear.",
+      "image_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/517821bd408f.png"
+    },
+    {
+      "name": "Pepe",
+      "species": "pig",
+      "personality": "The mud philosopher. Comments on everything with deep-sounding nonsense while never leaving his puddle.",
+      "visual_desc": "A chubby pink pig lounging in mud, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, a straw of hay in his mouth, half-closed thoughtful eyes.",
+      "image_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/e86e4d28a745.png"
+    },
+    {
+      "name": "Nina",
+      "species": "hen",
+      "personality": "The coop's breaking-news reporter. Documents every trivial event as a world-shaking scoop.",
+      "visual_desc": "A small nervous brown hen, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, tiny notebook and pencil, wide alert eyes, feathers slightly frazzled.",
+      "image_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/23fb01cfaa4d.png"
+    },
+    {
+      "name": "Gus",
+      "species": "goat",
+      "personality": "A chaotic troublemaker who eats absolutely everything — laundry, fences, important documents — with zero remorse.",
+      "visual_desc": "A scruffy grey goat with a lopsided grin, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, one horn slightly bent, a scrap of chewed cloth hanging from his mouth.",
+      "image_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/71a3dedc00f6.png"
+    },
+    {
+      "name": "Dora",
+      "species": "duck",
+      "personality": "A dramatic diva and conspiracy theorist who is convinced everything on the farm is a plot against her.",
+      "visual_desc": "A glossy white duck with an over-the-top expression, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, tiny sunglasses pushed up on her head, suspicious raised brow.",
+      "image_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/6a0132b31b3d.png"
+    },
+    {
+      "name": "Bex",
+      "species": "sheep",
+      "personality": "An anxious overthinker who agrees with whoever spoke last and panics about decisions that don't matter.",
+      "visual_desc": "A fluffy cream sheep with a worried face, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, enormous nervous eyes, wool sticking out in tufts.",
+      "image_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/8f3ebed1c89b.png"
+    },
+    {
+      "name": "Momo",
+      "species": "donkey",
+      "personality": "The deadpan pessimist. Responds to every exciting event with a flat, gloomy one-liner.",
+      "visual_desc": "A grey droopy-eared donkey with heavy eyelids, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, unimpressed deadpan expression, slightly slouched.",
+      "image_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/c48f035dc5f4.png"
+    },
+    {
+      "name": "Kiki",
+      "species": "goose",
+      "personality": "The self-appointed, extremely aggressive security guard of the pond. Honks first, asks questions never.",
+      "visual_desc": "A big grey-and-white goose with a long S-curved neck and a chunky bright-orange knob-billed beak, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, wearing a tiny navy security cap, furious tiny eyes, neck stretched forward menacingly mid-honk.",
+      "image_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/characters/8f08801876dc.png"
+    }
+  ],
+  "episodes": [
+    {
+      "creator": null,
+      "event": "Kiki aggressively attacks a floating leaf, slips into the pond, and emerges with it stuck on her beak while Momo watches.",
+      "script": "KIKI: *hissing at a floating leaf* You shall not pass!\n*Kiki charges, slips on mud, SPLASH! Pops up with the leaf stuck on her beak like a tiny beret.*\nMOMO: *stares flatly* The leaf strikes back.",
+      "characters_used": [
+        "Kiki",
+        "Momo"
+      ],
+      "video_prompt": "KEYFRAME: A hilarious claymation stop-motion plasticine scene in Aardman style with visible fingerprints in the clay. In the foreground, Kiki, a chunky white goose with big expressive eyes, furious tiny pupils, and flared wings, is sitting in a small mud puddle with her neck stretched forward menacingly, but a single green leaf is stuck flat on the very tip of her beak like a tiny French beret. In the background, Momo, a chunky grey droopy-eared donkey with heavy eyelids and a slightly slouched posture, stares with a completely unimpressed deadpan expression and big expressive eyes. Cinematic framing, bright farm background with wooden fences and green grass, shallow depth of field focusing on the leaf-beret.\nMOTION: Kiki pops up from the mud puddle in the foreground, the green leaf slaps perfectly onto her beak like a beret. She shakes her head once, but the leaf stays stubbornly stuck. In the background, Momo slowly blinks his heavy eyelids in deadpan judgment. Subtle slow camera push-in.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/1da19ed28d5a.mp4",
+      "video_description": "The white duck, wearing a green leaf on its head, sits in a muddy puddle with wings spread wide and mouth open, appearing animated. It then flaps its wings vigorously, splashing mud upward. As the duck flaps, the camera zooms in slightly and shifts focus toward the donkey, who remains seated calmly on the grass, blinking slowly and showing no reaction to the splashing. The sequence ends with the duck turning its head toward the donkey while still mid-flap, and the donkey maintaining its placid posture—no direct physical contact or impact occurs between them.",
+      "qa_status": "approved",
+      "qa_notes": "The video accurately captures the main characters and the core action of the scene. The duck is shown in a muddy puddle with a leaf on its head, splashing around, while the donkey remains in the background with a deadpan, blinking expression. The subtle camera push-in is also present. There are no serious visual incoherencies, continuity errors, or technical issues.",
+      "qa_attempts": 1,
+      "title": "Leaf-Crowned Duck Throws Muddy Tantrum at Unbothered Donkey 🦆💦",
+      "thumbnail_hint": "A split focus shot showing the white duck mid-flap in a muddy puddle with a green leaf on its head and mud flying, contrasted with the donkey sitting calmly on the grass in the background with a deadpan, unbothered stare.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/1d175b3f5956.png",
+      "description": "After losing a battle to a leaf, this white duck sits in a muddy puddle throwing a spectacular, mud-splashing tantrum while wearing its prize as a tiny beret. The donkey just sits on the grass blinking slowly, completely unfazed by the chaotic flapping and flying dirt. #Claymation #FarmDrama #Unbothered",
+      "status": "published"
+    },
+    {
+      "creator": null,
+      "event": "Bruno delivers a fiery union speech from a wooden crate while Nina records, until Gus silently eats the crate from underneath, causing Bruno to instantly drop out of sight.",
+      "script": "Bruno: Fellow workers, we must seize the—\nNina: Scoop! A historic rally!\nGus: *CHOMP*\nBruno: *drops out of frame with a clay SQUELCH*\nNina: ...He's been swallowed by the floorboards!",
+      "characters_used": [
+        "Bruno",
+        "Nina",
+        "Gus"
+      ],
+      "video_prompt": "KEYFRAME: Claymation stop-motion style, Aardman-style plasticine with visible thumbprints. In the foreground, Gus, a scruffy grey goat with a lopsided grin, big expressive eyes, chunky proportions, one slightly bent horn, and a scrap of chewed cloth hanging from his mouth, happily chews on a tiny handmade protest placard. In the background, Nina, a small nervous brown hen with big expressive wide alert eyes, chunky proportions, and slightly frazzled feathers, stares in shock at a perfectly chunky, red-clay-shaped hole in the rustic wooden farm floorboards. Her tiny notebook and pencil are frozen in mid-air. Cinematic framing, humorous, vibrant lighting.\nMOTION: Gus happily chews the tiny placard with a rhythmic side-to-side jaw motion. Nina slowly leans over the edge of the chunky red clay hole in the floorboards, her frazzled feathers ruffling, and slowly drops her tiny notebook and pencil into the hole. Subtle, slow camera push-in.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/4f24a5d30954.mp4",
+      "video_description": "The goat holds a tattered sign reading “BAH RIGHTS!” in its mouth and stands beside a red-rimmed hole in the wooden floor. The chicken, holding a notepad and pencil, initially observes, then leans forward and points its left wing toward the hole. As the chicken points, the goat begins moving out of frame to the left, and the chicken’s expression shifts to alarm—its eyes widen and beak opens—as it looks down into the hole, suggesting the pointing gesture has drawn attention to a sudden danger or surprise below.",
+      "qa_status": "approved",
+      "qa_notes": "The video reasonably reflects the script's intent. The main characters (Gus as a goat, Nina as a chicken) and core actions (Gus chewing, the hole in the floorboards, and Nina's alarmed reaction looking into the hole) are clearly present. While Bruno's physical fall isn't explicitly detailed in the visual analysis, Nina's reaction to the hole successfully fulfills the narrative beat without any serious visual incoherence or technical issues.",
+      "qa_attempts": 1,
+      "title": "Reporter Chicken Points at a Mystery Floor Hole and Instantly Freaks Out! 🐔🕳️",
+      "thumbnail_hint": "Extreme close-up of the claymation chicken with comically wide, terrified eyes and an open beak, peering down into a bright red-rimmed hole in the wooden floorboards, while a blurred goat holding a 'BAH RIGHTS!' sign walks away in the background.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/aa510ecb4804.png",
+      "description": "When the claymation chicken reporter points her wing at a suspicious red-rimmed hole in the floor, she expects a big scoop but gets a massive scare instead! Watch her eyes bulge in pure terror as the goat protestor wanders off and she realizes what is actually lurking down there. #Claymation #FarmDrama #PlotTwist",
+      "status": "published"
+    },
+    {
+      "creator": "@kasbsquall",
+      "event": "Dora fires a tiny bazooka at a hay bale, blasting it into a massive cloud of confetti, but the extreme recoil launches her backward at Mach 3 where she sticks head-first into a water trough, her little duck butt wiggling straight up.",
+      "script": "DORA: The Freemasons are hiding in the hay!\n[Dora fires a tiny bazooka. BOOM! The hay bale explodes into a massive cloud of neon confetti.]\n[The extreme recoil launches Dora backward at Mach 3. She sticks head-first into a water trough, her little clay duck butt wiggling straight up in the air.]\nMOMO: We're all just waiting to be eaten.",
+      "characters_used": [
+        "Dora",
+        "Momo"
+      ],
+      "video_prompt": "KEYFRAME: A hilarious claymation stop-motion shot of a glossy white chunky plasticine duck named Dora stuck head-first in a rustic wooden water trough, only her plump white clay butt and little orange feet sticking straight up in the air, Aardman-style with visible thumbprints in the clay, her tiny sunglasses pushed up on her head now resting on the rim of the trough. In the background, a grey chunky plasticine donkey named Momo with droopy ears and heavy eyelids stands with an unimpressed deadpan expression, surrounded by scattered neon confetti. Cinematic farm background, bright sunny lighting, highly detailed plasticine textures.\nMOTION: Dora's chunky white clay duck butt wiggles and kicks frantically in the water trough, splashing tiny water droplets, while Momo the grey donkey slowly blinks his heavy eyelids and shifts his weight with an unimpressed sigh. Subtle slow camera push-in, stop-motion claymation animation style, snappy and comedic timing.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/b262ea75ae0c.mp4",
+      "video_description": "A white clay duck lies upside down in a wooden tub, its orange webbed feet flailing in the air while water splashes around it. The grey donkey stands beside the tub, observing with a neutral expression; sunglasses rest on the tub’s rim near him. As the duck continues to thrash, the donkey leans slightly forward and picks up the sunglasses with his mouth. The duck then rolls over and exits the tub to the right, leaving the donkey alone holding the sunglasses.",
+      "qa_status": "approved",
+      "qa_notes": "The main characters and core action of the duck stuck head-first in the trough with its feet flailing while the donkey observes are clearly present. Minor extra actions like the sunglasses and the duck exiting do not constitute serious incoherence.",
+      "qa_attempts": 1,
+      "title": "Flailing Duck Gets Robbed of His Sunglasses by a Chill Donkey 😎🦆",
+      "thumbnail_hint": "Extreme close-up of the grey donkey smugly holding the sunglasses in its mouth, with the blurred white duck still upside down and flailing its orange feet in the splashing wooden tub in the background.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/f566ccd56aa9.png",
+      "description": "Your farm buddy throws a massive watery tantrum, so you decide it's the perfect time to casually bite his sunglasses right off the tub's rim. The duck eventually rolls over and waddles away in defeat, leaving the donkey to rock the stolen shades all by himself. #ClaymationFarm #StolenShades #FarmDrama",
+      "status": "published"
+    }
+  ]
+}

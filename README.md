@@ -365,18 +365,23 @@ Full steps and proof-capture checklist: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.m
 
 The mock harness makes the pipeline **fully deterministic and offline-testable**: with `FORCE_MOCK=true`, every agent returns a canned response derived from its own inputs, so the entire LangGraph flow (including the QA→Director regen edge) can be exercised without any network or credits.
 
-Tests are expected under `backend/tests/`, run with **pytest**:
+A **31-test pytest suite** lives under [`backend/tests/`](backend/tests/) and runs fully offline:
 
 ```bash
 cd backend
-pip install pytest
-FORCE_MOCK=true pytest            # deterministic, offline
-FORCE_MOCK=true pytest --cov=.    # with coverage
+pip install pytest httpx
+FORCE_MOCK=true python -m pytest tests/ -q     # 31 passed
 ```
 
-Recommended coverage targets: the orchestrator's conditional edge (`_after_qa`: approve / retake / out-of-budget), the JSON extractor/repair (`agents/_json.py`), each agent's fallback-on-missing-key behavior, and the OSS-required guard in `video_node`.
+Coverage highlights:
 
-> **Status note:** the mock-mode design is built for this, but a `backend/tests/` suite is not yet committed in this repository — the commands above are the intended entry point.
+| Test file | What it locks in |
+|---|---|
+| `test_regen.py` | The **self-correcting loop**: a rejected take is regenerated, the corrected take is approved & published, and the auditable take history accumulates — plus the budget-cap path. |
+| `test_orchestrator.py` | `_after_qa` routing (approve / retake / out-of-budget) and graph node ids. |
+| `test_pipeline.py` | Full mock-mode E2E: `run_stream` yields every stage in order and persists an Episode. |
+| `test_api.py` | `/health`, `/characters` (+409 duplicate), `/episodes`, the SSE stream, and the in-flight lock. |
+| `test_json.py` / `test_config.py` | JSON repair (fences, trailing commas, smart quotes) and endpoint auto-selection by key prefix. |
 
 ---
 

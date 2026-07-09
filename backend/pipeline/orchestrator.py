@@ -25,7 +25,7 @@ from langgraph.graph import StateGraph, START, END
 from sqlalchemy.orm import Session
 
 from config import settings
-from database.models import Character, Episode
+from database.models import Character, Episode, DEFAULT_CHANNEL
 from agents import scriptwriter, production_director, qa_reviewer, packager
 from services.video_gen_client import generate_video
 from services import oss_client, vision_client, image_gen_client, video_gen_client, usage
@@ -255,7 +255,9 @@ GRAPH = _build_graph()
 
 # --- Public entry ----------------------------------------------------------
 
-def _load_context(db: Session) -> tuple[list[dict], list[str], list[str]]:
+def _load_context(db: Session, channel_id: str = DEFAULT_CHANNEL) -> tuple[list[dict], list[str], list[str]]:
+    """Load a single channel's cast + history. Scoping by channel is what makes the
+    data flywheel per-tenant: a channel's votes bias only that channel's writing."""
     characters = [
         {
             "name": c.name,
@@ -264,17 +266,18 @@ def _load_context(db: Session) -> tuple[list[dict], list[str], list[str]]:
             "visual_desc": c.visual_desc,
             "image_url": c.image_url,  # canonical portrait → identity-lock reference
         }
-        for c in db.query(Character).all()
+        for c in db.query(Character).filter(Character.channel_id == channel_id).all()
     ]
     recent = [
         e.event
-        for e in db.query(Episode).order_by(Episode.created_at.desc()).limit(RECENT_LIMIT)
+        for e in db.query(Episode).filter(Episode.channel_id == channel_id)
+        .order_by(Episode.created_at.desc()).limit(RECENT_LIMIT)
         if e.event
     ]
-    # Data flywheel: the episodes the audience upvoted most bias tomorrow's writing.
+    # Data flywheel: the episodes THIS channel's audience upvoted most bias its next script.
     favorites = [
         e.event
-        for e in db.query(Episode).filter(Episode.votes > 0)
+        for e in db.query(Episode).filter(Episode.channel_id == channel_id, Episode.votes > 0)
         .order_by(Episode.votes.desc()).limit(3)
         if e.event
     ]
@@ -317,13 +320,15 @@ def _episode_from_state(final: FarmState) -> Episode:
     )
 
 
-def run_daily_episode(db: Session, idea: str = "", creator: str = "") -> Episode:
+def run_daily_episode(db: Session, idea: str = "", creator: str = "",
+                      channel_id: str = DEFAULT_CHANNEL) -> Episode:
     usage.reset()
-    characters, recent, favorites = _load_context(db)
+    characters, recent, favorites = _load_context(db, channel_id)
     final: FarmState = GRAPH.invoke(
         {"characters": characters, "recent": recent, "favorites": favorites, "idea": idea}
     )
     episode = _episode_from_state(final)
+    episode.channel_id = channel_id
     episode.creator = (creator or "").strip()[:48] or None
     db.add(episode)
     db.commit()
@@ -331,13 +336,13 @@ def run_daily_episode(db: Session, idea: str = "", creator: str = "") -> Episode
     return episode
 
 
-def run_stream(db: Session, idea: str = "", creator: str = ""):
+def run_stream(db: Session, idea: str = "", creator: str = "", channel_id: str = DEFAULT_CHANNEL):
     """Generator yielding (stage, data) per pipeline node, then ('done', episode).
 
     Powers the live "Studio" wizard so the user watches each agent work.
     """
     usage.reset()
-    characters, recent, favorites = _load_context(db)
+    characters, recent, favorites = _load_context(db, channel_id)
     final: FarmState = {}
     for chunk in GRAPH.stream(
         {"characters": characters, "recent": recent, "favorites": favorites, "idea": idea},
@@ -353,6 +358,7 @@ def run_stream(db: Session, idea: str = "", creator: str = ""):
                 time.sleep(settings.demo_pace_seconds)
 
     episode = _episode_from_state(final)
+    episode.channel_id = channel_id
     episode.creator = (creator or "").strip()[:48] or None
     db.add(episode)
     db.commit()

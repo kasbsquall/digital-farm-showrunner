@@ -86,8 +86,23 @@ export function ossThumb(url: string | null | undefined, w: number): string | un
   return `${url}?x-oss-process=image/resize,w_${w}/quality,q_80/format,webp`;
 }
 
+/** Stable per-browser id so a vote is idempotent (the server dedups on it). */
+function voterId(): string {
+  if (typeof window === "undefined") return "anon";
+  let id = window.localStorage.getItem("muckflix_voter");
+  if (!id) {
+    id = (crypto.randomUUID?.() ?? `v_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+    window.localStorage.setItem("muckflix_voter", id);
+  }
+  return id;
+}
+
 export async function voteEpisode(id: number): Promise<number> {
-  const res = await fetch(`${API}/episodes/${id}/vote`, { method: "POST" });
+  const res = await fetch(`${API}/episodes/${id}/vote`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ voter_id: voterId() }),
+  });
   if (!res.ok) throw new Error("Vote failed");
   const data = await res.json();
   return data.votes as number;

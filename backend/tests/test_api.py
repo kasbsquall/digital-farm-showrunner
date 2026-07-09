@@ -53,6 +53,34 @@ def test_sse_stream_returns_event_lines(seeded_db, client):
         assert f"event: {stage}" in text
 
 
+def test_vote_is_idempotent_per_voter(seeded_db, client):
+    ep_id = client.post("/episodes/generate", json={"idea": "chaos"}).json()["id"]
+
+    first = client.post(f"/episodes/{ep_id}/vote", json={"voter_id": "alice"})
+    assert first.status_code == 200 and first.json() == {"id": ep_id, "votes": 1, "counted": True}
+    # Same voter re-posts → not counted again (can't spam the flywheel).
+    again = client.post(f"/episodes/{ep_id}/vote", json={"voter_id": "alice"})
+    assert again.json() == {"id": ep_id, "votes": 1, "counted": False}
+    # A different voter does count.
+    bob = client.post(f"/episodes/{ep_id}/vote", json={"voter_id": "bob"})
+    assert bob.json() == {"id": ep_id, "votes": 2, "counted": True}
+
+
+def test_vote_requires_a_voter_id(seeded_db, client):
+    ep_id = client.post("/episodes/generate", json={"idea": "chaos"}).json()["id"]
+    resp = client.post(f"/episodes/{ep_id}/vote", json={"voter_id": ""})
+    assert resp.status_code == 400
+
+
+def test_episodes_are_scoped_by_channel(seeded_db, client):
+    client.post("/episodes/generate", json={"idea": "farm show"})   # default "farm" channel
+
+    farm = client.get("/episodes").json()                            # defaults to "farm"
+    other = client.get("/episodes", params={"channel": "space"}).json()
+    assert len(farm) == 1 and all(e["channel_id"] == "farm" for e in farm)
+    assert other == []                                               # another channel sees none of it
+
+
 def test_generate_conflicts_when_lock_held(client):
     # Simulate a concurrent in-flight generation by holding the lock directly.
     assert main._generation_lock.acquire(blocking=False)

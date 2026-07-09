@@ -13,8 +13,10 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from sqlalchemy.exc import IntegrityError
+
 from database.db import Base, engine, get_db, SessionLocal
-from database.models import Character, Episode
+from database.models import Character, Episode, Vote, DEFAULT_CHANNEL
 from database.generate_portraits import STYLE
 from pipeline.orchestrator import run_daily_episode, run_stream, generation_lock
 from services import image_gen_client, oss_client
@@ -42,6 +44,7 @@ app.add_middleware(
 def _episode_dict(e: Episode) -> dict:
     return {
         "id": e.id,
+        "channel_id": e.channel_id,
         "creator": e.creator,
         "title": e.title,
         "event": e.event,
@@ -78,6 +81,7 @@ def health():
 class GenerateRequest(BaseModel):
     idea: str = ""
     creator: str = ""
+    channel: str = DEFAULT_CHANNEL
 
 
 # Only one generation may run at a time: the pipeline does long, blocking I/O and
@@ -91,10 +95,11 @@ def generate_episode(req: GenerateRequest | None = None, db: Session = Depends(g
     """Run the full 4-agent pipeline and return the new episode."""
     idea = (req.idea if req else "")[:500]
     creator = (req.creator if req else "")[:48]
+    channel = ((req.channel if req else "") or DEFAULT_CHANNEL).strip()[:48] or DEFAULT_CHANNEL
     if not _generation_lock.acquire(blocking=False):
         raise HTTPException(status_code=409, detail="A generation is already running. Try again shortly.")
     try:
-        episode = run_daily_episode(db, idea=idea, creator=creator)
+        episode = run_daily_episode(db, idea=idea, creator=creator, channel_id=channel)
         return _episode_dict(episode)
     except Exception as e:
         db.rollback()
@@ -107,8 +112,10 @@ def generate_episode(req: GenerateRequest | None = None, db: Session = Depends(g
 def generate_episode_stream(
     idea: str = Query("", max_length=500),
     creator: str = Query("", max_length=48),
+    channel: str = Query(DEFAULT_CHANNEL, max_length=48),
 ):
     """Server-Sent Events: emits each pipeline stage live for the Studio wizard."""
+    channel_id = (channel or DEFAULT_CHANNEL).strip()[:48] or DEFAULT_CHANNEL
 
     def event_source():
         if not _generation_lock.acquire(blocking=False):
@@ -116,7 +123,7 @@ def generate_episode_stream(
             return
         db = SessionLocal()
         try:
-            for stage, data in run_stream(db, idea=idea, creator=creator):
+            for stage, data in run_stream(db, idea=idea, creator=creator, channel_id=channel_id):
                 yield f"event: {stage}\ndata: {json.dumps(data, ensure_ascii=False, default=str)}\n\n"
         except Exception as e:  # surface failures to the client
             db.rollback()
@@ -133,8 +140,8 @@ def generate_episode_stream(
 
 
 @app.get("/characters")
-def list_characters(db: Session = Depends(get_db)):
-    rows = db.query(Character).all()
+def list_characters(channel: str = Query(DEFAULT_CHANNEL, max_length=48), db: Session = Depends(get_db)):
+    rows = db.query(Character).filter(Character.channel_id == channel).all()
     return [
         {"name": c.name, "species": c.species, "personality": c.personality,
          "image_url": c.image_url}
@@ -143,20 +150,37 @@ def list_characters(db: Session = Depends(get_db)):
 
 
 @app.get("/episodes")
-def list_episodes(db: Session = Depends(get_db)):
-    rows = db.query(Episode).order_by(Episode.created_at.desc()).all()
+def list_episodes(channel: str = Query(DEFAULT_CHANNEL, max_length=48), db: Session = Depends(get_db)):
+    rows = (db.query(Episode).filter(Episode.channel_id == channel)
+            .order_by(Episode.created_at.desc()).all())
     return [_episode_dict(e) for e in rows]
 
 
+class VoteRequest(BaseModel):
+    voter_id: str = ""
+
+
 @app.post("/episodes/{episode_id}/vote")
-def vote_episode(episode_id: int, db: Session = Depends(get_db)):
-    """Audience upvote — the data flywheel: top-voted events bias tomorrow's Scriptwriter."""
+def vote_episode(episode_id: int, req: VoteRequest | None = None, db: Session = Depends(get_db)):
+    """Audience upvote — the data flywheel. Idempotent per (episode, voter): re-posting
+    the same vote does not inflate the count, so the signal can't be trivially spammed."""
     ep = db.get(Episode, episode_id)
     if ep is None:
         raise HTTPException(status_code=404, detail="Episode not found.")
+    voter = ((req.voter_id if req else "") or "").strip()[:64]
+    if not voter:
+        raise HTTPException(status_code=400, detail="A voter_id is required.")
+    if db.query(Vote).filter(Vote.episode_id == episode_id, Vote.voter_id == voter).first():
+        return {"id": ep.id, "votes": ep.votes or 0, "counted": False}
+    db.add(Vote(episode_id=episode_id, voter_id=voter))
     ep.votes = (ep.votes or 0) + 1
-    db.commit()
-    return {"id": ep.id, "votes": ep.votes}
+    try:
+        db.commit()
+    except IntegrityError:  # concurrent duplicate slipped past the check → treat as already-counted
+        db.rollback()
+        db.refresh(ep)
+        return {"id": ep.id, "votes": ep.votes or 0, "counted": False}
+    return {"id": ep.id, "votes": ep.votes, "counted": True}
 
 
 class CreateCharacter(BaseModel):
@@ -164,15 +188,17 @@ class CreateCharacter(BaseModel):
     species: str = "creature"
     personality: str
     look: str = ""
+    channel: str = DEFAULT_CHANNEL
 
 
 @app.post("/characters")
 def create_character(req: CreateCharacter, db: Session = Depends(get_db)):
     """Let anyone add their own claymation character to the cast (with an AI portrait)."""
     name = req.name.strip()[:32]
+    channel = (req.channel or DEFAULT_CHANNEL).strip()[:48] or DEFAULT_CHANNEL
     if not name:
         raise HTTPException(status_code=400, detail="A name is required.")
-    if db.query(Character).filter_by(name=name).first():
+    if db.query(Character).filter_by(channel_id=channel, name=name).first():
         raise HTTPException(status_code=409, detail=f"'{name}' is already in the cast.")
 
     look = (req.look.strip() or f"a {req.species}, {req.personality}")
@@ -187,6 +213,7 @@ def create_character(req: CreateCharacter, db: Session = Depends(get_db)):
             print(f"[create_character] portrait generation failed: {e}")
 
     c = Character(
+        channel_id=channel,
         name=name,
         species=req.species.strip()[:32] or "creature",
         personality=req.personality.strip()[:400],

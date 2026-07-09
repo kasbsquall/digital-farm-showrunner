@@ -1,9 +1,13 @@
 """Data models: Character, Episode. Kept minimal for the MVP pipeline."""
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, Integer, Float, String, Text, DateTime, JSON
+from sqlalchemy import Column, Integer, Float, String, Text, DateTime, JSON, UniqueConstraint
 
 from database.db import Base
+
+# A channel is one creator's show: its own cast + its own audience whose votes bias
+# only that channel's writing. The demo runs a single "farm" channel by default.
+DEFAULT_CHANNEL = "farm"
 
 
 def _now() -> datetime:
@@ -11,11 +15,13 @@ def _now() -> datetime:
 
 
 class Character(Base):
-    """A recurring farm character used as narrative context by Agent 1."""
+    """A recurring character used as narrative context by Agent 1 (scoped to a channel)."""
     __tablename__ = "characters"
+    __table_args__ = (UniqueConstraint("channel_id", "name", name="uq_character_channel_name"),)
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(64), unique=True, nullable=False)
+    channel_id = Column(String(48), default=DEFAULT_CHANNEL, nullable=False, index=True)
+    name = Column(String(64), nullable=False)  # unique per channel (see __table_args__)
     species = Column(String(64), nullable=False)
     personality = Column(Text, nullable=False)
     visual_desc = Column(Text, nullable=False)
@@ -27,6 +33,7 @@ class Episode(Base):
     __tablename__ = "episodes"
 
     id = Column(Integer, primary_key=True)
+    channel_id = Column(String(48), default=DEFAULT_CHANNEL, nullable=False, index=True)
     created_at = Column(DateTime, default=_now)
     creator = Column(String(48))  # nickname of whoever prompted this episode
 
@@ -60,4 +67,16 @@ class Episode(Base):
     description = Column(Text)
 
     status = Column(String(16), default="draft")  # draft | published
-    votes = Column(Integer, default=0)  # audience signal → feeds tomorrow's Scriptwriter (data flywheel)
+    votes = Column(Integer, default=0)  # denormalized count of Vote rows (data flywheel signal)
+
+
+class Vote(Base):
+    """One audience upvote, deduped per (episode, voter) so the flywheel can't be
+    trivially spammed by re-posting. `voter_id` is a client-supplied stable id."""
+    __tablename__ = "votes"
+    __table_args__ = (UniqueConstraint("episode_id", "voter_id", name="uq_vote_episode_voter"),)
+
+    id = Column(Integer, primary_key=True)
+    episode_id = Column(Integer, nullable=False, index=True)
+    voter_id = Column(String(64), nullable=False)
+    created_at = Column(DateTime, default=_now)

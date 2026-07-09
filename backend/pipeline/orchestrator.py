@@ -57,7 +57,9 @@ def scriptwriter_node(state: FarmState) -> FarmState:
 
 
 def director_node(state: FarmState) -> FarmState:
-    direction = production_director.run(state["story"]["script"], state["used"])
+    # On a regeneration, feed the QA rejection notes back so the director corrects it.
+    prev_notes = state.get("qa", {}).get("qa_notes", "") if state.get("attempt") else ""
+    direction = production_director.run(state["story"]["script"], state["used"], qa_notes=prev_notes)
     return {"direction": direction}
 
 

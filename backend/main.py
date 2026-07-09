@@ -59,7 +59,12 @@ def _episode_dict(e: Episode) -> dict:
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "digital-farm-showrunner", "mock_mode": settings.use_mock}
+    return {
+        "status": "ok",
+        "service": "digital-farm-showrunner",
+        "mock_text": settings.use_mock,
+        "mock_video": settings.mock_video,
+    }
 
 
 class GenerateRequest(BaseModel):

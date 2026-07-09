@@ -52,12 +52,21 @@ def _mock(script: str, characters: list[dict]) -> str:
     }, ensure_ascii=False)
 
 
-def run(script: str, characters: list[dict]) -> dict:
+def run(script: str, characters: list[dict], qa_notes: str = "") -> dict:
     visuals = "\n".join(f"- {c['name']}: {c.get('visual_desc', '')}" for c in characters)
+    user = USER_TMPL.format(script=script, visuals=visuals)
+    if qa_notes.strip():
+        # Closed feedback loop: the previous take was rejected — fix it specifically.
+        user += (
+            f"\n\nIMPORTANT — the previous attempt was REJECTED by QA for this reason:\n"
+            f'"{qa_notes.strip()}"\n'
+            "Redesign the keyframe and motion to directly FIX that problem: make the main "
+            "action and the involved characters unmistakably clear and correct."
+        )
     text = chat(
         SYSTEM,
-        USER_TMPL.format(script=script, visuals=visuals),
-        temperature=0.6,
+        user,
+        temperature=0.7,
         mock=_mock(script, characters),
     )
     data = parse_json(text)

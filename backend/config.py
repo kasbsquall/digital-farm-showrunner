@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     image_model: str = "qwen-image-2.0"       # retratos de personajes + thumbnails
     video_poll_seconds: int = 10              # intervalo de sondeo de la tarea
     video_timeout_seconds: int = 600          # tope de espera por un video
+    # Duración del clip. 0 = usar el default del modelo (~5s). Pon p.ej. 10 para
+    # intentar clips más largos (VERIFICAR que el modelo lo acepte; cuesta más).
+    video_duration: int = 0
     # Mantener el video en mock aunque Qwen texto sea real (hasta implementar
     # el submit/poll real de generación de video).
     mock_video: bool = True

@@ -59,6 +59,44 @@
   ],
   "episodes": [
     {
+      "creator": "@kasbsquall",
+      "event": "Pepe the pig strikes a profound pose balancing on one hoof atop the fence rail, overcorrects a violent wobble, and catapults backward into his mud puddle with a colossal splash.",
+      "script": "PEPE: To truly understand the mud, one must rise above it!\nMOMO: Gravity disagrees.\nPEPE: Yeeeee-haw!",
+      "characters_used": [
+        "Pepe",
+        "Momo"
+      ],
+      "video_prompt": "KEYFRAME: A chubby pink pig (Pepe) mid-air, completely upside down, falling from a crumbling mud-tower back into a mud puddle, arms and legs flailing wildly, big expressive eyes wide with comedic panic, a straw of hay flying out of his mouth. In the foreground, a grey droopy-eared donkey (Momo) with heavy eyelids stands perfectly still, looking completely unbothered with an unimpressed deadpan expression. Both are claymation stop-motion plasticine characters, Aardman-style, visible fingerprints in the clay, chunky proportions. Farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts\nMOTION: Pepe falls rapidly downwards in a clumsy arc, splashing heavily into the mud puddle with a giant clay squish and mud splash while his straw flies out of his mouth; Momo remains perfectly still in the foreground, only his heavy eyelids blinking slowly once, with a subtle camera push-in.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/f56995f02565.mp4",
+      "video_description": "The pig sits in a muddy puddle chewing hay, while the donkey stands nearby watching. The pig then climbs onto a tall, narrow stack of mud pies, balancing with arms outstretched as the donkey observes. The pig wobbles, loses balance, and falls backward off the stack, landing flat on its back in the puddle and sending mud flying upward. The donkey remains standing, unfazed, as mud splatters onto its face and body.",
+      "qa_status": "approved",
+      "qa_notes": "The core gag of Pepe rising above the mud and subsequently falling into it is clearly executed, though minor intended details like the straw flying out and Momo's specific slow blink are not explicitly confirmed.",
+      "qa_attempts": 1,
+      "title": "Pig Scales Wobbly Mud Pie Tower, Faceplants, And Drenches Unfazed Donkey 🐷💦",
+      "thumbnail_hint": "Mid-air shot of the pig falling backward flat on his back with a massive arc of mud flying upward, while the deadpan donkey in the foreground has a fresh mud splat right on its snout.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/1e24a6200c3f.png",
+      "description": "Pepe attempts to reach mud enlightenment by scaling a wobbly tower of mud pies, only to launch himself backward flat onto his back. The resulting colossal splash completely drenches Momo the donkey, who just stands there taking the surprise mud bath like an absolute champ. #claymation #mudpuddle #farmfail",
+      "status": "published",
+      "tokens_used": 23560,
+      "cost_usd": 0.85712,
+      "votes": 0,
+      "takes": [
+        {
+          "attempt": 1,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/f56995f02565.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/1e24a6200c3f.png",
+          "keyframe_prompt": "A chubby pink pig (Pepe) mid-air, completely upside down, falling from a crumbling mud-tower back into a mud puddle, arms and legs flailing wildly, big expressive eyes wide with comedic panic, a straw of hay flying out of his mouth. In the foreground, a grey droopy-eared donkey (Momo) with heavy eyelids stands perfectly still, looking completely unbothered with an unimpressed deadpan expression. Both are claymation stop-motion plasticine characters, Aardman-style, visible fingerprints in the clay, chunky proportions. Farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "Pepe falls rapidly downwards in a clumsy arc, splashing heavily into the mud puddle with a giant clay squish and mud splash while his straw flies out of his mouth; Momo remains perfectly still in the foreground, only his heavy eyelids blinking slowly once, with a subtle camera push-in.",
+          "video_description": "The pig sits in a muddy puddle chewing hay, while the donkey stands nearby watching. The pig then climbs onto a tall, narrow stack of mud pies, balancing with arms outstretched as the donkey observes. The pig wobbles, loses balance, and falls backward off the stack, landing flat on its back in the puddle and sending mud flying upward. The donkey remains standing, unfazed, as mud splatters onto its face and body.",
+          "qa_status": "approved",
+          "qa_score": 0.85,
+          "consistency": 0.9,
+          "qa_notes": "The core gag of Pepe rising above the mud and subsequently falling into it is clearly executed, though minor intended details like the straw flying out and Momo's specific slow blink are not explicitly confirmed."
+        }
+      ]
+    },
+    {
       "creator": null,
       "event": "Kiki aggressively attacks a floating leaf, slips into the pond, and emerges with it stuck on her beak while Momo watches.",
       "script": "KIKI: *hissing at a floating leaf* You shall not pass!\n*Kiki charges, slips on mud, SPLASH! Pops up with the leaf stuck on her beak like a tiny beret.*\nMOMO: *stares flatly* The leaf strikes back.",

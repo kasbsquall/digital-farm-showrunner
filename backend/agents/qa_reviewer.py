@@ -27,8 +27,9 @@ WHAT THE VIDEO ACTUALLY SHOWS (Qwen vision analysis of the real clip):
 
 Judge the take against this rubric — ALL must hold to APPROVE:
 1. Characters: the main character(s) from the script are clearly present.
-2. Action: the core action / cause→effect of the gag is clearly happening (not a static
-   or unrelated scene).
+2. Action: the core action / cause→effect of the gag is recognizably taking place. It may
+   be understated, but it must visibly be the RIGHT action — reject a static, wrong, or
+   unrelated scene, but do not demand a perfect or exaggerated performance.
 3. Integrity: the clip is not broken, empty, blurred-beyond-recognition, or off-topic.
 Reject if any check clearly fails or is ambiguous; approve when the gag reads.
 

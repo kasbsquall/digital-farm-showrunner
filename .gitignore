@@ -20,3 +20,11 @@ Thumbs.db
 
 # Next.js generated
 next-env.d.ts
+
+# Scratch / one-off dev artifacts
+backend/_*.log
+backend/scripts_oneoff_*.py
+backend/scripts_oneoff_*.json
+backend/scripts_qaloop_*.py
+backend/scripts_qaloop_*.json
+.pytest_cache/

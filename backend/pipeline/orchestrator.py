@@ -123,14 +123,15 @@ def _build_graph():
     g.add_node("scriptwriter", scriptwriter_node)
     g.add_node("director", director_node)
     g.add_node("video", video_node)
-    g.add_node("qa", qa_node)
+    # Node id differs from the "qa" state key (langgraph forbids the collision).
+    g.add_node("qa_review", qa_node)
     g.add_node("packager", packager_node)
 
     g.add_edge(START, "scriptwriter")
     g.add_edge("scriptwriter", "director")
     g.add_edge("director", "video")
-    g.add_edge("video", "qa")
-    g.add_conditional_edges("qa", _after_qa, {"director": "director", "packager": "packager"})
+    g.add_edge("video", "qa_review")
+    g.add_conditional_edges("qa_review", _after_qa, {"director": "director", "packager": "packager"})
     g.add_edge("packager", END)
     return g.compile()
 
@@ -206,7 +207,9 @@ def run_stream(db: Session, idea: str = "", creator: str = ""):
         for node, update in chunk.items():
             if update:
                 final.update(update)
-            yield node, update or {}
+            # Keep the public SSE stage name stable ("qa") despite the internal node id.
+            stage = "qa" if node == "qa_review" else node
+            yield stage, update or {}
 
     episode = _episode_from_state(final)
     episode.creator = (creator or "").strip()[:48] or None

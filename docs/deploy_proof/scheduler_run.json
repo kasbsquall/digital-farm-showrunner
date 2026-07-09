@@ -1,0 +1,52 @@
+{
+  "channel_id": "farm",
+  "unattended": true,
+  "episodes_generated": 3,
+  "published": 2,
+  "total_cost_usd": 1.17788,
+  "note": "Produced by scheduler.run_once() with NO human trigger per episode (rotating idea bank). Each publishes strictly on the QA verdict; rejected episodes ship as drafts. Real Alibaba Cloud generation.",
+  "runs": [
+    {
+      "n": 1,
+      "episode_id": 1,
+      "created_at": "2026-07-09 21:32:30.212279",
+      "channel_id": "farm",
+      "creator": "@showrunner",
+      "title": "Sunglasses Duck Accuses Donkey of Being a Gnome! 🦆👉",
+      "qa_status": "approved",
+      "qa_attempts": 1,
+      "status": "published",
+      "tokens_used": 15408,
+      "cost_usd": 0.300816,
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/98a3441d10f8.mp4"
+    },
+    {
+      "n": 2,
+      "episode_id": 2,
+      "created_at": "2026-07-09 21:39:42.876653",
+      "channel_id": "farm",
+      "creator": "@showrunner",
+      "title": "Duck Face-Plants in Feed, Goat Catches the Flying Hat! 🦆🧢",
+      "qa_status": "approved",
+      "qa_attempts": 1,
+      "status": "published",
+      "tokens_used": 17265,
+      "cost_usd": 0.30453,
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/4bf038a1f2c0.mp4"
+    },
+    {
+      "n": 3,
+      "episode_id": 3,
+      "created_at": "2026-07-09 21:51:13.081591",
+      "channel_id": "farm",
+      "creator": "@showrunner",
+      "title": "Sheep Shoves Giant Mud Clump on Chill Pig, Sinks Himself! 🐑💦",
+      "qa_status": "rejected",
+      "qa_attempts": 2,
+      "status": "draft",
+      "tokens_used": 26267,
+      "cost_usd": 0.572534,
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/3dce1847c525.mp4"
+    }
+  ]
+}

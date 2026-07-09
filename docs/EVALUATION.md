@@ -72,6 +72,13 @@ blended cost), exercising both outcomes:
 - **A real approved episode.** A 3-shot multi-shot episode was **approved on the first take**
   (consistency **0.9**, blended cost **$0.86**) and is committed to `snapshot.json`
   (published) — the convergence outcome, on real infra.
+- **A real *unattended* run — the autonomy claim, demonstrated.** The scheduler
+  (`scheduler.run_once`) produced **3 episodes with no per-episode human trigger** (rotating
+  idea bank): 2 auto-published on a passing QA verdict (~$0.30 each) and 1 held back as a
+  **draft** after QA rejected it on a real retake ($0.57) — total **$1.18**. Full evidence
+  (real timestamps ~7–12 min apart, per-episode receipts, QA verdicts) is committed to
+  [`deploy_proof/scheduler_run.json`](deploy_proof/scheduler_run.json). This is the
+  "runs a channel by itself" claim shown end-to-end, not just wired.
 
 ## Identity-lock — a second measured gate
 

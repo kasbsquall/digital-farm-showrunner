@@ -59,6 +59,108 @@
   ],
   "episodes": [
     {
+      "channel_id": null,
+      "creator": "@kasbsquall",
+      "event": "Gus the goat casually chomps the fence rail right under a wobbling Pepe, sending the pig plummeting into a flat pancake as a giant glob of thick mud slowly oozes off his squished snout.",
+      "script": "PEPE: True enlightenment requires perfect bal—\nGUS: *CRUNCH!*\nPEPE: *SPLAT!* ...ah, the sweet mud of reality.",
+      "characters_used": [
+        "Pepe",
+        "Gus"
+      ],
+      "video_prompt": "KEYFRAME: Claymation plasticine stop-motion, Aardman style, visible clay fingerprints. Cinematic slightly-wide shot, farm background with wooden fences and hay, bright natural daylight. Gus, a scruffy grey goat with a lopsided grin, claymation stop-motion plasticine character, visible fingerprints in the clay, big expressive eyes, chunky proportions, one horn slightly bent, and a scrap of chewed cloth hanging from his mouth, is stepping down heavily. Gus's hoof is pressing directly onto Pepe, a chubby pink pig, claymation stop-motion plasticine character, visible fingerprints in the clay, big expressive eyes, chunky proportions, and a straw of hay in his mouth. Gus is actively squishing Pepe deep into the mud. Pepe's eyes are comically bulging and the straw of hay is flying out of his mouth as a thick brown mud splash erupts around them.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts\nMOTION: Gus the scruffy grey goat presses his heavy hoof down hard, continuously squishing Pepe the chubby pink pig flatter and flatter into the mud, causing a comical eruption of thick brown mud splashes to fly upwards while Pepe's eyes bulge further and his straw of hay flies out, accompanied by a subtle camera push-in.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/91c22863a0ac.mp4",
+      "video_description": "A pink pig is partially submerged in a muddy puddle, holding a straw in its mouth. A black sheep stands beside the puddle and repeatedly slaps the pig’s head with its hoof, causing mud to splash upward each time. With each slap, the pig’s ears flap and its eyes widen in reaction; after the third slap, the pig’s head is pushed downward into the mud, submerging it further until only its eyes and snout remain visible above the surface. The sheep continues holding its hoof on the pig’s head as the mud settles.",
+      "qa_status": "rejected",
+      "qa_notes": "Regenerate the clip to feature the scruffy grey goat instead of the black sheep, and change the action from slapping the pig's head to stepping on and squishing the pig into the mud.",
+      "qa_attempts": 3,
+      "title": "Sheep Drops Hay on Pig, Triggering a Wild Mud Splash! 🐑💦",
+      "thumbnail_hint": "A close-up of the pink pig with straw on its snout, mouth wide open showing teeth in shock, as a giant splash of brown mud flies upward from a piece of hay dropped by a grey sheep.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/12a8be570200.png",
+      "description": "This pink pig was just minding its own business in a puddle until a grey sheep dropped a piece of hay right on its head! The sudden impact triggers a massive muddy splash that leaves the pig with its mouth wide open and teeth showing in pure, flappy-eared shock. #Claymation #FarmDrama #MudSplash",
+      "status": "draft",
+      "tokens_used": 36608,
+      "cost_usd": 0.843216,
+      "votes": 0,
+      "takes": [
+        {
+          "attempt": 1,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/fa91a726dbe9.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/12a8be570200.png",
+          "keyframe_prompt": "Claymation stop-motion plasticine, Aardman style, visible clay fingerprints. A chubby pink pig named Pepe with chunky proportions and big expressive eyes is mid-splat, his face squished comically flat into a puddle of thick brown mud, cheeks bulging out, eyes crossed in dizzy shock, a straw of hay bent in his mouth. Above him, a scruffy grey goat named Gus with chunky proportions, one slightly bent horn, and a lopsided grin leans down, a scrap of chewed cloth hanging from his mouth, looking at Pepe with big expressive eyes. Thick brown mud splashes are frozen in mid-air around Pepe's squished face. Farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "A single continuous 5-second motion: Pepe's squished pink face sinks deeper into the thick brown mud with a heavy, gelatinous squish, causing the frozen mud splash around his cheeks to erupt outward and drip down in exaggerated cartoon physics, accompanied by a subtle camera push-in.",
+          "video_description": "At the start (0.0 s), the pig is already submerged in a muddy puddle, with mud splashing upward around its head; a straw is in its mouth. A black sheep stands to the right, holding a bundle of hay in its mouth and looking down at the pig. Between 0.0 s and 0.2 s, mud continues to splash outward as the pig’s head rises slightly, and by 0.2 s, the pig’s body emerges further, coated in mud, while the sheep remains stationary, still holding the hay. From 0.2 s to 0.4 s, the pig settles into a half-submerged position, eyes wide, straw still in mouth, and the mud stops splashing—no further movement occurs from either character. The sequence shows the pig emerging from the mud (causing splashes), followed by stillness; the sheep does not initiate any action—it only observes.",
+          "qa_status": "rejected",
+          "qa_score": 0.1,
+          "consistency": 0.8,
+          "qa_notes": "The characters and integrity are intact, but the action fails because the pig emerges from the mud instead of sinking deeper, and the sheep does not perform the interrupting action that causes the squish."
+        },
+        {
+          "attempt": 2,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/91c22863a0ac.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/12a8be570200.png",
+          "keyframe_prompt": "A scruffy grey goat named Gus is performing the interrupting action, standing with one hoof pressed hard onto the back of a chubby pink pig named Pepe, squishing him deep into a puddle of brown mud. Pepe's chunky pink body is flattened into the mud, his big expressive eyes wide in shock, chunky proportions, a straw of hay bent in his mouth. Gus has a lopsided grin, big expressive eyes, chunky proportions, one horn slightly bent, a scrap of chewed cloth hanging from his mouth. Claymation plasticine stop-motion, Aardman style, visible clay fingerprints on both characters, farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot, clear staging focusing on the squishing action.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "The scruffy grey goat's hoof presses down harder, squishing the chubby pink pig deeper and deeper into the brown mud. The pig's body compresses and flattens further down into the puddle with exaggerated cartoon physics, mud bubbling and splashing up around his squished form, while the goat remains standing on him, accompanied by a subtle camera push-in.",
+          "video_description": "A pink pig is partially submerged in a muddy puddle, holding a straw in its mouth. A black sheep stands beside the puddle and repeatedly slaps the pig’s head with its hoof, causing mud to splash upward each time. With each slap, the pig’s ears flap and its eyes widen in reaction; after the third slap, the pig’s head is pushed downward into the mud, submerging it further until only its eyes and snout remain visible above the surface. The sheep continues holding its hoof on the pig’s head as the mud settles.",
+          "qa_status": "rejected",
+          "qa_score": 0.2,
+          "consistency": 0.8,
+          "qa_notes": "Regenerate the clip to feature the scruffy grey goat instead of the black sheep, and change the action from slapping the pig's head to stepping on and squishing the pig into the mud."
+        },
+        {
+          "attempt": 3,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/fab54975a13f.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/12a8be570200.png",
+          "keyframe_prompt": "Claymation plasticine stop-motion, Aardman style, visible clay fingerprints. Cinematic slightly-wide shot, farm background with wooden fences and hay, bright natural daylight. Gus, a scruffy grey goat with a lopsided grin, claymation stop-motion plasticine character, visible fingerprints in the clay, big expressive eyes, chunky proportions, one horn slightly bent, and a scrap of chewed cloth hanging from his mouth, is stepping down heavily. Gus's hoof is pressing directly onto Pepe, a chubby pink pig, claymation stop-motion plasticine character, visible fingerprints in the clay, big expressive eyes, chunky proportions, and a straw of hay in his mouth. Gus is actively squishing Pepe deep into the mud. Pepe's eyes are comically bulging and the straw of hay is flying out of his mouth as a thick brown mud splash erupts around them.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "Gus the scruffy grey goat presses his heavy hoof down hard, continuously squishing Pepe the chubby pink pig flatter and flatter into the mud, causing a comical eruption of thick brown mud splashes to fly upwards while Pepe's eyes bulge further and his straw of hay flies out, accompanied by a subtle camera push-in.",
+          "video_description": "A pink pig is submerged in a muddy puddle, with only its head visible and straw stuck to its snout. A grey sheep stands beside the puddle, holding a piece of hay in its mouth, then leans forward and drops the hay onto the pig’s head. As the hay lands, mud splashes upward around the pig’s head; the pig reacts by opening its mouth wide in surprise, revealing teeth, while its ears flap and more mud droplets fly outward. The splash and the pig’s reaction occur immediately after the hay makes contact, confirming the hay-drop as the direct cause of the splash and expression change.",
+          "qa_status": "rejected",
+          "qa_score": 0.1,
+          "consistency": 0.8,
+          "qa_notes": "The core action fails because a grey sheep drops hay onto the pig instead of Gus the goat squishing the pig flat with his hoof."
+        }
+      ]
+    },
+    {
+      "channel_id": "farm",
+      "creator": "@kasbsquall",
+      "event": "Pepe trips over a wooden bucket, tumbles head-over-heels in a spectacular windmill, and lands face-first in his mud puddle, sending a massive brown tidal wave that completely drenches Momo.",
+      "script": "PEPE: The universe is but a shallow puddle of— WOAH!\nMOMO: Great. Now my existential dread is pig-flavored.",
+      "characters_used": [
+        "Pepe",
+        "Momo"
+      ],
+      "video_prompt": "KEYFRAME: Claymation stop-motion plasticine, Aardman style, visible clay fingerprints. In a farm background with wooden fences and hay under bright natural daylight, a chubby pink pig with chunky proportions is slipping backward out of a mud puddle, his legs flailing in the air, a straw of hay falling from his mouth, and his big expressive eyes wide open in shock. Beside him, a grey droopy-eared donkey with chunky proportions and heavy eyelids stands slightly slouched, staring at a massive mid-air glob of brown clay mud with an utterly unimpressed deadpan expression. The mud is frozen mid-splash, inches from the donkey's face. Cinematic slightly-wide shot, highly detailed plasticine textures.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts\nMOTION: The massive glob of brown clay mud flies forward and splats heavily onto the donkey's face, while the pig falls backward out of the bottom of the frame with his legs kicking in the air. The donkey remains completely still and unimpressed, only slowly blinking his heavy eyelids as the mud drips down his snout. Exaggerated cartoon physics on the mud splash, with a subtle continuous camera push-in.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/7473b7cbc695.mp4",
+      "video_description": "At the start, a pink pig lies on its back in a muddy puddle, flailing its legs as a splash of mud erupts upward—implying it has just thrown or kicked something upward. The mud splatter lands directly on the face of a nearby grey donkey standing upright, covering its head and snout. The pig then sits up abruptly, pointing an accusatory finger at the donkey, while the donkey remains still, dazed, with mud dripping down its face. The sequence shows the pig’s action (kicking/throwing mud) causing the mud to hit the donkey, which then reacts passively with a stunned expression.",
+      "qa_status": "approved",
+      "qa_notes": "The core cause-and-effect of mud splattering onto the donkey's face while it remains dazed and still is clearly delivered, though the pig sits up and points rather than falling backward out of the frame.",
+      "qa_attempts": 1,
+      "title": "Pig Flails in Mud, Drenches Donkey, Then Blames Him! 🐷💦",
+      "thumbnail_hint": "A close-up of a dazed grey donkey with its face completely covered in dripping brown mud, while a pink pig sits up in the background pointing an accusatory finger.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/0bdb29bcb285.png",
+      "description": "A pink pig flails its legs in a muddy puddle, launching a massive brown splash directly onto a standing grey donkey's face. Instead of apologizing for the muddy facial, the pig abruptly sits up and aggressively points an accusatory finger at the dazed donkey! #claymation #stopmotion #farmdrama",
+      "status": "published",
+      "tokens_used": 16422,
+      "cost_usd": 0.302844,
+      "votes": 0,
+      "takes": [
+        {
+          "attempt": 1,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/7473b7cbc695.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/0bdb29bcb285.png",
+          "keyframe_prompt": "Claymation stop-motion plasticine, Aardman style, visible clay fingerprints. In a farm background with wooden fences and hay under bright natural daylight, a chubby pink pig with chunky proportions is slipping backward out of a mud puddle, his legs flailing in the air, a straw of hay falling from his mouth, and his big expressive eyes wide open in shock. Beside him, a grey droopy-eared donkey with chunky proportions and heavy eyelids stands slightly slouched, staring at a massive mid-air glob of brown clay mud with an utterly unimpressed deadpan expression. The mud is frozen mid-splash, inches from the donkey's face. Cinematic slightly-wide shot, highly detailed plasticine textures.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "The massive glob of brown clay mud flies forward and splats heavily onto the donkey's face, while the pig falls backward out of the bottom of the frame with his legs kicking in the air. The donkey remains completely still and unimpressed, only slowly blinking his heavy eyelids as the mud drips down his snout. Exaggerated cartoon physics on the mud splash, with a subtle continuous camera push-in.",
+          "video_description": "At the start, a pink pig lies on its back in a muddy puddle, flailing its legs as a splash of mud erupts upward—implying it has just thrown or kicked something upward. The mud splatter lands directly on the face of a nearby grey donkey standing upright, covering its head and snout. The pig then sits up abruptly, pointing an accusatory finger at the donkey, while the donkey remains still, dazed, with mud dripping down its face. The sequence shows the pig’s action (kicking/throwing mud) causing the mud to hit the donkey, which then reacts passively with a stunned expression.",
+          "qa_status": "approved",
+          "qa_score": 0.8,
+          "consistency": 0.8,
+          "qa_notes": "The core cause-and-effect of mud splattering onto the donkey's face while it remains dazed and still is clearly delivered, though the pig sits up and points rather than falling backward out of the frame."
+        }
+      ]
+    },
+    {
       "creator": "@kasbsquall",
       "event": "Pepe the pig strikes a profound pose balancing on one hoof atop the fence rail, overcorrects a violent wobble, and catapults backward into his mud puddle with a colossal splash.",
       "script": "PEPE: To truly understand the mud, one must rise above it!\nMOMO: Gravity disagrees.\nPEPE: Yeeeee-haw!",

@@ -69,12 +69,12 @@ export default function Home() {
           <div className="how-step">
             <span className="how-n">2</span>
             <b>4 agents produce it</b>
-            <p>Writer → director → keyframe → image-to-video → a vision QA that watches the real clip and retakes if it misses.</p>
+            <p>Writer → director → keyframe → image-to-video → a vision QA that watches the real clip and retakes if it misses. One gag, or a multi-shot micro-film.</p>
           </div>
           <div className="how-step">
             <span className="how-n">3</span>
             <b>A finished episode</b>
-            <p>Title, thumbnail and a publish-ready video — consistent characters, every single day.</p>
+            <p>Title, thumbnail and a publish-ready video — with a <b>measured</b> character-consistency score and a blended cost receipt on every episode.</p>
           </div>
         </div>
       </section>
@@ -122,7 +122,9 @@ export default function Home() {
             Consistent short-form video every day is the price of staying relevant online —
             and it's slow, expensive, and needs a team. MUCKFLIX turns one idea into a
             finished, on-brand, character-consistent episode for pennies, and lets your
-            audience co-create the next one. The farm is our demo; the engine is the product.
+            audience co-create the next one. It can even run a channel <b>unattended</b> —
+            publishing only what its own vision QA approves. The farm is our demo; the engine
+            is the product.
           </p>
           <div className="who">
             <span>Creators</span>

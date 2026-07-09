@@ -6,8 +6,9 @@ verifiably alive. Episode-generation endpoint gets wired once the pipeline exist
 from contextlib import asynccontextmanager
 
 import json
+import threading
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -74,28 +75,49 @@ class GenerateRequest(BaseModel):
     creator: str = ""
 
 
+# Only one generation may run at a time: the pipeline does long, blocking I/O and
+# holds a threadpool worker; a second concurrent run could starve /health & friends.
+_generation_lock = threading.Lock()
+
+
 @app.post("/episodes/generate")
 def generate_episode(req: GenerateRequest | None = None, db: Session = Depends(get_db)):
     """Run the full 4-agent pipeline and return the new episode."""
-    idea = req.idea if req else ""
-    creator = req.creator if req else ""
-    episode = run_daily_episode(db, idea=idea, creator=creator)
-    return _episode_dict(episode)
+    idea = (req.idea if req else "")[:500]
+    creator = (req.creator if req else "")[:48]
+    if not _generation_lock.acquire(blocking=False):
+        raise HTTPException(status_code=409, detail="A generation is already running. Try again shortly.")
+    try:
+        episode = run_daily_episode(db, idea=idea, creator=creator)
+        return _episode_dict(episode)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=502, detail=f"Generation failed: {e}")
+    finally:
+        _generation_lock.release()
 
 
 @app.get("/episodes/generate/stream")
-def generate_episode_stream(idea: str = "", creator: str = ""):
+def generate_episode_stream(
+    idea: str = Query("", max_length=500),
+    creator: str = Query("", max_length=48),
+):
     """Server-Sent Events: emits each pipeline stage live for the Studio wizard."""
 
     def event_source():
+        if not _generation_lock.acquire(blocking=False):
+            yield f"event: failed\ndata: {json.dumps({'message': 'A generation is already running. Please wait for it to finish.'})}\n\n"
+            return
         db = SessionLocal()
         try:
             for stage, data in run_stream(db, idea=idea, creator=creator):
                 yield f"event: {stage}\ndata: {json.dumps(data, ensure_ascii=False, default=str)}\n\n"
         except Exception as e:  # surface failures to the client
+            db.rollback()
             yield f"event: failed\ndata: {json.dumps({'message': str(e)})}\n\n"
         finally:
             db.close()
+            _generation_lock.release()
 
     return StreamingResponse(
         event_source(),

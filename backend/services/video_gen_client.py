@@ -17,8 +17,27 @@ import httpx
 from config import settings
 
 _MOCK_SAMPLE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBigBuckBunny.mp4"
+_MAX_RETRIES = 3
 
-# tool label (del Agente 2) → modelo real de DashScope
+
+def _post_with_retries(url: str, *, headers: dict, json: dict, timeout: int) -> httpx.Response:
+    """POST with a short retry/backoff on transient network or 5xx errors."""
+    last: Exception | None = None
+    for attempt in range(_MAX_RETRIES):
+        try:
+            resp = httpx.post(url, headers=headers, json=json, timeout=timeout)
+            resp.raise_for_status()
+            return resp
+        except (httpx.HTTPStatusError, httpx.RequestError) as e:
+            status = getattr(getattr(e, "response", None), "status_code", None)
+            # Retry only on transient failures (network errors or 5xx); fail fast on 4xx.
+            if status is not None and status < 500:
+                raise
+            last = e
+            time.sleep(1.5 * (attempt + 1))
+    raise RuntimeError(f"Video submit failed after {_MAX_RETRIES} retries: {last}")
+
+# tool label (from Agent 2) → real DashScope model
 _TOOL_TO_MODEL = {
     "happyhorse": lambda: settings.video_model,
     "wan": lambda: settings.video_model_wan,
@@ -43,11 +62,10 @@ def _headers(extra: dict | None = None) -> dict:
 def _submit_raw(model: str, inp: dict, parameters: dict | None = None) -> str:
     url = f"{settings.dashscope_base}/services/aigc/video-generation/video-synthesis"
     body = {"model": model, "input": inp, "parameters": parameters or {}}
-    resp = httpx.post(url, headers=_headers({"X-DashScope-Async": "enable"}), json=body, timeout=60)
-    resp.raise_for_status()
+    resp = _post_with_retries(url, headers=_headers({"X-DashScope-Async": "enable"}), json=body, timeout=60)
     task_id = resp.json().get("output", {}).get("task_id")
     if not task_id:
-        raise RuntimeError(f"Sin task_id en la respuesta de submit: {resp.json()}")
+        raise RuntimeError(f"No task_id in submit response: {resp.json()}")
     return task_id
 
 
@@ -69,16 +87,8 @@ def animate_image(image_url: str, motion_prompt: str) -> str:
 
 
 def _submit(model: str, prompt: str) -> str:
-    url = f"{settings.dashscope_base}/services/aigc/video-generation/video-synthesis"
-    # HappyHorse/Wan exigen un objeto `parameters` (usa defaults del modelo si va vacío).
-    body = {"model": model, "input": {"prompt": prompt}, "parameters": {}}
-    resp = httpx.post(url, headers=_headers({"X-DashScope-Async": "enable"}), json=body, timeout=60)
-    resp.raise_for_status()
-    data = resp.json()
-    task_id = data.get("output", {}).get("task_id")
-    if not task_id:
-        raise RuntimeError(f"Sin task_id en la respuesta de submit: {data}")
-    return task_id
+    # HappyHorse/Wan require a `parameters` object (empty = model defaults).
+    return _submit_raw(model, {"prompt": prompt}, {})
 
 
 def _poll(task_id: str) -> str:
@@ -92,12 +102,12 @@ def _poll(task_id: str) -> str:
         if status == "SUCCEEDED":
             video_url = output.get("video_url") or output.get("results", {}).get("video_url")
             if not video_url:
-                raise RuntimeError(f"Tarea SUCCEEDED sin video_url: {output}")
+                raise RuntimeError(f"Task SUCCEEDED but no video_url: {output}")
             return video_url
         if status in ("FAILED", "CANCELED", "UNKNOWN"):
-            raise RuntimeError(f"Generación de video {status}: {output.get('message', output)}")
+            raise RuntimeError(f"Video generation {status}: {output.get('message', output)}")
         if time.monotonic() > deadline:
-            raise TimeoutError(f"Timeout esperando el video (task {task_id}, último estado {status})")
+            raise TimeoutError(f"Timed out waiting for video (task {task_id}, last status {status})")
         time.sleep(settings.video_poll_seconds)
 
 

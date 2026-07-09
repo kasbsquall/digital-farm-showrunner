@@ -13,6 +13,7 @@ Graph:
 `run_daily_episode(db)` keeps the same signature the API depends on: it loads
 context from the DB, runs the graph, and persists the resulting Episode.
 """
+import logging
 from typing import TypedDict
 
 from langgraph.graph import StateGraph, START, END
@@ -26,6 +27,8 @@ from services import oss_client, vision_client, image_gen_client, video_gen_clie
 
 MAX_REGEN = 2  # Director can be re-run this many times after a QA rejection.
 RECENT_LIMIT = 5
+
+log = logging.getLogger("showrunner")
 
 
 class FarmState(TypedDict, total=False):
@@ -52,7 +55,12 @@ class FarmState(TypedDict, total=False):
 
 def scriptwriter_node(state: FarmState) -> FarmState:
     story = scriptwriter.run(state["characters"], state["recent"], state.get("idea", ""))
-    used = [c for c in state["characters"] if c["name"] in story["characters_used"]]
+    # Case-insensitive name match so a stray space/casing doesn't silently drop the
+    # chosen cast (which would defeat character consistency).
+    wanted = {n.strip().lower() for n in story.get("characters_used", [])}
+    used = [c for c in state["characters"] if c["name"].strip().lower() in wanted]
+    if not used:
+        log.warning("Scriptwriter cast %s matched none of the cast; using full lineup.", story.get("characters_used"))
     return {"story": story, "used": used or state["characters"]}
 
 
@@ -74,19 +82,26 @@ def video_node(state: FarmState) -> FarmState:
         return {"video_url": generate_video(d.get("motion_prompt", "farm"), "happyhorse"),
                 "video_description": "", "thumbnail_url": ""}
 
-    # 1) Keyframe: imagen fija de la escena, en el estilo de los personajes.
+    # Real generation MUST persist to OSS — otherwise we'd publish DashScope's
+    # temporary signed URLs, which expire and silently break the feed later.
+    if not oss_client.is_configured():
+        raise RuntimeError(
+            "Live video generation requires OSS to be configured (OSS_* env vars); "
+            "temporary provider URLs expire and must not be persisted."
+        )
+    # 1) Keyframe: a still of the scene, in the characters' style.
     kf_temp = image_gen_client.generate_image(d["keyframe_prompt"], size="1280*720")
-    kf_url = oss_client.persist_image(kf_temp, prefix="keyframes") if oss_client.is_configured() else kf_temp
-    # 2) Animar el keyframe (image→video) → hereda el look de los personajes.
+    kf_url = oss_client.persist_image(kf_temp, prefix="keyframes")
+    # 2) Animate the keyframe (image→video) → inherits the characters' look.
     vid_temp = video_gen_client.animate_image(kf_url, d["motion_prompt"])
-    vid_url = oss_client.persist_video(vid_temp) if oss_client.is_configured() else vid_temp
-    # 3) Visión: describir lo que realmente pasa.
+    vid_url = oss_client.persist_video(vid_temp)
+    # 3) Vision: describe what actually happens on screen.
     description = ""
     try:
         description = vision_client.describe_video(vid_url)
     except Exception as e:
-        print(f"[vision] no se pudo describir el video: {e}")
-    # El keyframe ES el primer frame → thumbnail perfectamente coherente.
+        log.warning("Could not describe the video with vision: %s", e)
+    # The keyframe IS frame 0 → a perfectly coherent thumbnail.
     return {"video_url": vid_url, "video_description": description, "thumbnail_url": kf_url}
 
 

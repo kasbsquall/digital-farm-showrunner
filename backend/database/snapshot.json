@@ -163,6 +163,59 @@
       "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/861f0f817d02.png",
       "description": "Pepe's philosophical stroll across the plank ends exactly how you'd expect — face-first into Gus. Another daily masterpiece from the barnyard. #ClaymationFarm #PigProblems #MUCKFLIX",
       "status": "published"
+    },
+    {
+      "creator": "@kasbsquall",
+      "event": "Pepe frantically juggles three turnips until they stall in mid-air and plummet down, burying him completely in a pile of root vegetables with only his snout poking out.",
+      "script": "PEPE: I balance the three sacred orbs of existence!\nPEPE: Alas, the orbs have chosen violence!\nMOMO: Great. Now I have to dig you out.",
+      "characters_used": [
+        "Pepe",
+        "Momo"
+      ],
+      "video_prompt": "KEYFRAME: A chubby pink pig, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, chunky proportions, a straw of hay in his mouth, is caught mid-squish, his pink body compressed vertically and squished flat into the mud like a pancake by the heavy downward pressure of three large golden orbs resting on his head and back. His big expressive eyes are wide and bulging comically in shock, his cheeks smeared wide from the downward crush. In the background, a grey droopy-eared donkey with heavy eyelids, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, unimpressed deadpan expression, slightly slouched, watches him. Claymation plasticine stop-motion, Aardman style, visible clay fingerprints, farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot, clear staging with the squished pig and heavy downward-pressing orbs as the obvious focal action.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts\nMOTION: The three heavy golden orbs press downward with immense weight, continuously squishing the pink pig's clay body flatter and flatter into the mud in one heavy, continuous downward compression, while thick brown mud oozes and bubbles up around his flattened edges, and his bulging eyes blink in a rapid shocked double-blink, accompanied by a subtle camera push-in.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/69c4cb859a65.mp4",
+      "video_description": "A pink pig lies flat in a muddy puddle with three large golden spheres stacked vertically on its back. A gray donkey stands to the right, observing. As the camera pushes in toward the pig, the top golden sphere wobbles and begins to tilt forward, causing the middle sphere to shift and press down on the pig’s back—this initiates a subtle squishing motion of the pig’s body and mud around it. The pig’s eyes widen slightly in reaction as the weight bears down, but no character moves voluntarily or makes contact; the instability of the stack alone triggers the physical response.",
+      "qa_status": "approved",
+      "qa_notes": "The take is approved because it clearly presents the required characters and successfully executes the core action of the golden orbs pressing down to squish the pig into the mud with the intended camera push-in and eye reaction.",
+      "qa_attempts": 3,
+      "title": "Wobbly Gold Spheres Squish Pig Into Mud! 🐷💥",
+      "thumbnail_hint": "Close-up of the pink pig's face with wide, panicked eyes peeking out from the mud puddle, while a giant golden sphere wobbles precariously on its back.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/02e456a72088.png",
+      "description": "Pepe thought balancing giant golden spheres in a mud puddle was a brilliant idea, until the top orb wobbled and the middle one violently squished him deeper into the muck! Now he's just a wide-eyed pancake while the donkey watches the disaster unfold. #claymation #farmfunny #squished",
+      "status": "published",
+      "takes": [
+        {
+          "attempt": 1,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/005667262b8d.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/fd644c0c09c1.png",
+          "keyframe_prompt": "A chubby pink pig lounging in mud, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, a straw of hay in his mouth, his half-closed thoughtful eyes now wide in sheer panic, is comically squished flat between three giant heavy clay orbs. Standing next to him is Momo, a grey droopy-eared donkey with heavy eyelids, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, unimpressed deadpan expression, slightly slouched, holding a small wooden shovel. Claymation plasticine stop-motion, Aardman style, visible clay fingerprints, farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot, mid-reaction with exaggerated expressive faces, clear staging with one obvious focal action.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "The three giant clay orbs slowly and heavily sink deeper into the mud with an exaggerated cartoon squish, compressing the pig's bulging pink cheeks and crossed eyes further into the muck in one continuous heavy downward motion, accompanied by a subtle camera push-in.",
+          "video_description": "The pig lies on its back in a mud puddle, holding straw in its mouth and resting against three large dark spheres stacked behind it. The donkey stands to the right, holding a shovel upright in its left hand and looking toward the pig. As the camera slowly pushes in, the pig shifts slightly, wiggling its legs and adjusting its head while remaining reclined; the donkey remains still, maintaining its posture and gaze. No contact or movement between characters occurs—the scene is static except for the pig’s minor wriggling and the camera’s forward motion.",
+          "qa_status": "rejected",
+          "qa_notes": "The core action of the orbs sinking and squishing the pig fails to occur, as the scene remains static with the pig merely resting against the spheres."
+        },
+        {
+          "attempt": 2,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/3bc2f3b40d6b.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/c1e94d7d2829.png",
+          "keyframe_prompt": "Claymation plasticine stop-motion, Aardman style, visible clay fingerprints on all surfaces. A chubby pink pig named Pepe (chunky proportions, big expressive eyes, half-closed thoughtful eyes now wide with shock, a straw of hay in his mouth) is being violently squished flat between three large golden glowing mystical orbs that are pressing deep into his soft clay body from above and both sides, his pink clay body visibly deforming and bulging outward around the spheres, his eyes bulging comically, the straw falling from his mouth. In the background, a grey droopy-eared donkey named Momo (heavy eyelids, chunky proportions, slightly slouched) watches with a completely deadpan unimpressed expression, one hoof raised ready to dig. Farm background with wooden fences and hay bales, bright natural daylight, cinematic slightly-wide shot, the single funniest frozen instant showing the orbs actively crushing Pepe mid-squish with exaggerated clay deformation.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "Over 5 seconds, the three golden orbs press down harder and harder into Pepe's pink clay body, squishing him progressively flatter with exaggerated cartoon physics, his clay body deforming and spreading outward like soft plasticine being compressed, his bulging eyes getting rounder, the straw completely falling out of his mouth, while Momo remains still in the background with a subtle camera push-in toward the squishing action, one single continuous pressing-down squish motion.",
+          "video_description": "The pig sits on the ground holding two glowing golden eggs, one in each hand, with a third balanced on its head; hay sticks out of its mouth. As the video progresses, the pig’s body rapidly inflates outward like a balloon, causing its arms to stretch wide and its facial expression to shift from strained to shocked. The inflation appears to be caused by internal pressure building up—possibly from swallowing or containing the eggs—though no external force is applied. The donkey in the background remains stationary, observing without interacting.",
+          "qa_status": "rejected",
+          "qa_notes": "The core action fails because the pig inflates outward like a balloon instead of being squished flat by the downward pressure of the golden orbs."
+        },
+        {
+          "attempt": 3,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/69c4cb859a65.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/02e456a72088.png",
+          "keyframe_prompt": "A chubby pink pig, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, chunky proportions, a straw of hay in his mouth, is caught mid-squish, his pink body compressed vertically and squished flat into the mud like a pancake by the heavy downward pressure of three large golden orbs resting on his head and back. His big expressive eyes are wide and bulging comically in shock, his cheeks smeared wide from the downward crush. In the background, a grey droopy-eared donkey with heavy eyelids, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, unimpressed deadpan expression, slightly slouched, watches him. Claymation plasticine stop-motion, Aardman style, visible clay fingerprints, farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot, clear staging with the squished pig and heavy downward-pressing orbs as the obvious focal action.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "The three heavy golden orbs press downward with immense weight, continuously squishing the pink pig's clay body flatter and flatter into the mud in one heavy, continuous downward compression, while thick brown mud oozes and bubbles up around his flattened edges, and his bulging eyes blink in a rapid shocked double-blink, accompanied by a subtle camera push-in.",
+          "video_description": "A pink pig lies flat in a muddy puddle with three large golden spheres stacked vertically on its back. A gray donkey stands to the right, observing. As the camera pushes in toward the pig, the top golden sphere wobbles and begins to tilt forward, causing the middle sphere to shift and press down on the pig’s back—this initiates a subtle squishing motion of the pig’s body and mud around it. The pig’s eyes widen slightly in reaction as the weight bears down, but no character moves voluntarily or makes contact; the instability of the stack alone triggers the physical response.",
+          "qa_status": "approved",
+          "qa_notes": "The take is approved because it clearly presents the required characters and successfully executes the core action of the golden orbs pressing down to squish the pig into the mud with the intended camera push-in and eye reaction."
+        }
+      ]
     }
   ]
 }

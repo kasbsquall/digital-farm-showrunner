@@ -15,6 +15,7 @@ import hashlib
 import httpx
 
 from config import settings
+from services import usage
 
 _MOCK_SAMPLE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBigBuckBunny.mp4"
 _MAX_RETRIES = 3
@@ -74,6 +75,11 @@ def _params() -> dict:
     return {"duration": settings.video_duration} if settings.video_duration > 0 else {}
 
 
+def _clip_seconds() -> float:
+    """Billed clip length for cost metering (model default when duration is unset)."""
+    return float(settings.video_duration or settings.video_default_seconds)
+
+
 def animate_image(image_url: str, motion_prompt: str) -> str:
     """Image→video (HappyHorse i2v): animate a keyframe. Returns a playable URL."""
     if settings.use_mock or settings.mock_video:
@@ -83,7 +89,9 @@ def animate_image(image_url: str, motion_prompt: str) -> str:
         {"media": [{"url": image_url}], "prompt": motion_prompt},
         _params(),
     )
-    return _poll(task_id)
+    url = _poll(task_id)
+    usage.add_video(_clip_seconds())  # meter the generated clip into the per-episode cost
+    return url
 
 
 def _submit(model: str, prompt: str) -> str:
@@ -118,7 +126,9 @@ def generate_video(prompt: str, tool: str = "happyhorse") -> str:
 
     model = _TOOL_TO_MODEL.get(tool, _TOOL_TO_MODEL["happyhorse"])()
     task_id = _submit(model, prompt)
-    return _poll(task_id)
+    url = _poll(task_id)
+    usage.add_video(_clip_seconds())  # meter the generated clip into the per-episode cost
+    return url
 
 
 def stitch(clip_urls: list[str]) -> str:

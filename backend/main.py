@@ -6,7 +6,6 @@ verifiably alive. Episode-generation endpoint gets wired once the pipeline exist
 from contextlib import asynccontextmanager
 
 import json
-import threading
 
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,14 +16,16 @@ from sqlalchemy.orm import Session
 from database.db import Base, engine, get_db, SessionLocal
 from database.models import Character, Episode
 from database.generate_portraits import STYLE
-from pipeline.orchestrator import run_daily_episode, run_stream
+from pipeline.orchestrator import run_daily_episode, run_stream, generation_lock
 from services import image_gen_client, oss_client
 from config import settings
+import scheduler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    scheduler.start_background()  # unattended daily channel (no-op unless SCHEDULER_ENABLED)
     yield
 
 
@@ -81,7 +82,8 @@ class GenerateRequest(BaseModel):
 
 # Only one generation may run at a time: the pipeline does long, blocking I/O and
 # holds a threadpool worker; a second concurrent run could starve /health & friends.
-_generation_lock = threading.Lock()
+# Shared with the scheduler so unattended runs never collide with API runs.
+_generation_lock = generation_lock
 
 
 @app.post("/episodes/generate")

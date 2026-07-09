@@ -17,6 +17,7 @@ import json
 import logging
 import operator
 import os
+import threading
 import time
 from typing import Annotated, TypedDict
 
@@ -31,6 +32,10 @@ from services import oss_client, vision_client, image_gen_client, video_gen_clie
 
 MAX_REGEN = int(os.getenv("MAX_REGEN", "2"))  # Director re-runs after a QA rejection (0 caps cost).
 RECENT_LIMIT = 5
+
+# Single-flight guard shared by the API and the unattended scheduler: the pipeline
+# does long blocking I/O and the module-level usage meter assumes one run at a time.
+generation_lock = threading.Lock()
 
 log = logging.getLogger("showrunner")
 
@@ -110,8 +115,13 @@ def video_node(state: FarmState) -> FarmState:
         # 1) Keyframe. On a retake, REUSE the previous character-consistent keyframe and
         #    only re-animate with the corrected motion — a surgical "retake the shot",
         #    not "reshoot the movie" (protects consistency and saves an image call).
+        #    BUT if the last take failed the identity-lock (off-model character), the
+        #    keyframe itself is the problem — regenerate it fresh instead of reusing.
         prior = state.get("takes") or []
-        reuse_kf = prior[-1]["thumbnail_url"] if prior and prior[-1].get("thumbnail_url") else ""
+        last = prior[-1] if prior else None
+        last_ok_identity = not last or last.get("consistency") is None \
+            or last["consistency"] >= settings.identity_min
+        reuse_kf = last["thumbnail_url"] if last and last.get("thumbnail_url") and last_ok_identity else ""
         if reuse_kf:
             kf_url = reuse_kf
             log.info("Surgical retake: re-animating the existing keyframe with the corrected motion.")
@@ -172,6 +182,7 @@ def _take_record(state: FarmState, attempt: int, qa: dict) -> dict:
 
 def qa_node(state: FarmState) -> FarmState:
     attempt = state.get("attempt", 0) + 1
+    consistency = state.get("consistency")
     # No real video (placeholder mode) → nothing to review: auto-approve.
     if not _video_is_real():
         note = (
@@ -181,14 +192,27 @@ def qa_node(state: FarmState) -> FarmState:
         )
         qa = {"qa_status": "approved", "qa_score": 1.0, "qa_notes": note}
     elif not state.get("video_description", "").strip():
-        # Vision genuinely unavailable → don't let a blank description bias QA to reject.
-        qa = {"qa_status": "approved", "qa_score": 0.6,
-              "qa_notes": "Vision description unavailable; approved by default (not penalized)."}
+        # Vision could not verify the clip. "Nothing publishes unwatched" → do NOT
+        # auto-approve: reject so the loop retries vision, and if it never resolves
+        # the episode is published as a draft, never as approved.
+        qa = {"qa_status": "rejected", "qa_score": 0.0,
+              "qa_notes": "Vision could not verify the clip (description unavailable) — not approved."}
     else:
         qa = qa_reviewer.run(
             state["video_url"], state["story"]["script"],
             state["direction"].get("motion_prompt", ""), state.get("video_description", ""),
         )
+    # Identity-lock gate: a keyframe that doesn't match the canonical character is a
+    # HARD fail regardless of the action — reject so the loop regenerates the keyframe.
+    if (_video_is_real() and settings.identity_check and settings.identity_min > 0
+            and consistency is not None and consistency < settings.identity_min):
+        qa = {
+            "qa_status": "rejected",
+            "qa_score": min(qa.get("qa_score", 0.0), consistency),
+            "qa_notes": (f"Identity-lock: character consistency {consistency:.2f} is below "
+                         f"{settings.identity_min:.2f} (off-model character). "
+                         + qa.get("qa_notes", "")).strip(),
+        }
     return {"qa": qa, "attempt": attempt, "takes": [_take_record(state, attempt, qa)]}
 
 

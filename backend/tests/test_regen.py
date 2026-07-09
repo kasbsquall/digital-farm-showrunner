@@ -55,3 +55,42 @@ def test_qa_loop_stops_at_budget_and_publishes_best_take(db, monkeypatch):
     assert ep.qa_status == "rejected"
     assert ep.status == "draft"                     # not published when never approved
     assert len(ep.takes or []) == 2
+
+
+def test_identity_lock_gate_rejects_offmodel_keyframe(db, monkeypatch):
+    """A keyframe below the consistency threshold is rejected even if the ACTION is fine."""
+    db.add(Character(name="Pepe", species="pig", personality="mud philosopher",
+                     visual_desc="pink pig", image_url="http://x/portrait.png"))
+    db.commit()
+
+    _stub_real_media(monkeypatch)
+    monkeypatch.setattr(orch, "MAX_REGEN", 0)
+    monkeypatch.setattr(orch.settings, "identity_check", True)
+    monkeypatch.setattr(orch.settings, "identity_min", 0.55)
+    monkeypatch.setattr(orch.vision_client, "consistency_score", lambda kf, ref: 0.1)
+    # QA on the action would APPROVE — the identity gate must override it to rejected.
+    monkeypatch.setattr(orch.qa_reviewer, "run",
+                        lambda *a, **k: {"qa_status": "approved", "qa_score": 0.9, "qa_notes": "action is clear"})
+
+    ep = orch.run_daily_episode(db, idea="Starring Pepe: does something")
+
+    assert ep.qa_status == "rejected"               # off-model character is a hard fail
+    assert ep.status == "draft"
+    last = (ep.takes or [])[-1]
+    assert last["consistency"] == 0.1
+    assert "identity-lock" in last["qa_notes"].lower()
+
+
+def test_vision_failure_rejects_instead_of_auto_approving(db, monkeypatch):
+    """Nothing publishes unwatched: a blank vision description must NOT auto-approve."""
+    db.add(Character(name="Pepe", species="pig", personality="mud philosopher", visual_desc="pink pig"))
+    db.commit()
+
+    _stub_real_media(monkeypatch)
+    monkeypatch.setattr(orch, "MAX_REGEN", 0)
+    monkeypatch.setattr(orch.vision_client, "describe_video", lambda u: "")  # vision unavailable
+
+    ep = orch.run_daily_episode(db, idea="Starring Pepe: does something")
+
+    assert ep.qa_status == "rejected"
+    assert ep.status == "draft"                     # published as draft, never approved

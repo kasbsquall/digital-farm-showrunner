@@ -62,6 +62,12 @@ class Settings(BaseSettings):
     # episode; token_budget (0 = unlimited) also gates whether another retake fits.
     token_cost_per_1k: float = 0.002
     token_budget: int = 0
+    # Media cost is NOT token-based — it is priced per unit. These are list-price
+    # ESTIMATES so the per-episode receipt reflects the true blended cost (text +
+    # image + video), not just the cheap text half.
+    image_cost_usd: float = 0.02              # per generated keyframe/image
+    video_cost_usd_per_second: float = 0.05   # per second of i2v/t2v video
+    video_default_seconds: int = 5            # assumed clip length when duration=0 (for costing)
 
     # Multi-shot: episodes of N chained shots (setup → escalation → punchline),
     # stitched into one video. 1 = the classic single-gag micro-drama.
@@ -70,6 +76,16 @@ class Settings(BaseSettings):
     # character matches its canonical portrait (0-1), stored per take — a measurable
     # consistency gate (the qwen-image endpoint does not accept a reference image).
     identity_check: bool = False
+    # A take whose keyframe scores below this vs the canonical portrait is REJECTED
+    # (wrong/off-model character) and regenerated with a fresh keyframe. 0 = measure
+    # only, don't gate. Applies only when identity_check is on.
+    identity_min: float = 0.55
+
+    # Unattended "daily channel" scheduler: runs the showrunner on an interval and
+    # publishes on the QA verdict — the autonomous loop the track asks for. Off by
+    # default so tests/demos never spend credits unprompted.
+    scheduler_enabled: bool = False
+    scheduler_interval_hours: float = 24.0
 
     @property
     def use_mock(self) -> bool:

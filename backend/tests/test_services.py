@@ -200,6 +200,7 @@ def test_usage_cost_is_total_over_1000_times_rate():
 
 def test_usage_reset_zeroes_state():
     usage.add(5, 5)
+    usage.add_media(0.5)
     usage.reset()
     snap = usage.snapshot()
     assert snap == {
@@ -207,8 +208,28 @@ def test_usage_reset_zeroes_state():
         "completion_tokens": 0,
         "total_tokens": 0,
         "calls": 0,
+        "media_calls": 0,
+        "text_cost_usd": 0.0,
+        "media_cost_usd": 0.0,
         "cost_usd": 0.0,
     }
+
+
+def test_usage_blended_cost_includes_media():
+    """cost_usd = text tokens + image + video, not just the cheap text half."""
+    usage.reset()
+    usage.add(600, 400)                 # 1000 text tokens
+    usage.add_image()                   # image_cost_usd
+    usage.add_video(5)                  # 5s * video_cost_usd_per_second
+    snap = usage.snapshot()
+    text = round(1000 / 1000 * settings.token_cost_per_1k, 6)
+    media = round(settings.image_cost_usd + 5 * settings.video_cost_usd_per_second, 6)
+    assert snap["text_cost_usd"] == text
+    assert snap["media_cost_usd"] == media
+    assert snap["media_calls"] == 2
+    assert snap["cost_usd"] == round(text + media, 6)
+    # media dominates a real episode → blended cost is well above text-only.
+    assert snap["cost_usd"] > snap["text_cost_usd"]
 
 
 def test_usage_add_coerces_none_to_zero():

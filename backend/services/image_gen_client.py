@@ -9,6 +9,7 @@ import time
 import httpx
 
 from config import settings
+from services import usage
 
 _MAX_RETRIES = 3
 
@@ -35,6 +36,7 @@ def generate_image(prompt: str, size: str = "1024*1024", reference_url: str | No
             content = resp.json()["output"]["choices"][0]["message"]["content"]
             for item in content:
                 if item.get("image"):
+                    usage.add_image()  # meter this generation into the per-episode cost
                     return item["image"]
             raise RuntimeError(f"Image response had no image: {content}")
         except (httpx.HTTPStatusError, httpx.RequestError) as e:

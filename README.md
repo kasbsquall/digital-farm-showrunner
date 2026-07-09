@@ -1,87 +1,416 @@
 # 🐔 MUCKFLIX — The Digital Farm Showrunner
 
-**Qwen Cloud Hackathon 2026 · Track 2: AI Showrunner**
+> An autonomous pipeline of AI agents that writes, art-directs, films, quality-checks and packages a brand-new claymation farm micro-drama **video every single day** — end to end, with no human production team.
 
-**An autonomous "showrunner" that produces a serialized, character-consistent short
-video show — every single day, with zero human production team.**
+![Track](https://img.shields.io/badge/Qwen%20Cloud%20Hackathon-Track%202%3A%20AI%20Showrunner-e7501f)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Models](https://img.shields.io/badge/models-Qwen%20Cloud%20(DashScope)-6d28d9)
+![Cloud](https://img.shields.io/badge/deploy-Alibaba%20Cloud%20ECS%20%2B%20OSS-ff6a00)
+![Backend](https://img.shields.io/badge/backend-FastAPI%20%2B%20LangGraph-009688)
+![Frontend](https://img.shields.io/badge/frontend-Next.js%2014-000000)
 
-MUCKFLIX is a claymation farm channel where a pipeline of **4 AI agents** takes a
-one-line idea and runs the *entire* production — writing, art-directing, filming,
-QA and packaging — into a finished, publish-ready episode. The farm is the demo;
-the real deliverable is a **general engine for daily, on-brand, serialized video**.
+**Hackathon:** Qwen Cloud Global AI Hackathon 2026 — **Track 2: AI Showrunner**.
+**Deliverable:** a general **engine for daily, on-brand, character-consistent serialized video**. The claymation farm ("MUCKFLIX") is the demo channel; the pipeline is the product.
 
-## The problem it actually solves
+---
 
-Short-form video is the oxygen of the modern internet — but **producing consistent
-daily video is slow, expensive, and needs a whole team.** Creators, SMBs and brands
-are stuck on a treadmill they can't afford. Existing AI video tools make *one-off*
-clips with **no character continuity and no quality control** — you can't run a
-*show* on them.
+## 1. The problem & the insight
 
-MUCKFLIX closes exactly those gaps:
+### The problem
 
-- **Serialized, character-consistent cast.** A keyframe→image-to-video technique locks
-  each recurring character's look across episodes (the generated still *is* frame 0 of
-  the clip). Point the engine at *your* mascot and it runs *your* daily show.
-- **Autonomous quality control you can trust.** A vision model (Qwen3-VL) watches the
-  *actual* generated clip and, if it doesn't match the intended gag, **feeds the reason
-  back to the director to regenerate** — a real self-correcting loop, so it can publish
-  unsupervised.
-- **Audience co-creation → built-in virality & monetization.** Anyone submits an idea and
-  gets **credited** on the episode. The obvious business model: subscriptions per channel
-  + microtransactions to prioritize your idea for tomorrow's episode.
+Short-form video is the oxygen of the modern internet. But **producing a *serialized daily show* is slow, expensive, and needs a whole team** — a writer, an art director, a camera/animation crew, a QA pass, and an editor to package and publish. Creators, SMBs and brands are stuck on a treadmill they can't staff.
 
-**Who it's for:** creators who need a daily show without a studio, brands that want mascot
-marketing at scale, and educators who want an endless, on-brand animated series.
+Generic AI-video tools don't solve this. They generate **one-off clips** with two fatal gaps for anyone running a *show*:
 
-## The 4 agents
+| Gap in one-off AI video | Why it kills a serialized show |
+|---|---|
+| **No character continuity** | Your mascot looks different every clip. There is no cast, so there is no "show." |
+| **No quality control** | The model frequently produces something *other* than what you asked for — and nobody catches it. You cannot publish unsupervised. |
 
-| # | Agent | Role | Qwen surface |
-|---|-------|------|--------------|
-| 1 | **Scriptwriter** | Invents the day's gag + tiny script, with continuity from past episodes. | qwen3.7 (text) |
-| 2 | **Production Director** | Turns the script into a keyframe image prompt + a single 5s motion. | qwen3.7 (text) |
-| — | *Keyframe → Video* | Paints the scene (Qwen-Image) then animates that exact still (HappyHorse i2v). | qwen-image · happyhorse-i2v |
-| 3 | **Quality Control** | Watches the *real* clip via vision; if it misses the gag, feeds the reason back to the Director to regenerate. | qwen3-vl |
-| 4 | **Packager** | Writes the viral title + description that match what the video actually shows. | qwen3.7 (text) |
+### The insight
 
-## Stack
+A daily show doesn't need a better *clip generator* — it needs a **studio**: a repeatable production line where recurring characters stay on-model, and where a step at the end actually *watches the footage* and calls a retake when it's wrong. That is exactly what a human showrunner's team provides, and it is what MUCKFLIX automates.
 
-- **Backend:** FastAPI (Python 3.11) — Alibaba Cloud ECS / Function Compute
-- **Orquestación:** LangGraph
-- **Modelos:** Qwen Cloud (DashScope)
-- **Video:** Wan / HappyHorse
-- **DB:** PostgreSQL (Alibaba Cloud RDS) / SQLite
-- **Storage:** Alibaba Cloud OSS
-- **Frontend:** Next.js
+Two techniques make this work (detailed in [§5](#5-the-two-signature-techniques)):
 
-## Setup rápido (local)
+1. **Keyframe → image-to-video** for character consistency: a still is generated *in each character's established look*, and that exact still is animated — so the cast stays on-model, and the still doubles as a perfectly coherent thumbnail.
+2. **A vision-grounded, self-correcting QA loop**: a vision model describes what the *actual* generated clip shows; QA rejects on mismatch; the rejection note is fed back to the Director to regenerate — bounded so cost can never run away.
+
+---
+
+## 2. What it does (the product)
+
+MUCKFLIX takes a **one-line idea** (or nothing at all) and runs the *entire* production of a finished, publish-ready episode:
+
+- **Bring your own character.** Anyone can add their own claymation character to the cast (with an AI-generated portrait). Point the same engine at *your* mascot and it runs *your* daily show.
+- **Audience co-creation.** A viewer casts the stars, pitches a gag, and gets **credited** on the resulting episode — the built-in path to virality and monetization (subscriptions per channel + microtransactions to prioritize your idea for tomorrow).
+- **Watch it produce, live.** The "Studio" wizard streams every production stage over Server-Sent Events, including the QA retake loop, so you can watch the agents work in real time.
+- **A finished episode, not a raw clip.** Each run yields a viral title, a coherent thumbnail (the keyframe), a QA verdict, and a publish-ready video with consistent characters.
+
+### Engine vs. demo framing
+
+The farm — a claymation barnyard of romantic cows, mud philosophers, and an aggressively territorial goose — is a **demo channel** chosen because it makes character-consistency and comedic QA visually obvious. Swap the cast, the style prompt, and the brand, and the *same* pipeline produces a daily show for any vertical: brand mascots, kids' channels, educational series.
+
+---
+
+## 3. The base cast
+
+Seeded so the Scriptwriter has continuity from day one (see `backend/database/seed_characters.py`). All plasticine, all Aardman-style.
+
+| Character | Species | Personality (one-liner) |
+|---|---|---|
+| **Lola** | cow | Hopeless romantic — falls in love with buckets, fenceposts, clouds. |
+| **Pepe** | pig | The mud philosopher; deep-sounding nonsense, never leaves the puddle. |
+| **Nina** | hen | Breaking-news reporter treating every triviality as a world-shaking scoop. |
+| **Gus** | goat | Chaotic troublemaker who eats everything, zero remorse. |
+| **Dora** | duck | Dramatic diva and conspiracy theorist. |
+| **Bex** | sheep | Anxious overthinker; agrees with whoever spoke last. |
+| **Momo** | donkey | Deadpan pessimist with a gloomy one-liner for everything. |
+| **Kiki** | goose | Self-appointed, extremely aggressive pond security guard. |
+
+---
+
+## 4. Architecture
+
+The backend is a **LangGraph `StateGraph`** wiring four agents plus a video sub-stage. State flows through a single typed dict (`FarmState`) and each node returns a partial update.
+
+### The agents
+
+| # | Agent | File | Qwen model / surface | Input | Output |
+|---|---|---|---|---|---|
+| 1 | **Scriptwriter** | `backend/agents/scriptwriter.py` | `qwen3.7-plus` (text) | Full cast, recent episode events (for continuity), optional user idea | `event`, `script` (2–4 lines), `characters_used` |
+| 2 | **Production Director** | `backend/agents/production_director.py` | `qwen3.7-plus` (text) | The script + the *faithful visual description* of each cast member; on a retake, the QA rejection note | `keyframe_prompt` (a frozen funniest instant), `motion_prompt` (one 5s action), `video_tool` |
+| — | **Video sub-stage** | `backend/pipeline/orchestrator.py` → services | `qwen-image-2.0` → `happyhorse-1.1-i2v` → `qwen3-vl-plus` | Director's keyframe + motion prompts | Persisted `video_url`, `thumbnail_url` (= the keyframe), and a vision `video_description` |
+| 3 | **QA Reviewer** | `backend/agents/qa_reviewer.py` | `qwen3.7-plus` (text), reasoning over `qwen3-vl-plus` output | Script, motion prompt, and **what the clip actually shows** | `qa_status` (`approved`/`rejected`), `qa_notes` |
+| 4 | **Packager** | `backend/agents/packager.py` | `qwen3.7-plus` (text) | Event, script, and the vision description | `title` (with emojis), `thumbnail_hint`, `description` (+ hashtags) |
+
+Every agent asks the model for **strict JSON** and parses it through a tolerant extractor (`backend/agents/_json.py`) that strips code fences, isolates the outer `{...}`, and repairs trailing commas / smart quotes before a second `json.loads`. An LLM formatting slip therefore never crashes the pipeline — each agent also falls back to safe defaults on missing keys.
+
+### The pipeline flow
+
+```
+recent events + cast (SQLite / Alibaba Cloud RDS PostgreSQL)
+                     │
+                     ▼
+ ┌──────────────── LangGraph StateGraph ─────────────────┐
+ │                                                       │
+ │  START → scriptwriter → director → video → qa_review  │
+ │                           ▲                    │      │
+ │                           │                    │      │
+ │                  ┌────────┘   rejected &       │      │
+ │                  │            attempt≤MAX_REGEN │      │
+ │                  └────────────────◄────────────┘      │
+ │                                    │                  │
+ │                        approved OR out of budget      │
+ │                                    ▼                  │
+ │                                packager → END         │
+ └──────────────────────────┬────────────────────────────┘
+                            ▼
+        Episode row (DB) + video/thumbnail on Alibaba Cloud OSS
+                            │
+                            ▼
+              Next.js feed  ◄── FastAPI /episodes
+```
+
+The **conditional edge** after `qa_review` (`_after_qa` in the orchestrator) is the heart of the graph:
+
+- `qa_status == "approved"` → go to **packager**.
+- rejected **and** `attempt > MAX_REGEN` → go to **packager** anyway (publish the best take, never loop forever).
+- rejected **and** budget remains → go back to **director**, this time with the rejection note.
+
+> A rendering of the full architecture lives at [`docs/architecture_diagram.png`](docs/architecture_diagram.png) (editable source: `docs/architecture_diagram.svg`), with the agent flow also described in [`docs/README.md`](docs/README.md).
+
+### How Qwen Cloud connects to backend, DB and frontend
+
+- **Backend ↔ Qwen Cloud.** Text agents call the **OpenAI-compatible** DashScope endpoint via `backend/services/qwen_client.py`. Image, video and vision calls use the **native DashScope** endpoint, derived automatically from the same base URL (`/compatible-mode/v1` → `/api/v1`, see `config.dashscope_base`). The correct base URL is auto-selected by API-key prefix (see [§10](#10-local-setup--deploy)).
+- **Backend ↔ DB.** SQLAlchemy models (`Character`, `Episode`) persist to SQLite by default, or Alibaba Cloud RDS PostgreSQL by swapping `DATABASE_URL`. Every finished run is written as one `Episode` row.
+- **Backend ↔ OSS.** Generated media is downloaded from DashScope's temporary URLs and re-uploaded to Alibaba Cloud OSS for a stable public link (`backend/services/oss_client.py`).
+- **Frontend ↔ Backend.** Next.js reads `/characters` and `/episodes` (REST) and consumes `/episodes/generate/stream` (SSE) to render the live Studio wizard. OSS images are downsized on the fly with `?x-oss-process=image/resize,...` (`ossThumb` in `frontend/lib/api.ts`).
+
+---
+
+## 5. The two signature techniques
+
+### (a) Keyframe → image-to-video for character consistency
+
+Instead of a blind text-to-video prompt, the video sub-stage runs three deliberate steps (`video_node` in `backend/pipeline/orchestrator.py`):
+
+1. **Keyframe** — `qwen-image-2.0` paints a **single frozen still** of the funniest split-second of the gag, describing every character *in their established look* (the Director is fed each cast member's `visual_desc`). This still is persisted to OSS.
+2. **Animate** — `happyhorse-1.1-i2v` (image-to-video) takes **that exact still as frame 0** and animates one continuous ~5-second motion. Because the video *starts from* the on-model keyframe, the characters inherit their established appearance instead of being re-hallucinated.
+3. **Describe** — `qwen3-vl-plus` watches the resulting clip (feeds the next technique).
+
+Two consequences fall out for free:
+
+- **The keyframe *is* the thumbnail.** `thumbnail_url` is set to the keyframe URL — a thumbnail that is guaranteed to match frame 0 of the video, at no extra generation cost.
+- **A consistent clay universe.** A shared style string (Aardman plasticine, visible clay fingerprints, chunky proportions) plus an anti-artifact negative prompt (`no text, no watermark, no distorted limbs, no melted faces…`) is appended to every keyframe so episodes look like the same show and avoid the tells that scream "AI."
+
+### (b) The vision-grounded, self-correcting QA loop
+
+One-off tools generate and hope. MUCKFLIX **closes the loop on the real footage**:
+
+1. **Vision grounding.** `qwen3-vl-plus` (`backend/services/vision_client.py`) narrates the *actual chronological cause-and-effect* of the generated clip — who hits/pushes/throws what, and how the other reacts — observing only what's on screen.
+2. **QA judges reality, not intent.** The QA agent compares that description against the script and the motion prompt. It is strict but not a perfectionist: it rejects only on serious incoherence or a broken/empty video.
+3. **Targeted feedback.** On rejection, the `qa_notes` are fed **back into the Director** (`director_node` reads `state["qa"]["qa_notes"]` on any attempt after the first), which redesigns the keyframe and motion to *specifically fix that problem*.
+4. **Bounded by `MAX_REGEN`.** The loop can run at most `MAX_REGEN` (default **2**) Director re-runs. If still rejected, the best take is packaged and published as a **draft** rather than looping forever — this is the token-budget guard.
+
+Downstream, both the **QA verdict and the Packager's title/description are grounded in the vision output**, so the published copy describes what the video *actually* shows ("the rooster smacks the bread into Pepe's mouth"), not merely what the script intended.
+
+---
+
+## 6. Qwen Cloud & Alibaba Cloud usage
+
+### Qwen Cloud (DashScope) capabilities
+
+| Capability | Model (default) | Endpoint surface | File |
+|---|---|---|---|
+| Text agents (Writer, Director, QA, Packager) | `qwen3.7-plus` | OpenAI-compatible `/compatible-mode/v1` | `backend/services/qwen_client.py` |
+| Keyframe & portrait generation | `qwen-image-2.0` | Native DashScope multimodal-generation (sync) | `backend/services/image_gen_client.py` |
+| Image-to-video (animate the keyframe) | `happyhorse-1.1-i2v` | Native DashScope video-synthesis (async submit/poll) | `backend/services/video_gen_client.py` |
+| Text-to-video (fallback) | `happyhorse-1.1-t2v` / `wan2.7-t2v` | Native DashScope video-synthesis (async submit/poll) | `backend/services/video_gen_client.py` |
+| Video understanding for QA/packaging | `qwen3-vl-plus` | OpenAI-compatible (`video_url` content part) | `backend/services/vision_client.py` |
+
+DashScope video generation is genuinely **asynchronous**: the client POSTs with `X-DashScope-Async: enable` to get a `task_id`, then polls `GET /tasks/{id}` every `video_poll_seconds` until `SUCCEEDED`/`FAILED`, capped by `video_timeout_seconds`. Transient network/5xx errors are retried with backoff; 4xx errors fail fast.
+
+### Alibaba Cloud
+
+| Service | Role | Proof / file |
+|---|---|---|
+| **ECS** (Docker on Ubuntu) | Runs the FastAPI backend | `backend/deploy/deploy.sh`, [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
+| **OSS** (Object Storage) | Permanent public storage for generated videos, keyframes/thumbnails and portraits | `backend/services/oss_client.py` |
+| **OSS deploy-proof** | A standalone script that uploads a marker object and reads it back — a real service call, not a mention | `backend/deploy/alibaba_deploy_proof.py` |
+| **RDS PostgreSQL** (optional) | Production database (swap `DATABASE_URL`) | `docker-compose.yml`, `backend/database/db.py` |
+
+**Why OSS is mandatory for live generation.** DashScope returns *temporary signed URLs* for generated media that expire. Persisting those would silently break the feed later, so live video generation **refuses to run unless OSS is configured** (`video_node` raises if `oss_client.is_configured()` is false). Every generated asset is downloaded and re-hosted on OSS before it reaches the DB.
+
+---
+
+## 7. Tech stack
+
+| Layer | Technology |
+|---|---|
+| Orchestration | **LangGraph** `StateGraph` (typed state, conditional regen edge) |
+| Backend API | **FastAPI** + Uvicorn (Python 3.11) |
+| AI models | **Qwen Cloud (DashScope)** — text, image, video, vision |
+| HTTP / SDK | `openai` (OpenAI-compatible), `httpx` (native DashScope async) |
+| Config / validation | `pydantic-settings`, Pydantic v2 |
+| Database | **SQLAlchemy 2** → SQLite (default) or Alibaba Cloud **RDS PostgreSQL** |
+| Object storage | Alibaba Cloud **OSS** (`oss2`) |
+| Frontend | **Next.js 14** (App Router), React 18, TypeScript, SSE (`EventSource`) |
+| Deploy | **Docker** on Alibaba Cloud **ECS**; `docker-compose` for local Postgres |
+
+---
+
+## 8. Project structure
+
+```
+cloudhackathon/
+├── README.md                  # (this file)
+├── LICENSE                    # MIT
+├── docker-compose.yml         # local Postgres + backend
+├── backend/
+│   ├── main.py                # FastAPI app: health, characters, episodes, generate, SSE stream
+│   ├── config.py              # env config; endpoint auto-select by key prefix; mock/demo flags
+│   ├── Dockerfile             # python:3.11-slim → uvicorn
+│   ├── requirements.txt
+│   ├── pipeline/
+│   │   └── orchestrator.py    # LangGraph graph + nodes + regen loop + DB persistence
+│   ├── agents/
+│   │   ├── scriptwriter.py    # Agent 1 — the day's gag + tiny script
+│   │   ├── production_director.py  # Agent 2 — keyframe + motion prompts (+ QA feedback)
+│   │   ├── qa_reviewer.py     # Agent 3 — approve/reject on the real clip
+│   │   ├── packager.py        # Agent 4 — viral title + description
+│   │   └── _json.py           # tolerant LLM-JSON extractor/repair
+│   ├── services/
+│   │   ├── qwen_client.py     # text (OpenAI-compatible) + mock mode + retries
+│   │   ├── image_gen_client.py# keyframe/portrait (sync DashScope multimodal)
+│   │   ├── video_gen_client.py# image→video & text→video (async submit/poll)
+│   │   ├── vision_client.py   # qwen3-vl video description
+│   │   └── oss_client.py      # persist media to Alibaba Cloud OSS
+│   ├── database/
+│   │   ├── models.py          # Character, Episode
+│   │   ├── db.py              # engine/session
+│   │   ├── seed_characters.py # base 8-animal cast
+│   │   ├── seed_from_snapshot.py  # zero-cost seed of real episodes/portraits
+│   │   └── snapshot.json      # committed demo data (media on OSS)
+│   └── deploy/
+│       ├── deploy.sh          # one-command ECS deploy
+│       └── alibaba_deploy_proof.py  # real OSS call (deploy proof)
+├── frontend/                  # Next.js 14 App Router
+│   ├── app/page.tsx           # landing: hero, Studio, CinemaFeed, CastGrid
+│   ├── components/
+│   │   ├── Studio.tsx         # live SSE wizard (cast picker, idea, per-stage activity)
+│   │   ├── CinemaFeed.tsx     # episode feed + behind-the-scenes modal
+│   │   └── CastGrid.tsx       # cast + "create your own character"
+│   └── lib/api.ts             # REST + SSE client, OSS thumbnail helper
+└── docs/
+    ├── DEPLOYMENT.md          # Alibaba Cloud deploy + proof capture
+    ├── README.md              # architecture notes
+    ├── architecture_diagram.png / .svg
+    └── pipeline_graph.md
+```
+
+---
+
+## 9. API reference
+
+Base URL defaults to `http://localhost:8000`. Served by `backend/main.py`.
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/health` | GET | Liveness + current mock flags (`mock_text`, `mock_video`). |
+| `/characters` | GET | List the cast (name, species, personality, portrait URL). |
+| `/characters` | POST | Create your own character (optionally with an AI portrait). Body: `name`, `species`, `personality`, `look`. |
+| `/episodes` | GET | All episodes, newest first (full record incl. video, thumbnail, QA). |
+| `/episodes/generate` | POST | Run the full 4-agent pipeline and return the new episode. Body: `idea`, `creator`. |
+| `/episodes/generate/stream` | GET | **Server-Sent Events**: emits each pipeline stage live for the Studio wizard. Query: `idea`, `creator`. |
+
+**Concurrency guard.** Generation is CPU/IO-heavy and blocking, so a process-wide lock allows only **one** generation at a time; a second concurrent request gets `409` (POST) or a `failed` SSE event. The SSE stream emits one event per node (`scriptwriter`, `director`, `video`, `qa`, `packager`) and finally `done` with the new episode id — or `failed` with a message on error.
+
+---
+
+## 10. Local setup & deploy
+
+### 10.1 Environment variables
+
+All config is env-driven (`backend/config.py`). **Mock mode is the default** so the whole app runs with zero keys and zero cost.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `DATABASE_URL` | `sqlite:///./farm.db` | DB DSN; swap for Alibaba Cloud RDS PostgreSQL. |
+| `QWEN_API_KEY` | *(empty)* | Qwen Cloud key. **Empty ⇒ mock mode.** |
+| `QWEN_BASE_URL_OVERRIDE` | *(empty)* | Workspace/Model Studio endpoint; wins over auto-selection. |
+| `QWEN_BASE_URL_PAYG` | `dashscope-intl…/compatible-mode/v1` | Endpoint for pay-as-you-go keys (`sk-…`). |
+| `QWEN_BASE_URL_TOKEN_PLAN` | `token-plan.ap-southeast-1…/compatible-mode/v1` | Endpoint for hackathon token-plan keys (`sk-sp-…`). |
+| `QWEN_TEXT_MODEL` | `qwen3.7-plus` | Text model for the 4 agents. |
+| `VISION_MODEL` | `qwen3-vl-plus` | Video-understanding model. |
+| `IMAGE_MODEL` | `qwen-image-2.0` | Keyframe + portrait generation. |
+| `VIDEO_MODEL_I2V` | `happyhorse-1.1-i2v` | Image-to-video (the primary path). |
+| `VIDEO_MODEL` / `VIDEO_MODEL_WAN` | `happyhorse-1.1-t2v` / `wan2.7-t2v` | Text-to-video fallbacks. |
+| `MOCK_VIDEO` | `true` | Keep video mocked even when text is live (flip to `false` for real video). |
+| `FORCE_MOCK` | `false` | Force full mock mode even with a key present. |
+| `MAX_REGEN` | `2` | Max Director retakes after a QA rejection (cost cap). |
+| `VIDEO_POLL_SECONDS` / `VIDEO_TIMEOUT_SECONDS` | `10` / `600` | Async video poll interval / timeout. |
+| `VIDEO_DURATION` | `0` | Clip length; `0` = model default (~5s). |
+| `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET` / `OSS_BUCKET` / `OSS_ENDPOINT` | *(empty)* | Alibaba Cloud OSS (**required for live video**). |
+| `DEMO_VIDEO_URL` / `DEMO_THUMBNAIL_URL` / `DEMO_VIDEO_DESC` / `DEMO_PACE_SECONDS` | *(empty/0)* | Recording/demo mode: replay a real clip at zero cost and pace the SSE so each stage is visible. |
+| `CREATE_REAL_PORTRAITS` | `false` | Generate a real portrait for user-created characters even in mock mode. |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | (frontend) Backend base URL. |
+
+### 10.2 Run modes at a glance
+
+| Mode | How | Cost | Behavior |
+|---|---|---|---|
+| **Mock** (default) | No `QWEN_API_KEY`, or `FORCE_MOCK=true` | $0 | Every agent returns a deterministic canned response; video is a placeholder URL; QA auto-approves. The whole graph runs offline — ideal for tests and CI. |
+| **Demo / recording** | Mock + `DEMO_VIDEO_URL` (+ `DEMO_PACE_SECONDS`) | $0 | Replays a real clip and paces the SSE so the wizard looks live end-to-end. |
+| **Text-live, video-mock** | `QWEN_API_KEY` set, `MOCK_VIDEO=true` | text tokens only | Real Qwen scripts/direction/QA/packaging; placeholder video. |
+| **Fully live** | `QWEN_API_KEY` + `MOCK_VIDEO=false` + `OSS_*` | full | Real keyframe → i2v → vision → QA loop; media persisted to OSS. |
+
+The `mock`/live switch requires **no code change** — every service checks `settings.use_mock` and returns caller-supplied mock data (`backend/services/qwen_client.py`).
+
+### 10.3 Backend (local)
 
 ```bash
 cd backend
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env        # rellena QWEN_API_KEY, OSS_*
-python -m database.seed_characters   # siembra la granja
+cp .env.example .env               # optional; empty .env = mock mode, $0
+python -m database.seed_characters # seed the base cast
 uvicorn main:app --reload
 ```
 
-Verifica: <http://localhost:8000/health> · <http://localhost:8000/characters>
+Verify: <http://localhost:8000/health> · <http://localhost:8000/characters>
 
-## Docker
+To populate the app with the committed **real** episodes/portraits (served from OSS) at zero cost:
 
 ```bash
-docker compose up --build
+python -m database.seed_from_snapshot   # idempotent
 ```
 
-## Personajes base
+### 10.4 Frontend (local)
 
-Bruno (gallo sindicalista) · Lola (vaca romántica) · Tractor (indiferente) ·
-Pepe (cerdo filósofo) · Nina (gallina reportera).
+```bash
+cd frontend
+npm install
+npm run dev            # http://localhost:3000  (set NEXT_PUBLIC_API_URL if backend isn't on :8000)
+```
 
-## Arquitectura
+### 10.5 Local Postgres via Docker
 
-Ver [`docs/README.md`](docs/README.md).
+```bash
+docker compose up --build   # Postgres 16 + backend on :8000
+```
 
-## Licencia
+### 10.6 One-command Alibaba Cloud deploy
 
-MIT — ver [LICENSE](LICENSE).
+On a fresh Ubuntu **ECS** instance (allow inbound TCP 22 + 80):
+
+```bash
+ssh root@<ECS_PUBLIC_IP>
+curl -fsSL https://raw.githubusercontent.com/kasbsquall/digital-farm-showrunner/main/backend/deploy/deploy.sh | bash
+```
+
+This installs Docker, builds the image, runs it on port 80→8000, writes a **`FORCE_MOCK=true`** `.env` (no keys, no credits), and seeds the cast + real episodes from the snapshot — so the app is fully populated and live for **$0**. Verify with `curl http://<ip>/health` and `/episodes`.
+
+To enable live generation and prove OSS *from the instance*, set `FORCE_MOCK=false`, add `QWEN_API_KEY` + `OSS_*`, re-run the container, then:
+
+```bash
+docker exec muckflix python -m deploy.alibaba_deploy_proof   # OSS upload ok=True url=...
+```
+
+Full steps and proof-capture checklist: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+---
+
+## 11. Testing
+
+The mock harness makes the pipeline **fully deterministic and offline-testable**: with `FORCE_MOCK=true`, every agent returns a canned response derived from its own inputs, so the entire LangGraph flow (including the QA→Director regen edge) can be exercised without any network or credits.
+
+Tests are expected under `backend/tests/`, run with **pytest**:
+
+```bash
+cd backend
+pip install pytest
+FORCE_MOCK=true pytest            # deterministic, offline
+FORCE_MOCK=true pytest --cov=.    # with coverage
+```
+
+Recommended coverage targets: the orchestrator's conditional edge (`_after_qa`: approve / retake / out-of-budget), the JSON extractor/repair (`agents/_json.py`), each agent's fallback-on-missing-key behavior, and the OSS-required guard in `video_node`.
+
+> **Status note:** the mock-mode design is built for this, but a `backend/tests/` suite is not yet committed in this repository — the commands above are the intended entry point.
+
+---
+
+## 12. Cost & token-budget notes
+
+Cost control is a first-class design goal, not an afterthought:
+
+| Lever | Effect |
+|---|---|
+| **Keyframe → i2v** | One image + one short i2v job is cheaper and more controllable than brute-forcing long text-to-video, and the keyframe *doubles as the thumbnail* (no extra generation). |
+| **`MAX_REGEN`** | Hard cap on QA retakes (default 2). The loop *always* terminates into the Packager; it can never run away on tokens/video jobs. |
+| **Mock mode** | No key ⇒ every model call is skipped; the full app runs at **$0** for development, CI and demos. |
+| **Demo/recording mode** | Replays a real clip at **$0** so the pipeline can be recorded end-to-end without spending credits. |
+| **Snapshot seeding** | A deployed instance shows real episodes/portraits (served from OSS) with **zero API calls**. |
+| **`MOCK_VIDEO` split** | Run real text agents while keeping the expensive video step mocked, to iterate on prompts cheaply. |
+| **OSS on-the-fly resize** | `ossThumb` requests downscaled WebP (`x-oss-process`), cutting feed payloads from ~1.4 MB to a few KB. |
+
+---
+
+## 13. Roadmap / productization
+
+The farm proves the engine; the business is **serialized daily video as a service**.
+
+- **Per-creator channels.** Point the pipeline at any cast + style to run a distinct daily show per creator/brand.
+- **Monetization.** Channel subscriptions + **microtransactions** to prioritize your submitted idea for tomorrow's episode (audience co-creation is already wired via the `creator` credit).
+- **Richer casts & continuity.** Deeper multi-episode story arcs and larger character rosters.
+- **Longer / multi-shot clips.** Extend beyond the ~5s single-gag format (`VIDEO_DURATION` is already a knob) toward multi-beat episodes.
+- **Scheduling & auto-publish.** A daily cron that runs the showrunner and publishes unsupervised — the QA loop is what makes this safe.
+- **Managed RDS + CDN.** Production Postgres on Alibaba Cloud RDS and OSS-backed CDN delivery for the feed.
+
+---
+
+## 14. License
+
+**MIT** — see [`LICENSE`](LICENSE).
+
+Built by Kevin Soto Burgos · AVANC3 · Qwen Cloud Global AI Hackathon 2026 · **Track 2: AI Showrunner**.

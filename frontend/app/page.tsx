@@ -17,7 +17,7 @@ export default function Home() {
       setCharacters(c);
       setEpisodes(e);
     } catch {
-      setError("Backend no disponible en " + API);
+      setError("Backend unavailable at " + API);
     }
   }
 

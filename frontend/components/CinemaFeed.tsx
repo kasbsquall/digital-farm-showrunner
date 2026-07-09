@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { type Episode, ossThumb } from "@/lib/api";
 
 function activateOnKey(fn: () => void) {
@@ -24,6 +24,14 @@ function splitPrompt(vp: string | null): { keyframe: string; motion: string } {
 function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
   const { keyframe, motion } = splitPrompt(ep.video_prompt);
   const approved = ep.qa_status === "approved";
+  const heroTitle = ep.title ?? ep.event ?? `Episode ${ep.id}`;
+
+  // Close on Escape, like any well-behaved modal.
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
   const steps = [
     { img: "/agents/scriptwriter.png", who: "Scriptwriter", model: "qwen3.7", body: (
       <><span className="k">Event</span>{ep.event}<span className="k">Script</span>{ep.script}</>
@@ -51,7 +59,7 @@ function BTSModal({ ep, onClose }: { ep: Episode; onClose: () => void }) {
           </div>
           <button className="modal-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
-        <img className="modal-hero" src={ossThumb(ep.thumbnail_url, 900)} alt="" />
+        <img className="modal-hero" src={ossThumb(ep.thumbnail_url, 900)} alt={heroTitle} />
         <div className="bts-timeline">
           {steps.map((s, i) => (
             <div className="bts-step" key={i}>

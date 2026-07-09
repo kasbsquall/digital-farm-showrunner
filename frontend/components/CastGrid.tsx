@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type Character, type Episode, ossThumb, createCharacter } from "@/lib/api";
 
 const ROLE: Record<string, string> = {
@@ -36,6 +36,17 @@ export function CastGrid({
   const [err, setErr] = useState<string | null>(null);
 
   const epsOf = (name: string) => episodes.filter((e) => (e.characters_used ?? []).includes(name));
+
+  // Close whichever modal is open on Escape (don't close mid-submit).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (sel) setSel(null);
+      else if (creating && !busy) setCreating(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [sel, creating, busy]);
 
   async function submit() {
     if (!form.name.trim() || !form.personality.trim()) {
@@ -117,7 +128,7 @@ export function CastGrid({
                 <div className="row">
                   {epsOf(sel.name).map((e) => (
                     <div className="ep" key={e.id}>
-                      <img src={ossThumb(e.thumbnail_url, 300)} alt="" />
+                      <img src={ossThumb(e.thumbnail_url, 300)} alt={e.title ?? e.event ?? ""} />
                       <span>{e.title ?? e.event}</span>
                     </div>
                   ))}

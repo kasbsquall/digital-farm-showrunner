@@ -80,6 +80,16 @@ blended cost), exercising both outcomes:
   [`deploy_proof/scheduler_run.json`](deploy_proof/scheduler_run.json). This is the
   "runs a channel by itself" claim shown end-to-end, not just wired.
 
+**Honest finding on recovery.** Across many real runs, the loop's behavior on live infra is
+bimodal: an achievable gag is approved on take 1, and a gag the video model can't cast/stage
+correctly is rejected on *every* take and shipped as a **draft** — it rarely reject-*then*-
+approves in a single run. That is expected: the Director's feedback is text, and the i2v
+endpoint takes no reference conditioning, so a corrective note can't *force* the generator
+on-model (the same limitation identity-lock scores rather than fixes). The loop's real value
+on live infra is therefore the **fail-safe** — bounded cost, best-take selection, and "nothing
+publishes unwatched" — not guaranteed self-repair. We surface this rather than cherry-pick a
+lucky recovery.
+
 ## Identity-lock — a second measured gate
 
 Character consistency is also measured, not just asserted. With `IDENTITY_CHECK` enabled,

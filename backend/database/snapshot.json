@@ -59,6 +59,84 @@
   ],
   "episodes": [
     {
+      "channel_id": "farm",
+      "creator": "@kasbsquall",
+      "event": "Bex the sheep sneezes so violently that a massive cloud of dust blows Momo the donkey backward, causing him to sit down with a heavy splash directly into a mud puddle.",
+      "script": "BEX: Oh dear, the pollen is just... ACHOOOO!\nMOMO: Just my luck.",
+      "characters_used": [
+        "Bex",
+        "Momo"
+      ],
+      "video_prompt": "KEYFRAME: A frozen split-second of a massive sneeze. Bex, a fluffy cream sheep with a worried face, enormous nervous eyes, and chunky proportions, is caught mid-sneeze, her head thrown violently backward, mouth wide open, her wool tufts blown wildly backwards by the force of the sneeze. Next to her, Momo, a grey droopy-eared donkey with heavy eyelids and a slightly slouched chunky body, has a completely unimpressed deadpan expression, but his long droopy ears are blown straight back horizontally by the sneeze's wind. A single bright yellow pollen grain is frozen mid-air right in front of Momo's nose. Claymation plasticine stop-motion, Aardman style, visible clay fingerprints on all surfaces, farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot, clear staging, highly detailed.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts\nMOTION: Bex's head snaps forward with a heavy, squishy cartoon recoil from her massive sneeze, sending a visible shockwave through her fluffy cream wool that blows forward. Simultaneously, Momo's long grey ears flap forward from the wind and then slowly droop back down to their original slouched position, maintaining his deadpan expression. A subtle, smooth camera push-in emphasizes the squishy clay physics and the comedic timing of the recoil.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/079cb4196a35.mp4",
+      "video_description": "At 0:00, the sheep sneezes violently, expelling a burst of hay and a dandelion seed head toward the donkey. The dandelion seed head strikes the donkey’s face and sticks to his snout, while a single stalk of hay lodges horizontally across his nostrils. From 0:01 to 0:04, the sheep recoils slightly, then stands upright and blinks, while the donkey remains still, eyes half-lidded, with the hay stalk and dandelion remnants visibly adhered to his face.",
+      "qa_status": "approved",
+      "qa_notes": "The core sneeze-and-consequence gag reads clearly with both characters present and Momo's deadpan reaction intact, although the intended wind and ear-flap physics were replaced by physical debris.",
+      "qa_attempts": 1,
+      "title": "Sheep Sneeze Sticks Hay & Dandelion On Donkey's Face! 🐑🌼",
+      "thumbnail_hint": "A close-up of the donkey's deadpan, half-lidded face featuring a horizontal stalk of hay lodged perfectly across his nostrils and a fluffy dandelion seed head stuck to his snout, with the blinking sheep visible in the background.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/821c01d5e44a.png",
+      "description": "Bex unleashes a violent pollen sneeze that launches a dandelion and a stalk of hay straight into Momo’s face. Now the donkey is just standing there with a hay-mustache and a dandelion snout, staring blankly in pure defeat. #claymation #farmdrama #sneeze",
+      "status": "published",
+      "tokens_used": 14984,
+      "cost_usd": 0.299968,
+      "votes": 0,
+      "takes": [
+        {
+          "attempt": 1,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/079cb4196a35.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/821c01d5e44a.png",
+          "keyframe_prompt": "A frozen split-second of a massive sneeze. Bex, a fluffy cream sheep with a worried face, enormous nervous eyes, and chunky proportions, is caught mid-sneeze, her head thrown violently backward, mouth wide open, her wool tufts blown wildly backwards by the force of the sneeze. Next to her, Momo, a grey droopy-eared donkey with heavy eyelids and a slightly slouched chunky body, has a completely unimpressed deadpan expression, but his long droopy ears are blown straight back horizontally by the sneeze's wind. A single bright yellow pollen grain is frozen mid-air right in front of Momo's nose. Claymation plasticine stop-motion, Aardman style, visible clay fingerprints on all surfaces, farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot, clear staging, highly detailed.. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "Bex's head snaps forward with a heavy, squishy cartoon recoil from her massive sneeze, sending a visible shockwave through her fluffy cream wool that blows forward. Simultaneously, Momo's long grey ears flap forward from the wind and then slowly droop back down to their original slouched position, maintaining his deadpan expression. A subtle, smooth camera push-in emphasizes the squishy clay physics and the comedic timing of the recoil.",
+          "video_description": "At 0:00, the sheep sneezes violently, expelling a burst of hay and a dandelion seed head toward the donkey. The dandelion seed head strikes the donkey’s face and sticks to his snout, while a single stalk of hay lodges horizontally across his nostrils. From 0:01 to 0:04, the sheep recoils slightly, then stands upright and blinks, while the donkey remains still, eyes half-lidded, with the hay stalk and dandelion remnants visibly adhered to his face.",
+          "qa_status": "approved",
+          "qa_score": 0.8,
+          "consistency": 0.8,
+          "qa_notes": "The core sneeze-and-consequence gag reads clearly with both characters present and Momo's deadpan reaction intact, although the intended wind and ear-flap physics were replaced by physical debris."
+        }
+      ]
+    },
+    {
+      "channel_id": "farm",
+      "creator": "@kasbsquall",
+      "event": "Nina flaps up in a frantic breaking-news panic, her wings acting like helicopter blades that knock Pepe's straw hat clean off his head and into his mud puddle with a giant splash, before she proudly struts away.",
+      "script": "NINA: EXTRA! EXTRA! THE SHADOW IS MOVING!\nPEPE: Yet the mud remains eternal...\nNINA: I MUST BROADCAST FROM HIGHER GROUND!",
+      "characters_used": [
+        "Nina",
+        "Pepe"
+      ],
+      "video_prompt": "KEYFRAME: A small nervous brown hen, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, tiny notebook and pencil, wide alert eyes, feathers slightly frazzled, is frozen mid-leap in the air, desperately launching herself towards the pig. Below her, a chubby pink pig lounging in mud, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, a straw of hay in his mouth, half-closed thoughtful eyes, looks up at her with mild confusion. Clear staging with one obvious focal action. Claymation plasticine stop-motion, Aardman style, visible clay fingerprints, farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts\nMOTION: The hen launches forward through the air in a continuous, exaggerated cartoon arc, her frazzled feathers flapping, and lands with a heavy, squishy clay splat directly onto the top of the pig, compressing her body flat. The pig remains perfectly still in the mud, his eyes slowly blinking upward, while the camera executes a subtle push-in.",
+      "video_tool": "happyhorse-i2v",
+      "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/2dcd823f210e.mp4",
+      "video_description": "A brown hen, holding a notepad and pencil, leaps mid-air toward a pink pig lying in a mud puddle with straw in its mouth. As the hen descends, the notepad flies out of its grasp. The hen lands face-first into the mud, directly on top of the pig, causing mud to splash upward; the pig remains lying down but now has the hen’s body draped over it, still holding the straw.",
+      "qa_status": "approved",
+      "qa_notes": "The core action of the hen leaping and landing directly on top of the pig in the mud is clearly executed with both characters present, though it lacks the specific exaggerated cartoon squash-and-stretch compression requested in the script.",
+      "qa_attempts": 1,
+      "title": "Reporter Hen Face-Plants on Pig After Dropping Notepad! 🐔💥",
+      "thumbnail_hint": "Close-up of the brown hen face-down in the mud directly on top of the pink pig, with mud splashing upward, while the pig lazily chews its straw with a completely deadpan expression.",
+      "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/585734e9687b.png",
+      "description": "This clumsy brown hen tries to leap into the air for a dramatic breaking-news broadcast, but drops her notepad and face-plants directly onto the pink pig in the mud puddle! The giant splash covers them both, but the pig doesn't even flinch and just keeps lazily chewing its straw. #ClaymationComedy #FarmFails #MudPuddle",
+      "status": "published",
+      "tokens_used": 16395,
+      "cost_usd": 0.30279,
+      "votes": 0,
+      "takes": [
+        {
+          "attempt": 1,
+          "video_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/episodes/2dcd823f210e.mp4",
+          "thumbnail_url": "https://farm-showrunner-kevin.oss-ap-southeast-1.aliyuncs.com/keyframes/585734e9687b.png",
+          "keyframe_prompt": "A small nervous brown hen, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, tiny notebook and pencil, wide alert eyes, feathers slightly frazzled, is frozen mid-leap in the air, desperately launching herself towards the pig. Below her, a chubby pink pig lounging in mud, claymation stop-motion plasticine character, Aardman-style, visible fingerprints in the clay, big expressive eyes, chunky proportions, a straw of hay in his mouth, half-closed thoughtful eyes, looks up at her with mild confusion. Clear staging with one obvious focal action. Claymation plasticine stop-motion, Aardman style, visible clay fingerprints, farm background with wooden fences and hay, bright natural daylight, cinematic slightly-wide shot. no text, no watermark, no logos, no distorted or extra limbs, no melted faces, no blurry artifacts",
+          "motion_prompt": "The hen launches forward through the air in a continuous, exaggerated cartoon arc, her frazzled feathers flapping, and lands with a heavy, squishy clay splat directly onto the top of the pig, compressing her body flat. The pig remains perfectly still in the mud, his eyes slowly blinking upward, while the camera executes a subtle push-in.",
+          "video_description": "A brown hen, holding a notepad and pencil, leaps mid-air toward a pink pig lying in a mud puddle with straw in its mouth. As the hen descends, the notepad flies out of its grasp. The hen lands face-first into the mud, directly on top of the pig, causing mud to splash upward; the pig remains lying down but now has the hen’s body draped over it, still holding the straw.",
+          "qa_status": "approved",
+          "qa_score": 0.85,
+          "consistency": 0.8,
+          "qa_notes": "The core action of the hen leaping and landing directly on top of the pig in the mud is clearly executed with both characters present, though it lacks the specific exaggerated cartoon squash-and-stretch compression requested in the script."
+        }
+      ]
+    },
+    {
       "channel_id": null,
       "creator": "@kasbsquall",
       "event": "Gus the goat casually chomps the fence rail right under a wobbling Pepe, sending the pig plummeting into a flat pancake as a giant glob of thick mud slowly oozes off his squished snout.",

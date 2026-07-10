@@ -6,10 +6,12 @@ verifiably alive. Episode-generation endpoint gets wired once the pipeline exist
 from contextlib import asynccontextmanager
 
 import json
+import os
 
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -221,3 +223,11 @@ def create_character(req: CreateCharacter, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(c)
     return {"name": c.name, "species": c.species, "personality": c.personality, "image_url": c.image_url}
+
+
+# Serve the built frontend (Next.js static export) at "/" so the whole app is one origin —
+# no CORS, no mixed-content, one URL. Mounted LAST so the API routes above win; a no-op
+# when the export isn't present (local backend-only dev / tests).
+_FRONTEND_DIR = os.getenv("FRONTEND_DIR", "static_frontend")
+if os.path.isdir(_FRONTEND_DIR):
+    app.mount("/", StaticFiles(directory=_FRONTEND_DIR, html=True), name="frontend")

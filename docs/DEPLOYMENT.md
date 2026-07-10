@@ -22,22 +22,28 @@ ssh root@<ECS_PUBLIC_IP>
 curl -fsSL https://raw.githubusercontent.com/kasbsquall/digital-farm-showrunner/main/backend/deploy/deploy.sh | bash
 ```
 
-That installs Docker, builds the image, runs it on port 8000, and seeds the cast +
-real episodes from the committed snapshot (media served from public OSS). It runs
-with `FORCE_MOCK=true` by default, so **it needs no API keys and costs nothing**.
+That installs Docker, builds **one image** (the root `Dockerfile`: the Next.js frontend
+compiled to a static export and served by the FastAPI backend), runs it on **port 80**,
+and seeds the cast + real episodes from the committed snapshot (media served from public
+OSS). It runs with `FORCE_MOCK=true` by default, so **it needs no API keys and costs
+nothing** — the whole browsable app on one URL.
 
 **Verify:**
 ```bash
+curl http://localhost/            # the app (HTML)
 curl http://localhost/health      # {"status":"ok", ...}
-curl http://localhost/episodes    # the real episodes
+curl http://localhost/episodes    # the real episodes (JSON)
 ```
+Then open `http://<ECS_PUBLIC_IP>/` in a browser — the full UI, same origin as the API
+(no CORS, no mixed-content).
 
 ### (Optional) enable live generation + prove OSS from the instance
 Edit `/opt/digital-farm-showrunner/backend/.env`, set `FORCE_MOCK=false`, add
-`QWEN_API_KEY`, `QWEN_BASE_URL_OVERRIDE` and the `OSS_*` vars, then:
+`QWEN_API_KEY`, `QWEN_BASE_URL_OVERRIDE` and the `OSS_*` vars, then from the repo root:
 ```bash
-cd /opt/digital-farm-showrunner/backend && docker rm -f muckflix
-docker run -d --name muckflix --restart unless-stopped -p 80:8000 --env-file .env muckflix-backend
+cd /opt/digital-farm-showrunner && docker rm -f muckflix
+docker build -t muckflix .
+docker run -d --name muckflix --restart unless-stopped -p 80:8000 --env-file backend/.env muckflix
 docker exec muckflix python -m deploy.alibaba_deploy_proof   # OSS upload ok=True url=...
 ```
 
@@ -52,10 +58,10 @@ Screenshot **all** of these into `docs/deploy_proof/`:
    `docker ps` (container up) and, if OSS is configured, the `alibaba_deploy_proof`
    output with `ok=True` and the OSS URL.
 
-## 4. Frontend (optional, for the full demo)
+## 4. Frontend
 
-Point the Next.js app at the deployed API by setting `NEXT_PUBLIC_API_URL=http://<ECS_PUBLIC_IP>`,
-or run it locally against the deployed backend. The frontend can be hosted anywhere
-(Vercel/static) — the *backend on Alibaba Cloud* is what the requirement asks for.
+No separate step — the one-command deploy above already builds the Next.js UI (static
+export, `NEXT_PUBLIC_API_URL=""` → same-origin API) into the same image and serves it at
+`http://<ECS_PUBLIC_IP>/`. The full app runs from **one container on Alibaba Cloud**.
 
 > 💡 Tear down the instance right after recording to avoid ongoing charges.

@@ -16,15 +16,15 @@
 
 ## 🎬 Demo & live proof
 
-**▶ Demo video:** _(YouTube link — TODO)_
+**▶ Demo video (2:28):** https://youtu.be/afZ2do3w900
 
-**Flagship proof — the self-correcting QA loop, shown live.** The retake loop isn't a claim: it's visible in the "How it was made" retake view, and there is a **committed real episode** whose take history reads `rejected → rejected → approved` (see the "Wobbly Gold Spheres…" episode in [`backend/database/snapshot.json`](backend/database/snapshot.json), rendered as the per-take retake UI in the behind-the-scenes modal). The clip that finally passed is the one shipped to the feed.
+**Flagship proof — the self-correcting QA loop.** The retake loop isn't a claim: it's visible in the "How it was made" retake view. A mock-mode "Wobbly Gold Spheres…" episode illustrates the full `rejected → rejected → approved` arc shape, and a **real, live-infra** regeneration run is committed too — "Sheep Drops Hay on Pig" regenerated twice on real vision-grounded `qa_notes` before the QA gate shipped the best take as a draft ($0.84 blended, consistency 0.8 held across takes). See [`backend/database/snapshot.json`](backend/database/snapshot.json) and the honest "loop firing on live infrastructure" section of [`docs/EVALUATION.md`](docs/EVALUATION.md).
 
 - **Architecture at a glance:** [`docs/architecture_diagram.png`](docs/architecture_diagram.png)
 - **Alibaba Cloud deploy proof:** [`docs/deploy_proof/`](docs/deploy_proof/)
 - **Test suite (fully offline):** [`backend/tests/`](backend/tests/)
 - **QA-gate evaluation (100% on a labeled set):** [`docs/EVALUATION.md`](docs/EVALUATION.md)
-- **Multi-shot & identity-lock, validated on real generation:** a 3-shot Pepe episode stitched into one **15.5-second** video on OSS, and an identity-lock check that scored **0.9** for a matching character vs. **0.0** for a mismatch (see [§5a](#5-the-two-signature-techniques)).
+- **Multi-shot & identity-lock, validated on real generation:** a 3-shot Pepe episode stitched into one **15.5-second** video on OSS, and an identity-lock check that scores **0.8–0.9** for a matching character vs. **0.0** for a mismatch — a committed real run is in [`docs/deploy_proof/identity_calibration.json`](docs/deploy_proof/identity_calibration.json) (see [§5a](#5-the-two-signature-techniques)).
 
 ---
 
